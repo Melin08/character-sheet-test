@@ -1153,7 +1153,7 @@ document.addEventListener("click", async (e) => {
   }
 
   // HP Quick Modal Open / Actions
-  if (e.target.id === "openHpModalBtn" || e.target.closest("#openHpModalBtn")) {
+  if (e.target.id === "openHpModalBtn" || e.target.closest("#openHpModalBtn") || e.target.closest(".hp-corner-btn")) {
     const amtInput = document.getElementById("hpModalAmount");
     if (amtInput) amtInput.value = "";
     document.getElementById("hpModal")?.classList.add("open");
