@@ -66,6 +66,18 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.45) !important;
 }
 
+/* Remove default number input spinner arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Scrollbars */
 textarea::-webkit-scrollbar,
 .modal-list::-webkit-scrollbar,
