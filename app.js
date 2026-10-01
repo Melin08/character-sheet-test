@@ -218,6 +218,24 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
+function updateXpBar() {
+  const xpInput = document.getElementById("charExp");
+  const fill = document.getElementById("xpBarFill");
+  if (!xpInput || !fill) return;
+
+  const raw = parseInt(xpInput.value.replace(/\D/g, ""), 10) || 0;
+  const level = parseInt(document.getElementById("charLevel")?.value, 10) || 1;
+  const xpThresholds = [
+    0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+    85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000
+  ];
+  const curTier = xpThresholds[level - 1] || 0;
+  const nextTier = xpThresholds[level] || curTier + 10000;
+  const span = Math.max(1, nextTier - curTier);
+  const progress = Math.min(100, Math.max(0, ((raw - curTier) / span) * 100));
+  fill.style.width = `${progress}%`;
+}
+
 function recalculateAll() {
   const levelInput = document.getElementById("charLevel");
   const level = parseInt(levelInput?.value, 10) || 1;
@@ -271,6 +289,8 @@ function recalculateAll() {
 
   const passInsEl = document.getElementById("passiveInsight");
   if (passInsEl) passInsEl.textContent = 10 + insBonus;
+
+  updateXpBar();
 }
 
 function renderWeapons() {
@@ -513,10 +533,10 @@ function renderConditionChips() {
 }
 
 function renderBlurredPills() {
-  document.querySelectorAll(".field-pill[data-blur-id]").forEach((pill) => {
-    const blurId = pill.dataset.blurId;
-    if (myBlurredPills.includes(blurId)) pill.classList.add("blurred");
-    else pill.classList.remove("blurred");
+  document.querySelectorAll("[data-blur-id]").forEach((el) => {
+    const blurId = el.dataset.blurId;
+    if (myBlurredPills.includes(blurId)) el.classList.add("blurred");
+    else el.classList.remove("blurred");
   });
 }
 
@@ -692,14 +712,12 @@ function applyLongRest() {
   if (maxHpEl && curHpEl) curHpEl.value = maxHpEl.value;
   if (tempHpEl) tempHpEl.value = 0;
 
-  // Restore Spell Slots to max
   for (let lvl = 1; lvl <= 9; lvl++) {
     const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
     const curEl = document.getElementById(`slot${lvl}_cur`);
     if (curEl) curEl.value = maxVal;
   }
 
-  // Restore Hit Dice (regain half of max, minimum 1)
   const hdCurEl = document.getElementById("hitDiceCur");
   const hdMaxEl = document.getElementById("hitDiceMax");
   const maxHd = parseInt(hdMaxEl?.value, 10) || 1;
@@ -707,13 +725,11 @@ function applyLongRest() {
   const regained = Math.max(1, Math.floor(maxHd / 2));
   if (hdCurEl) hdCurEl.value = Math.min(maxHd, curHd + regained);
 
-  // Reset Death Saves
   const succEl = document.getElementById("deathSucc");
   const failEl = document.getElementById("deathFail");
   if (succEl) succEl.value = 0;
   if (failEl) failEl.value = 0;
 
-  // Reset Class Points to max
   const classMaxEl = document.getElementById("classPtsMax");
   const classCurEl = document.getElementById("classPtsCur");
   if (classMaxEl && classCurEl) classCurEl.value = classMaxEl.value;
@@ -1211,11 +1227,11 @@ document.addEventListener("click", async (e) => {
   }
 
   // Rest Buttons
-  if (e.target.id === "shortRestBtn") {
+  if (e.target.id === "shortRestBtn" || e.target.closest("#shortRestBtn")) {
     applyShortRest();
     return;
   }
-  if (e.target.id === "longRestBtn") {
+  if (e.target.id === "longRestBtn" || e.target.closest("#longRestBtn")) {
     applyLongRest();
     return;
   }
@@ -1241,11 +1257,11 @@ document.addEventListener("click", async (e) => {
 
   // Blur Toggle
   if (e.target.closest(".blur-toggle-btn")) {
-    const pill = e.target.closest(".blur-toggle-btn").closest(".field-pill");
-    if (pill) {
-      pill.classList.toggle("blurred");
-      const blurId = pill.dataset.blurId;
-      if (pill.classList.contains("blurred")) {
+    const wrapper = e.target.closest(".blur-toggle-btn").closest("[data-blur-id]");
+    if (wrapper) {
+      wrapper.classList.toggle("blurred");
+      const blurId = wrapper.dataset.blurId;
+      if (wrapper.classList.contains("blurred")) {
         if (!myBlurredPills.includes(blurId)) myBlurredPills.push(blurId);
       } else {
         myBlurredPills = myBlurredPills.filter((id) => id !== blurId);
@@ -1427,8 +1443,9 @@ document.addEventListener("click", async (e) => {
   }
 
   // Tabs
-  if (e.target.classList.contains("main-tab")) {
-    switchMainTab(e.target.dataset.target);
+  if (e.target.classList.contains("main-tab") || e.target.closest(".main-tab")) {
+    const tabBtn = e.target.closest(".main-tab");
+    switchMainTab(tabBtn.dataset.target);
     return;
   }
 
@@ -1446,7 +1463,7 @@ document.addEventListener("click", async (e) => {
       attr: ".attributes-group",
       skills: ".skills-group",
       traits: "#abilitiesSection",
-      spells: "#spellsSection",
+      spells: "#tab-spells",
       journal: "#tab-journal"
     };
     document.querySelector(map[e.target.dataset.scroll])?.scrollIntoView({ behavior: "smooth" });
