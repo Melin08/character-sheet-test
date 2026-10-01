@@ -283,7 +283,6 @@ function recalculateAll() {
     if (row.id === "row_ins") insBonus = total;
   });
 
-  // Passive Senses Update
   const passPercEl = document.getElementById("passivePerception");
   if (passPercEl) passPercEl.textContent = 10 + percBonus;
 
@@ -433,7 +432,6 @@ function attachSpellDragEvents() {
   });
 }
 
-/* Interactive Spell Slot Pips Renderer */
 function renderSpellSlotGrid() {
   const container = document.getElementById("slotsGridContainer");
   if (!container) return;
@@ -1461,7 +1459,7 @@ document.addEventListener("click", async (e) => {
     switchMainTab(e.target.dataset.tab);
     const map = {
       attr: ".attributes-group",
-      skills: ".skills-group",
+      skills: ".skills-attribute-matrix",
       traits: "#tab-traits",
       spells: "#tab-spells",
       journal: "#tab-journal"
