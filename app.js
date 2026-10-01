@@ -321,7 +321,7 @@ function renderMyTraits() {
   if (!container) return;
 
   if (myCharacterTraits.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 0.5rem 0;">No abilities added yet. Click "+ Add Ability" above to browse the compendium.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 1.5rem 0; text-align: center;">No abilities added yet. Click "+ Add Ability" above to browse the compendium.</p>`;
     return;
   }
 
@@ -354,7 +354,7 @@ function renderMySpells() {
   if (!container) return;
 
   if (myCharacterSpells.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; text-align: center; font-style: italic; padding: 1rem 0;">No spells added yet. Click "+ Add Spell" above to browse the compendium.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; text-align: center; font-style: italic; padding: 1.5rem 0;">No spells added yet. Click "+ Add Spell" above to browse the compendium.</p>`;
     return;
   }
 
@@ -1462,7 +1462,7 @@ document.addEventListener("click", async (e) => {
     const map = {
       attr: ".attributes-group",
       skills: ".skills-group",
-      traits: "#abilitiesSection",
+      traits: "#tab-traits",
       spells: "#tab-spells",
       journal: "#tab-journal"
     };
