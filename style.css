@@ -102,7 +102,9 @@ textarea::-webkit-scrollbar-thumb:hover,
 .spell-add-badge,
 .btn-outline,
 .btn-text-red,
-.file-label {
+.file-label,
+.hp-quick-btn,
+.slot-pip {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -121,7 +123,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 .cond-chip:hover,
 .spell-add-badge:hover,
 .btn-outline:hover,
-.file-label:hover {
+.file-label:hover,
+.hp-quick-btn:hover {
   transform: translateY(-2.5px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
 }
@@ -136,7 +139,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 .cond-chip:active,
 .spell-add-badge:active,
 .btn-outline:active,
-.file-label:active {
+.file-label:active,
+.hp-quick-btn:active {
   transform: translateY(1.5px) scale(0.96) !important;
   filter: brightness(0.92);
 }
@@ -333,6 +337,29 @@ textarea::-webkit-scrollbar-thumb:hover,
 
 .btn-danger-ghost:hover {
   background: rgba(239, 68, 68, 0.15);
+}
+
+/* Rest Buttons */
+.btn-short-rest {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: var(--accent-amber) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+.btn-short-rest:hover {
+  background: rgba(245, 158, 11, 0.28) !important;
+  border-color: var(--accent-amber) !important;
+}
+
+.btn-long-rest {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: var(--accent-emerald) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+.btn-long-rest:hover {
+  background: rgba(16, 185, 129, 0.28) !important;
+  border-color: var(--accent-emerald) !important;
 }
 
 .file-label {
@@ -713,6 +740,44 @@ textarea::-webkit-scrollbar-thumb:hover,
   text-align: center;
 }
 
+/* Health Pool with Temp HP & Quick Calc */
+.hp-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hp-quick-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  border-radius: var(--radius-xs);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hp-quick-btn:hover {
+  background: var(--primary-red);
+  color: #ffffff;
+}
+
+.hp-card-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.hp-gauges-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .hp-gauge-box {
   display: flex;
   align-items: center;
@@ -722,6 +787,24 @@ textarea::-webkit-scrollbar-thumb:hover,
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55);
   border-radius: var(--radius-md);
   padding: 0.4rem 0.65rem;
+}
+
+.temp-hp-box {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.55rem;
+}
+
+.temp-hp-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  letter-spacing: 0.04em;
 }
 
 .hp-input {
@@ -737,6 +820,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 
 .hp-input.cur { color: #f87171 !important; }
 .hp-input.max { color: #ffffff !important; }
+.hp-input.temp { width: 34px; color: var(--accent-blue) !important; font-size: 1.05rem; }
 
 .hp-divider {
   color: var(--text-dim);
@@ -833,6 +917,49 @@ textarea::-webkit-scrollbar-thumb:hover,
 .section-title.tight-title {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+}
+
+/* Passive Senses Bar */
+.passive-senses-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.85rem 0;
+}
+
+.passive-badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.65rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.passive-badge-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.passive-badge-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.passive-badge-value {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+  margin-top: 0.15rem;
 }
 
 /* Attributes */
@@ -1183,7 +1310,7 @@ textarea::-webkit-scrollbar-thumb:hover,
   font-weight: 700;
 }
 
-/* Weapons & Attacks (Fixed Grid & Width constraints) */
+/* Weapons & Attacks (Constrained Grid) */
 .btn-add-weapon {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.25) 100%) !important;
   border: 1px solid rgba(239, 68, 68, 0.45) !important;
@@ -1778,6 +1905,7 @@ textarea.block-text,
   max-width: 80px;
 }
 
+/* Interactive Spell Slots Grid & Pips */
 .slots-grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -1791,7 +1919,7 @@ textarea.block-text,
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background: linear-gradient(145deg, #131a26 0%, #0d121c 100%);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
@@ -1799,6 +1927,7 @@ textarea.block-text,
   gap: 0.45rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
+  min-height: 120px;
 }
 
 .slot-tile:hover {
@@ -1813,6 +1942,37 @@ textarea.block-text,
   text-transform: uppercase;
 }
 
+.slot-pips-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  min-height: 24px;
+  padding: 0.25rem 0;
+}
+
+.slot-pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-medium);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.slot-pip.active {
+  background: var(--accent-blue);
+  border-color: #7dd3fc;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.65);
+}
+
+.slot-pip:hover {
+  transform: scale(1.2);
+}
+
 .slot-counter {
   display: flex;
   align-items: center;
@@ -1822,17 +1982,18 @@ textarea.block-text,
   border: 1px solid var(--border-medium);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55);
   border-radius: var(--radius-sm);
-  padding: 0.25rem;
+  padding: 0.2rem;
   width: 100%;
+  margin-top: auto;
 }
 
 .slot-input {
-  width: 26px;
+  width: 22px;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 800;
   padding: 0;
   text-align: center;
@@ -2265,6 +2426,66 @@ textarea.block-text,
 }
 
 .char-delete-btn:hover { color: var(--primary-red); }
+
+/* HP Adjust Modal */
+.hp-modal-box {
+  max-width: 440px;
+}
+
+.hp-modal-content {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.hp-modal-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hp-modal-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.hp-modal-amount-input {
+  font-size: 1.8rem !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  padding: 0.6rem !important;
+}
+
+.hp-modal-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.hp-act-btn {
+  padding: 0.75rem 1rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+}
+
+.hp-act-damage {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+}
+
+.hp-act-heal {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+  color: #ffffff !important;
+}
+
+.hp-act-temp {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #ffffff !important;
+}
 
 /* Auth Modal */
 .auth-modal-box { max-width: 440px; }
