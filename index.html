@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>D&D 5e Character Sheet</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <link rel="stylesheet" href="style.css?v=28" />
+  <link rel="stylesheet" href="style.css?v=29" />
 </head>
 <body id="top">
 
@@ -54,7 +54,18 @@
       <span id="saveStatus" class="status-msg"></span>
     </div>
 
+    <!-- Character Name & Compact Circular Portrait -->
     <div class="name-box">
+      <div class="avatar-frame" id="avatarFrame" title="Click to upload character portrait">
+        <img id="charAvatarImg" class="char-avatar-img" src="" alt="Avatar" style="display: none;" />
+        <div class="avatar-placeholder" id="avatarPlaceholder">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
+      </div>
       <input type="text" id="charName" class="save-field name-input" placeholder="Character Name" />
     </div>
 
@@ -212,7 +223,7 @@
               <input type="number" id="maxHp" class="save-field hp-input max" value="10" title="Max HP" />
             </div>
             <div class="card-details">
-              <span class="card-title">Hit Points</span>
+              <span class="card-title hp-title-btn" id="hpTitleClick">Hit Points</span>
               <span class="card-caption">Current vs Max</span>
             </div>
           </div>
@@ -907,6 +918,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=28"></script>
+  <script src="app.js?v=29"></script>
 </body>
 </html>
