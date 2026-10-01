@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>D&D 5e Character Sheet</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <link rel="stylesheet" href="style.css?v=26" />
+  <link rel="stylesheet" href="style.css?v=27" />
 </head>
 <body id="top">
 
@@ -107,7 +107,7 @@
           <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <path d="M1 12s4-8 11-8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
@@ -187,7 +187,7 @@
         </div>
       </div>
 
-      <!-- Vitals HUD -->
+      <!-- Vitals HUD (Restored to exact clean height) -->
       <div class="vitals-hud">
         <div class="vitals-card ac-card">
           <span class="card-tag">Defense</span>
@@ -200,29 +200,25 @@
           </div>
         </div>
 
-        <!-- Health Pool with Quick HP button and Temp HP -->
+        <!-- Health Pool: Original single-row layout with sneaky ± button -->
         <div class="vitals-card hp-card">
-          <div class="hp-card-top">
-            <span class="card-tag">Health Pool</span>
-            <button type="button" class="hp-quick-btn" id="openHpModalBtn" title="Damage / Heal calculator">± Calc</button>
-          </div>
-          <div class="card-main hp-card-main">
-            <div class="hp-gauges-cluster">
-              <div class="hp-gauge-box">
-                <input type="number" id="curHp" class="save-field hp-input cur" value="10" title="Current HP" />
-                <span class="hp-divider">/</span>
-                <input type="number" id="maxHp" class="save-field hp-input max" value="10" title="Max HP" />
-              </div>
-              <div class="temp-hp-box" title="Temporary HP">
-                <span class="temp-hp-label">Temp</span>
-                <input type="number" id="tempHp" class="save-field hp-input temp" value="0" placeholder="0" />
-              </div>
+          <span class="card-tag">Health Pool</span>
+          <div class="card-main">
+            <div class="hp-gauge-box">
+              <input type="number" id="curHp" class="save-field hp-input cur" value="10" title="Current HP" />
+              <span class="hp-divider">/</span>
+              <input type="number" id="maxHp" class="save-field hp-input max" value="10" title="Max HP" />
             </div>
             <div class="card-details">
-              <span class="card-title">Hit Points</span>
-              <span class="card-caption">Current / Max / Temp</span>
+              <div class="card-title-row">
+                <span class="card-title hp-title-btn" id="openHpModalBtn" title="Click to adjust HP">Hit Points</span>
+                <button type="button" class="hp-subtle-btn" id="openHpModalBtnIcon" title="Adjust HP">±</button>
+              </div>
+              <span class="card-caption">Current vs Max</span>
             </div>
           </div>
+          <!-- Hidden Temp HP input so character saves & formulas keep working -->
+          <input type="hidden" id="tempHp" class="save-field" value="0" />
         </div>
 
         <div class="vitals-card death-card">
@@ -910,6 +906,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=26"></script>
+  <script src="app.js?v=27"></script>
 </body>
 </html>
