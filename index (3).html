@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D 5e Character Sheet</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="style.css?v=25" />
+</head>
+<body id="top">
+
+  <div id="saveToast" class="toast-banner">Saved!</div>
+
+  <div class="sheet-container">
+    <header class="top-utility-bar">
+      <div class="app-brand">
+        <span class="app-logo">⚔</span>
+        <span class="app-title">D&D 5e Character Sheet</span>
+      </div>
+
+      <div class="header-right">
+        <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
+        <div class="wiki-box">
+          <span class="wiki-title">WIKI LINKS:</span>
+          <div class="wiki-links">
+            <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">Wikidot</a>
+            <span class="wiki-sep">/</span>
+            <a href="https://roll20.net/compendium/dnd5e/Weapons#content" target="_blank" rel="noopener noreferrer">Weapons</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="top-nav">
+      <div class="btn-group">
+        <button class="btn btn-primary" id="saveBtn" type="button">Save</button>
+        <button class="btn btn-ghost" id="loadBtn" type="button">Load</button>
+        <button class="btn btn-ghost" id="newBtn" type="button">New</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-ghost" id="backupBtn" type="button">Backup</button>
+        <label class="btn btn-ghost file-label">
+          Restore
+          <input type="file" id="restoreFile" accept=".json" />
+        </label>
+        <button class="btn btn-danger-ghost" id="deleteBtn" type="button">Delete</button>
+      </div>
+      <span id="saveStatus" class="status-msg"></span>
+    </div>
+
+    <div class="name-box">
+      <input type="text" id="charName" class="save-field name-input" placeholder="Character Name" />
+    </div>
+
+    <div class="tab-controls">
+      <button class="main-tab active" data-target="tab-stats" type="button">Stats &amp; Equipment</button>
+      <button class="main-tab" data-target="tab-journal" type="button">Notes &amp; Lore</button>
+    </div>
+
+    <!-- TAB 1: STATS & EQUIPMENT -->
+    <div id="tab-stats" class="tab-page active">
+      <!-- Meta Row 1 -->
+      <div class="meta-row-grid">
+        <div class="field-pill dropdown-pill-wrapper" data-blur-id="class">
+          <span class="pill-label">Class</span>
+          <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Select class..." />
+          <div id="classDropdown" class="dropdown-menu"></div>
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill dropdown-pill-wrapper" data-blur-id="race">
+          <span class="pill-label">Race</span>
+          <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Select race..." />
+          <div id="raceDropdown" class="dropdown-menu"></div>
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill" data-blur-id="background">
+          <span class="pill-label">Background</span>
+          <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Soldier" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill" data-blur-id="alignment">
+          <span class="pill-label">Alignment</span>
+          <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill" data-blur-id="level">
+          <span class="pill-label">Level</span>
+          <input type="number" id="charLevel" class="save-field pill-input center" value="1" min="1" max="20" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Meta Row 2 -->
+      <div class="meta-row-grid">
+        <div class="field-pill" data-blur-id="exp">
+          <span class="pill-label">XP</span>
+          <input type="text" id="charExp" class="save-field pill-input center" placeholder="0 XP" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill badge-pill" data-blur-id="prof">
+          <span class="pill-label">Proficiency</span>
+          <span id="profBonusDisplay" class="pill-badge">+2</span>
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill" data-blur-id="inspiration">
+          <span class="pill-label">Inspiration</span>
+          <input type="text" id="charInspiration" class="save-field pill-input center" placeholder="None" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill" data-blur-id="speed">
+          <span class="pill-label">Speed</span>
+          <input type="number" id="charSpeed" class="save-field pill-input center" value="30" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="field-pill hitdice-pill" data-blur-id="hitdice">
+          <span class="pill-label">Hit Dice</span>
+          <div class="hitdice-box">
+            <input type="text" id="hitDiceCur" class="save-field hitdice-input" value="1" placeholder="Cur" />
+            <span class="hitdice-divider">/</span>
+            <input type="text" id="hitDiceMax" class="save-field hitdice-input" value="1" placeholder="Max" />
+          </div>
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vitals HUD -->
+      <div class="vitals-hud">
+        <div class="vitals-card ac-card">
+          <span class="card-tag">Defense</span>
+          <div class="card-main">
+            <input type="number" id="ac" class="save-field ac-input" value="10" />
+            <div class="card-details">
+              <span class="card-title">Armor Class</span>
+              <span class="card-caption">Base Protection</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vitals-card hp-card">
+          <span class="card-tag">Health Pool</span>
+          <div class="card-main">
+            <div class="hp-gauge-box">
+              <input type="number" id="curHp" class="save-field hp-input cur" value="10" title="Current HP" />
+              <span class="hp-divider">/</span>
+              <input type="number" id="maxHp" class="save-field hp-input max" value="10" title="Max HP" />
+            </div>
+            <div class="card-details">
+              <span class="card-title">Hit Points</span>
+              <span class="card-caption">Current vs Max</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vitals-card death-card">
+          <span class="card-tag">Mortality</span>
+          <div class="card-main">
+            <div class="death-saves-box">
+              <div class="save-track succ">
+                <span class="track-label">Success</span>
+                <input type="number" id="deathSucc" class="save-field death-input success-txt" value="0" min="0" max="3" />
+              </div>
+              <div class="save-track fail">
+                <span class="track-label">Failure</span>
+                <input type="number" id="deathFail" class="save-field death-input fail-txt" value="0" min="0" max="3" />
+              </div>
+            </div>
+            <div class="card-details">
+              <span class="card-title">Death Saves</span>
+              <span class="card-caption">3 to live or die</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vitals-card resource-card">
+          <span class="card-tag">Power</span>
+          <div class="card-main">
+            <div class="resource-counter-box">
+              <input type="number" id="classPtsCur" class="save-field res-input" value="0" title="Current Points" />
+              <span class="hp-divider">/</span>
+              <input type="number" id="classPtsMax" class="save-field res-input" value="0" title="Max Points" />
+            </div>
+            <div class="card-details">
+              <span class="card-title">Class Points</span>
+              <span class="card-caption">Ki, Rages, Sorcery</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column Layout: Attributes/Skills vs Combat/Equipment -->
+      <div class="two-col-layout">
+        <div class="left-pane">
+          <h2 class="section-title">Attributes</h2>
+          <div class="attributes-group">
+            <div class="attr-pod attr-str" data-attr="str">
+              <div class="attr-badge">
+                <span class="attr-abbr">Str</span>
+                <span class="attr-full">Strength</span>
+              </div>
+              <div class="attr-score-box">
+                <input type="number" id="attr_str" class="attr-input save-field center" value="10" />
+              </div>
+              <div class="attr-mod-box">
+                <span class="attr-mod center" id="mod_str">+0</span>
+              </div>
+              <div class="attr-save-box">
+                <label class="save-check">
+                  <input type="checkbox" id="save_str" class="save-field check-save" />
+                  <span>Save</span>
+                </label>
+                <span class="save-val center" id="save_val_str">0</span>
+                <span class="hex-die roll-btn" data-type="save" data-attr="str" title="Roll Strength Save"></span>
+              </div>
+            </div>
+
+            <div class="attr-pod attr-dex" data-attr="dex">
+              <div class="attr-badge">
+                <span class="attr-abbr">Dex</span>
+                <span class="attr-full">Dexterity</span>
+              </div>
+              <div class="attr-score-box">
+                <input type="number" id="attr_dex" class="attr-input save-field center" value="10" />
+              </div>
+              <div class="attr-mod-box">
+                <span class="attr-mod center" id="mod_dex">+0</span>
+              </div>
+              <div class="attr-save-box">
+                <label class="save-check">
+                  <input type="checkbox" id="save_dex" class="save-field check-save" />
+                  <span>Save</span>
+                </label>
+                <span class="save-val center" id="save_val_dex">0</span>
+                <span class="hex-die roll-btn" data-type="save" data-attr="dex" title="Roll Dexterity Save"></span>
+              </div>
+            </div>
+
+            <div class="attr-pod attr-con" data-attr="con">
+              <div class="attr-badge">
+                <span class="attr-abbr">Con</span>
+                <span class="attr-full">Constitution</span>
+              </div>
+              <div class="attr-score-box">
+                <input type="number" id="attr_con" class="attr-input save-field center" value="10" />
+              </div>
+              <div class="attr-mod-box">
+                <span class="attr-mod center" id="mod_con">+0</span>
+              </div>
+              <div class="attr-save-box">
+                <label class="save-check">
+                  <input type="checkbox" id="save_con" class="save-field check-save" />
+                  <span>Save</span>
+                </label>
+                <span class="save-val center" id="save_val_con">0</span>
+                <span class="hex-die roll-btn" data-type="save" data-attr="con" title="Roll Constitution Save"></span>
+              </div>
+            </div>
+
+            <div class="attr-pod attr-int" data-attr="int">
+              <div class="attr-badge">
+                <span class="attr-abbr">Int</span>
+                <span class="attr-full">Intelligence</span>
+              </div>
+              <div class="attr-score-box">
+                <input type="number" id="attr_int" class="attr-input save-field center" value="10" />
+              </div>
+              <div class="attr-mod-box">
+                <span class="attr-mod center" id="mod_int">+0</span>
+              </div>
+              <div class="attr-save-box">
+                <label class="save-check">
+                  <input type="checkbox" id="save_int" class="save-field check-save" />
+                  <span>Save</span>
+                </label>
+                <span class="save-val center" id="save_val_int">0</span>
+                <span class="hex-die roll-btn" data-type="save" data-attr="int" title="Roll Intelligence Save"></span>
+              </div>
+            </div>
+
+            <div class="attr-pod attr-wis" data-attr="wis">
+              <div class="attr-badge">
+                <span class="attr-abbr">Wis</span>
+                <span class="attr-full">Wisdom</span>
+              </div>
+              <div class="attr-score-box">
+                <input type="number" id="attr_wis" class="attr-input save-field center" value="10" />
+              </div>
+              <div class="attr-mod-box">
+                <span class="attr-mod center" id="mod_wis">+0</span>
+              </div>
+              <div class="attr-save-box">
+                <label class="save-check">
+                  <input type="checkbox" id="save_wis" class="save-field check-save" />
+                  <span>Save</span>
+                </label>
+                <span class="save-val center" id="save_val_wis">0</span>
+                <span class="hex-die roll-btn" data-type="save" data-attr="wis" title="Roll Wisdom Save"></span>
+              </div>
+            </div>
+
+            <div class="attr-pod attr-cha" data-attr="cha">
+              <div class="attr-badge">
+                <span class="attr-abbr">Cha</span>
+                <span class="attr-full">Charisma</span>
+              </div>
+              <div class="attr-score-box">
+                <input type="number" id="attr_cha" class="attr-input save-field center" value="10" />
+              </div>
+              <div class="attr-mod-box">
+                <span class="attr-mod center" id="mod_cha">+0</span>
+              </div>
+              <div class="attr-save-box">
+                <label class="save-check">
+                  <input type="checkbox" id="save_cha" class="save-field check-save" />
+                  <span>Save</span>
+                </label>
+                <span class="save-val center" id="save_val_cha">0</span>
+                <span class="hex-die roll-btn" data-type="save" data-attr="cha" title="Roll Charisma Save"></span>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="section-title">Skills</h2>
+          <div class="skills-group">
+            <div class="skill-row" data-stat="dex" id="row_acro">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_acro_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_acro_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Acrobatics <span class="stat-tag dex-tag">Dex</span></span>
+              <span class="skill-val center" id="val_acro">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="acro" title="Roll Acrobatics"></span>
+            </div>
+
+            <div class="skill-row" data-stat="wis" id="row_anim">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_anim_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_anim_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Animal Handling <span class="stat-tag wis-tag">Wis</span></span>
+              <span class="skill-val center" id="val_anim">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="anim" title="Roll Animal Handling"></span>
+            </div>
+
+            <div class="skill-row" data-stat="int" id="row_arca">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_arca_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_arca_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Arcana <span class="stat-tag int-tag">Int</span></span>
+              <span class="skill-val center" id="val_arca">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="arca" title="Roll Arcana"></span>
+            </div>
+
+            <div class="skill-row" data-stat="str" id="row_athl">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_athl_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_athl_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Athletics <span class="stat-tag str-tag">Str</span></span>
+              <span class="skill-val center" id="val_athl">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="athl" title="Roll Athletics"></span>
+            </div>
+
+            <div class="skill-row" data-stat="cha" id="row_dec">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_dec_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_dec_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Deception <span class="stat-tag cha-tag">Cha</span></span>
+              <span class="skill-val center" id="val_dec">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="dec" title="Roll Deception"></span>
+            </div>
+
+            <div class="skill-row" data-stat="int" id="row_hist">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_hist_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_hist_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">History <span class="stat-tag int-tag">Int</span></span>
+              <span class="skill-val center" id="val_hist">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="hist" title="Roll History"></span>
+            </div>
+
+            <div class="skill-row" data-stat="wis" id="row_ins">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_ins_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_ins_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Insight <span class="stat-tag wis-tag">Wis</span></span>
+              <span class="skill-val center" id="val_ins">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="ins" title="Roll Insight"></span>
+            </div>
+
+            <div class="skill-row" data-stat="cha" id="row_intm">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_intm_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_intm_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Intimidation <span class="stat-tag cha-tag">Cha</span></span>
+              <span class="skill-val center" id="val_intm">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="intm" title="Roll Intimidation"></span>
+            </div>
+
+            <div class="skill-row" data-stat="int" id="row_inv">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_inv_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_inv_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Investigation <span class="stat-tag int-tag">Int</span></span>
+              <span class="skill-val center" id="val_inv">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="inv" title="Roll Investigation"></span>
+            </div>
+
+            <div class="skill-row" data-stat="wis" id="row_med">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_med_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_med_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Medicine <span class="stat-tag wis-tag">Wis</span></span>
+              <span class="skill-val center" id="val_med">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="med" title="Roll Medicine"></span>
+            </div>
+
+            <div class="skill-row" data-stat="int" id="row_nat">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_nat_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_nat_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Nature <span class="stat-tag int-tag">Int</span></span>
+              <span class="skill-val center" id="val_nat">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="nat" title="Roll Nature"></span>
+            </div>
+
+            <div class="skill-row" data-stat="wis" id="row_perc">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_perc_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_perc_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Perception <span class="stat-tag wis-tag">Wis</span></span>
+              <span class="skill-val center" id="val_perc">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="perc" title="Roll Perception"></span>
+            </div>
+
+            <div class="skill-row" data-stat="cha" id="row_perf">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_perf_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_perf_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Performance <span class="stat-tag cha-tag">Cha</span></span>
+              <span class="skill-val center" id="val_perf">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="perf" title="Roll Performance"></span>
+            </div>
+
+            <div class="skill-row" data-stat="cha" id="row_pers">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_pers_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_pers_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Persuasion <span class="stat-tag cha-tag">Cha</span></span>
+              <span class="skill-val center" id="val_pers">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="pers" title="Roll Persuasion"></span>
+            </div>
+
+            <div class="skill-row" data-stat="int" id="row_rel">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_rel_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_rel_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Religion <span class="stat-tag int-tag">Int</span></span>
+              <span class="skill-val center" id="val_rel">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="rel" title="Roll Religion"></span>
+            </div>
+
+            <div class="skill-row" data-stat="dex" id="row_slt">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_slt_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_slt_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Sleight of Hand <span class="stat-tag dex-tag">Dex</span></span>
+              <span class="skill-val center" id="val_slt">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="slt" title="Roll Sleight of Hand"></span>
+            </div>
+
+            <div class="skill-row" data-stat="dex" id="row_ste">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_ste_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_ste_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Stealth <span class="stat-tag dex-tag">Dex</span></span>
+              <span class="skill-val center" id="val_ste">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="ste" title="Roll Stealth"></span>
+            </div>
+
+            <div class="skill-row" data-stat="wis" id="row_surv">
+              <div class="skill-toggles">
+                <label title="Proficiency"><input type="checkbox" class="save-field prof-cb" id="cb_surv_p" /><span class="bubble"></span></label>
+                <label title="Expertise"><input type="checkbox" class="save-field exp-cb" id="cb_surv_e" /><span class="bubble"></span></label>
+              </div>
+              <span class="skill-label">Survival <span class="stat-tag wis-tag">Wis</span></span>
+              <span class="skill-val center" id="val_surv">0</span>
+              <span class="hex-die roll-btn" data-type="skill" data-id="surv" title="Roll Survival"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-pane">
+          <h2 class="section-title">Dice Roller</h2>
+          <div class="dice-bar">
+            <button class="btn red dice-btn" data-sides="20" type="button">1d20</button>
+            <button class="btn red dice-btn" data-sides="12" type="button">1d12</button>
+            <button class="btn red dice-btn" data-sides="10" type="button">1d10</button>
+            <button class="btn red dice-btn" data-sides="8" type="button">1d8</button>
+            <button class="btn red dice-btn" data-sides="6" type="button">1d6</button>
+            <button class="btn red dice-btn" data-sides="4" type="button">1d4</button>
+            <div class="dice-result-badge">
+              <span id="rollResult" class="roll-output">-</span>
+            </div>
+          </div>
+
+          <div class="dice-history-card">
+            <div class="dice-history-header">
+              <span class="dice-history-title">Roll History</span>
+            </div>
+            <div class="dice-history-list" id="diceHistoryList">
+              <span class="dice-history-empty">No rolls logged yet.</span>
+            </div>
+          </div>
+
+          <div class="currency-bar">
+            <div class="coin-item"><label for="coin_cp">CP</label><input type="number" id="coin_cp" class="save-field coin-input center" value="0" /></div>
+            <div class="coin-item"><label for="coin_sp">SP</label><input type="number" id="coin_sp" class="save-field coin-input center" value="0" /></div>
+            <div class="coin-item"><label for="coin_gp">GP</label><input type="number" id="coin_gp" class="save-field coin-input center" value="0" /></div>
+            <div class="coin-item"><label for="coin_pp">PP</label><input type="number" id="coin_pp" class="save-field coin-input center" value="0" /></div>
+          </div>
+
+          <div class="section-header-bar">
+            <h2 class="section-title">Weapons &amp; Attacks</h2>
+            <button type="button" class="btn btn-add-weapon" id="addWeaponBtn">+ Add Weapon</button>
+          </div>
+
+          <div class="attacks-table-wrapper">
+            <div class="attacks-table">
+              <div class="attack-headers">
+                <span>Name</span>
+                <span class="center">Type</span>
+                <span class="center">Damage</span>
+                <span>Notes &amp; Properties</span>
+                <span></span>
+              </div>
+              <div class="attack-rows-container" id="weaponsContainer"></div>
+            </div>
+          </div>
+
+          <hr class="red-divider" />
+
+          <div class="conditions-container">
+            <div class="conditions-header-bar">
+              <span class="tactical-title">Conditions Tracker</span>
+              <div class="exhaustion-meter">
+                <span class="exhaustion-label">Exhaustion:</span>
+                <input type="number" id="exhaustionLevel" class="save-field exhaustion-input center" value="0" min="0" max="6" />
+              </div>
+            </div>
+            <div class="condition-chips-grid" id="conditionChips">
+              <button type="button" class="cond-chip" data-cond="blinded">Blinded</button>
+              <button type="button" class="cond-chip" data-cond="charmed">Charmed</button>
+              <button type="button" class="cond-chip" data-cond="deafened">Deafened</button>
+              <button type="button" class="cond-chip" data-cond="frightened">Frightened</button>
+              <button type="button" class="cond-chip" data-cond="grappled">Grappled</button>
+              <button type="button" class="cond-chip" data-cond="incapacitated">Incapacitated</button>
+              <button type="button" class="cond-chip" data-cond="invisible">Invisible</button>
+              <button type="button" class="cond-chip" data-cond="paralyzed">Paralyzed</button>
+              <button type="button" class="cond-chip" data-cond="petrified">Petrified</button>
+              <button type="button" class="cond-chip" data-cond="poisoned">Poisoned</button>
+              <button type="button" class="cond-chip" data-cond="prone">Prone</button>
+              <button type="button" class="cond-chip" data-cond="restrained">Restrained</button>
+              <button type="button" class="cond-chip" data-cond="stunned">Stunned</button>
+              <button type="button" class="cond-chip" data-cond="unconscious">Unconscious</button>
+            </div>
+          </div>
+
+          <h2 class="section-title tight-title">Proficiencies &amp; Resistances</h2>
+          <textarea id="otherProfs" class="save-field block-text tight-block" rows="5" placeholder="Armor, weapons, tools, languages, damage resistances, immunities..."></textarea>
+
+          <h2 class="section-title tight-title">Equipment &amp; Inventory</h2>
+          <textarea id="inventory" class="save-field block-text" rows="6" placeholder="Detailed inventory, weights, magic items, containers..."></textarea>
+        </div>
+      </div>
+
+      <!-- Abilities & Traits Section -->
+      <section class="abilities-full-section" id="abilitiesSection">
+        <hr class="red-divider" />
+        <div class="section-header-bar">
+          <h2 class="section-title">Abilities &amp; Traits</h2>
+          <button class="btn btn-add-trait" id="addTraitBtn" type="button">+ Add Ability</button>
+        </div>
+        <div id="traitsList" class="traits-grid-container"></div>
+      </section>
+
+      <!-- Spells Section -->
+      <section class="spells-full-section" id="spellsSection">
+        <hr class="red-divider" />
+        <h2 class="section-title center">Spells</h2>
+
+        <div class="spell-basics">
+          <div class="spell-stat-card">
+            <span class="spell-stat-label">Spell Ability</span>
+            <input type="text" id="spellAbility" class="save-field spell-stat-input center" placeholder="INT" />
+          </div>
+          <div class="spell-stat-card">
+            <span class="spell-stat-label">Save DC</span>
+            <input type="text" id="spellDc" class="save-field spell-stat-input center" placeholder="13" />
+          </div>
+          <div class="spell-stat-card">
+            <span class="spell-stat-label">Attack Bonus</span>
+            <input type="text" id="spellAtkBonus" class="save-field spell-stat-input center" placeholder="+5" />
+          </div>
+          <div class="spell-stat-card">
+            <span class="spell-stat-label">Prepared</span>
+            <div class="slot-counter stat-dual">
+              <input type="number" id="preparedCur" class="save-field slot-input center" value="0" />
+              <span class="slot-divider">/</span>
+              <input type="number" id="preparedMax" class="save-field slot-input center" value="0" />
+            </div>
+          </div>
+          <div class="spell-stat-card concentration-card">
+            <span class="spell-stat-label">Concentration</span>
+            <input type="text" id="spellConcentration" class="save-field spell-stat-input concentration-input center" placeholder="None" />
+          </div>
+        </div>
+
+        <h3 class="subsection-title center">Spell Slots</h3>
+        <div class="slots-grid">
+          <div class="slot-tile"><span class="slot-level">1st</span><div class="slot-counter"><input type="number" id="slot1_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot1_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">2nd</span><div class="slot-counter"><input type="number" id="slot2_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot2_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">3rd</span><div class="slot-counter"><input type="number" id="slot3_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot3_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">4th</span><div class="slot-counter"><input type="number" id="slot4_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot4_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">5th</span><div class="slot-counter"><input type="number" id="slot5_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot5_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">6th</span><div class="slot-counter"><input type="number" id="slot6_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot6_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">7th</span><div class="slot-counter"><input type="number" id="slot7_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot7_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">8th</span><div class="slot-counter"><input type="number" id="slot8_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot8_max" class="save-field slot-input center" value="0" /></div></div>
+          <div class="slot-tile"><span class="slot-level">9th</span><div class="slot-counter"><input type="number" id="slot9_cur" class="save-field slot-input center" value="0" /><span class="slot-divider">/</span><input type="number" id="slot9_max" class="save-field slot-input center" value="0" /></div></div>
+        </div>
+
+        <div class="cantrips-header">
+          <div class="cantrips-title-group">
+            <strong>Spells &amp; Cantrips</strong>
+          </div>
+          <div class="spell-filter-wrap">
+            <input type="text" id="filterSpellbookInput" class="spell-filter-input" placeholder="Quick filter spellbook..." />
+          </div>
+          <button class="btn btn-add-spell" id="addSpellBtn" type="button">+ Add Spell</button>
+        </div>
+
+        <div id="spellsList" class="spells-grid-container"></div>
+      </section>
+    </div>
+
+    <!-- TAB 2: NOTES & LORE -->
+    <div id="tab-journal" class="tab-page">
+      <div class="subtab-controls">
+        <button class="sub-tab active" data-sub="sub-notes" type="button">General Notes</button>
+        <button class="sub-tab" data-sub="sub-personality" type="button">Personality &amp; Lore</button>
+        <button class="sub-tab" data-sub="sub-npcs" type="button">NPCs &amp; Contacts</button>
+      </div>
+
+      <div id="sub-notes" class="subtab-page active">
+        <h2 class="section-title">Campaign Notes &amp; Log</h2>
+        <textarea id="campaignNotes" class="save-field block-text journal-box" rows="16" placeholder="Quests, session notes, locations, clues..."></textarea>
+      </div>
+
+      <div id="sub-personality" class="subtab-page">
+        <div class="two-col-layout">
+          <div>
+            <h2 class="section-title">Personality Traits</h2>
+            <textarea id="traits" class="save-field block-text" rows="4"></textarea>
+
+            <h2 class="section-title">Ideals</h2>
+            <textarea id="ideals" class="save-field block-text" rows="4"></textarea>
+          </div>
+          <div>
+            <h2 class="section-title">Bonds</h2>
+            <textarea id="bonds" class="save-field block-text" rows="4"></textarea>
+
+            <h2 class="section-title">Flaws</h2>
+            <textarea id="flaws" class="save-field block-text" rows="4"></textarea>
+          </div>
+        </div>
+
+        <h2 class="section-title">Character Backstory</h2>
+        <textarea id="backstory" class="save-field block-text journal-box" rows="8"></textarea>
+      </div>
+
+      <div id="sub-npcs" class="subtab-page">
+        <h2 class="section-title">NPCs, Factions &amp; Contacts</h2>
+        <textarea id="npcList" class="save-field block-text journal-box" rows="16" placeholder="Names, affiliations, attitudes, notes..."></textarea>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="sheet-footer">
+      <hr class="footer-divider" />
+      <div class="footer-meta">
+        <div class="footer-title">5e Character Sheet</div>
+        <ol class="footer-links">
+          <li><button type="button" id="helpLinkBtn" class="footer-link-action">Help</button></li>
+          <li>Created by Melin08</li>
+          <li><a href="https://github.com/Melin08" target="_blank" rel="noopener noreferrer" class="footer-url-link">GitHub</a></li>
+        </ol>
+      </div>
+      <div class="bottom-quicknav">
+        <a href="#top">Top</a>
+        <span>|</span>
+        <button class="footer-nav-btn" data-tab="tab-stats" data-scroll="attr">Attributes</button>
+        <span>|</span>
+        <button class="footer-nav-btn" data-tab="tab-stats" data-scroll="skills">Skills</button>
+        <span>|</span>
+        <button class="footer-nav-btn" data-tab="tab-stats" data-scroll="traits">Abilities</button>
+        <span>|</span>
+        <button class="footer-nav-btn" data-tab="tab-stats" data-scroll="spells">Spells</button>
+        <span>|</span>
+        <button class="footer-nav-btn" data-tab="tab-journal" data-scroll="journal">Notes</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODALS -->
+  <div id="helpModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box help-modal-box">
+      <div class="modal-header">
+        <h3>Support &amp; Community</h3>
+        <button id="closeHelpModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="help-modal-content">
+        <p class="help-text">Need help, found an issue, or want to suggest ideas? Message me on Discord: <strong>@lmp2620</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box char-modal-box">
+      <div class="modal-header">
+        <h3>Saved Characters</h3>
+        <button id="closeLoadModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      <div id="charList" class="modal-list"></div>
+    </div>
+  </div>
+
+  <div id="spellModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>5e Spells Compendium</h3>
+        <button id="closeSpellModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-search-bar">
+        <input type="text" id="spellSearchInput" placeholder="Search spells (e.g. Fireball, Cure Wounds, Shield)..." autocomplete="off" />
+        <button type="button" class="btn red custom-spell-btn" id="addCustomSpellBtn">+ Custom Spell</button>
+      </div>
+      <div id="spellApiList" class="modal-list"></div>
+    </div>
+  </div>
+
+  <div id="traitModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>5e Features &amp; Abilities</h3>
+        <button id="closeTraitModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-search-bar">
+        <input type="text" id="traitSearchInput" placeholder="Search abilities, traits &amp; powers..." autocomplete="off" />
+        <button type="button" class="btn red custom-spell-btn" id="addCustomTraitBtn">+ Custom Ability</button>
+      </div>
+      <div id="traitApiList" class="modal-list"></div>
+    </div>
+  </div>
+
+  <div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box auth-modal-box">
+      <div class="modal-header">
+        <h3 id="authModalTitle">Account &amp; Cloud Sync</h3>
+        <button id="closeAuthModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="auth-modal-content">
+        <div id="authLoggedOutView">
+          <div class="auth-input-group">
+            <input type="email" id="authEmail" class="auth-input" placeholder="Email address" autocomplete="username" />
+            <input type="password" id="authPassword" class="auth-input" placeholder="Password" autocomplete="current-password" />
+          </div>
+          <div class="auth-btn-row">
+            <button class="btn red" id="emailLoginBtn" type="button">Sign In</button>
+            <button class="btn gray" id="emailSignUpBtn" type="button">Sign Up</button>
+          </div>
+          <div class="auth-divider"><span>OR</span></div>
+          <button class="btn gray auth-google-btn" id="googleLoginBtn" type="button">Sign in with Google</button>
+        </div>
+        <div id="authLoggedInView" style="display: none;">
+          <p class="auth-user-label">Signed in as</p>
+          <p id="currentUserText" class="auth-user-email"></p>
+          <div class="auth-sync-status" id="cloudSyncStatus">Cloud Sync: Active</div>
+          <button class="btn red auth-logout-btn" id="logoutBtn" type="button">Log Out</button>
+        </div>
+        <p id="authErrorMsg" class="auth-error-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+  <script src="app.js?v=25"></script>
+</body>
+</html>
