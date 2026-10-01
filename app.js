@@ -244,6 +244,9 @@ function recalculateAll() {
     }
   });
 
+  let percBonus = mods["wis"] || 0;
+  let insBonus = mods["wis"] || 0;
+
   document.querySelectorAll(".skill-row").forEach((row) => {
     const stat = row.dataset.stat;
     const statMod = mods[stat] ?? 0;
@@ -256,7 +259,17 @@ function recalculateAll() {
 
     const valElem = row.querySelector(".skill-val");
     if (valElem) valElem.textContent = total >= 0 ? `+${total}` : total;
+
+    if (row.id === "row_perc") percBonus = total;
+    if (row.id === "row_ins") insBonus = total;
   });
+
+  // Passive Senses Update
+  const passPercEl = document.getElementById("passivePerception");
+  if (passPercEl) passPercEl.textContent = 10 + percBonus;
+
+  const passInsEl = document.getElementById("passiveInsight");
+  if (passInsEl) passInsEl.textContent = 10 + insBonus;
 }
 
 function renderWeapons() {
@@ -399,6 +412,57 @@ function attachSpellDragEvents() {
   });
 }
 
+/* Interactive Spell Slot Pips Renderer */
+function renderSpellSlotGrid() {
+  const container = document.getElementById("slotsGridContainer");
+  if (!container) return;
+
+  const suffixes = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"];
+  let html = "";
+
+  for (let lvl = 1; lvl <= 9; lvl++) {
+    const curVal = parseInt(document.getElementById(`slot${lvl}_cur`)?.value, 10) || 0;
+    const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
+
+    let pipsHtml = "";
+    for (let i = 0; i < maxVal; i++) {
+      const isAvailable = i < curVal;
+      pipsHtml += `<span class="slot-pip ${isAvailable ? 'active' : ''}" data-slot-lvl="${lvl}" data-pip-idx="${i}" title="${isAvailable ? 'Click to Cast' : 'Click to Recover'}"></span>`;
+    }
+
+    html += `
+      <div class="slot-tile" data-slot-lvl="${lvl}">
+        <span class="slot-level">${suffixes[lvl - 1]}</span>
+        <div class="slot-pips-container">
+          ${pipsHtml || '<span style="font-size:0.65rem; color:#475569;">No Slots</span>'}
+        </div>
+        <div class="slot-counter">
+          <input type="number" id="slot${lvl}_cur" class="save-field slot-input center" value="${curVal}" min="0" />
+          <span class="slot-divider">/</span>
+          <input type="number" id="slot${lvl}_max" class="save-field slot-input center" value="${maxVal}" min="0" />
+        </div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function updateSlotPips(lvl) {
+  const tile = document.querySelector(`.slot-tile[data-slot-lvl="${lvl}"]`);
+  if (!tile) return;
+  const cur = parseInt(document.getElementById(`slot${lvl}_cur`)?.value, 10) || 0;
+  const max = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
+  const pipsBox = tile.querySelector(".slot-pips-container");
+  if (!pipsBox) return;
+
+  let pipsHtml = "";
+  for (let i = 0; i < max; i++) {
+    const isAvailable = i < cur;
+    pipsHtml += `<span class="slot-pip ${isAvailable ? 'active' : ''}" data-slot-lvl="${lvl}" data-pip-idx="${i}" title="${isAvailable ? 'Click to Cast' : 'Click to Recover'}"></span>`;
+  }
+  pipsBox.innerHTML = pipsHtml || '<span style="font-size:0.65rem; color:#475569;">No Slots</span>';
+}
+
 function addDiceHistory(desc, total) {
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   diceRollHistory.unshift({ desc, total, time });
@@ -525,6 +589,7 @@ function applyCharacterData(charData) {
   renderConditionChips();
   renderBlurredPills();
   recalculateAll();
+  renderSpellSlotGrid();
 }
 
 function loadSheet() {
@@ -544,6 +609,7 @@ function loadSheet() {
       renderMyTraits();
       renderConditionChips();
       renderBlurredPills();
+      renderSpellSlotGrid();
     }
   }
 }
@@ -565,7 +631,8 @@ function resetSheet() {
       field.classList.contains("slot-input") ||
       field.classList.contains("death-input") ||
       field.classList.contains("res-input") ||
-      field.classList.contains("exhaustion-input")
+      field.classList.contains("exhaustion-input") ||
+      field.id === "tempHp"
     ) field.value = 0;
     else field.value = "";
   });
@@ -587,8 +654,126 @@ function resetSheet() {
   renderMyTraits();
   renderConditionChips();
   renderBlurredPills();
+  renderSpellSlotGrid();
   saveSheet(false);
   showStatus("New Sheet Created!");
+}
+
+/* Rest Logic Engines */
+function applyLongRest() {
+  if (!confirm("Take a Long Rest? This will restore HP to max, refill all spell slots, recover class points, clear death saves, and regain up to half your total Hit Dice.")) return;
+
+  const maxHpEl = document.getElementById("maxHp");
+  const curHpEl = document.getElementById("curHp");
+  const tempHpEl = document.getElementById("tempHp");
+  if (maxHpEl && curHpEl) curHpEl.value = maxHpEl.value;
+  if (tempHpEl) tempHpEl.value = 0;
+
+  // Restore Spell Slots to max
+  for (let lvl = 1; lvl <= 9; lvl++) {
+    const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
+    const curEl = document.getElementById(`slot${lvl}_cur`);
+    if (curEl) curEl.value = maxVal;
+  }
+
+  // Restore Hit Dice (regain half of max, minimum 1)
+  const hdCurEl = document.getElementById("hitDiceCur");
+  const hdMaxEl = document.getElementById("hitDiceMax");
+  const maxHd = parseInt(hdMaxEl?.value, 10) || 1;
+  const curHd = parseInt(hdCurEl?.value, 10) || 0;
+  const regained = Math.max(1, Math.floor(maxHd / 2));
+  if (hdCurEl) hdCurEl.value = Math.min(maxHd, curHd + regained);
+
+  // Reset Death Saves
+  const succEl = document.getElementById("deathSucc");
+  const failEl = document.getElementById("deathFail");
+  if (succEl) succEl.value = 0;
+  if (failEl) failEl.value = 0;
+
+  // Reset Class Points to max
+  const classMaxEl = document.getElementById("classPtsMax");
+  const classCurEl = document.getElementById("classPtsCur");
+  if (classMaxEl && classCurEl) classCurEl.value = classMaxEl.value;
+
+  renderSpellSlotGrid();
+  saveSheet(false);
+  showStatus("Long Rest Complete!");
+}
+
+function applyShortRest() {
+  const hdCurEl = document.getElementById("hitDiceCur");
+  const curHd = parseInt(hdCurEl?.value, 10) || 0;
+  const maxHd = parseInt(document.getElementById("hitDiceMax")?.value, 10) || 1;
+
+  if (curHd <= 0) {
+    alert("You have no Hit Dice left to spend during a Short Rest!");
+    return;
+  }
+
+  const spend = confirm(`Take a Short Rest?\nYou have ${curHd} of ${maxHd} Hit Dice available.\nClick OK to spend 1 Hit Die and recover HP.`);
+  if (spend) {
+    const conMod = parseInt(document.getElementById("mod_con")?.textContent, 10) || 0;
+    const roll = Math.floor(Math.random() * 8) + 1; // Default to d8 if die size isn't parsed
+    const healTotal = Math.max(1, roll + conMod);
+
+    hdCurEl.value = Math.max(0, curHd - 1);
+
+    const curHpEl = document.getElementById("curHp");
+    const maxHp = parseInt(document.getElementById("maxHp")?.value, 10) || 10;
+    const curHp = parseInt(curHpEl?.value, 10) || 0;
+    const newHp = Math.min(maxHp, curHp + healTotal);
+    if (curHpEl) curHpEl.value = newHp;
+
+    addDiceHistory(`Short Rest Hit Die (1d8 + ${conMod})`, healTotal);
+    saveSheet(false);
+    showStatus(`Regained ${healTotal} HP!`);
+  }
+}
+
+/* HP Quick Calculator Engine */
+function applyHpAdjustment(action) {
+  const amountInput = document.getElementById("hpModalAmount");
+  const amt = parseInt(amountInput?.value, 10);
+  if (isNaN(amt) || amt <= 0) {
+    alert("Please enter a valid number greater than 0.");
+    return;
+  }
+
+  const curHpEl = document.getElementById("curHp");
+  const maxHp = parseInt(document.getElementById("maxHp")?.value, 10) || 10;
+  const tempHpEl = document.getElementById("tempHp");
+
+  let curHp = parseInt(curHpEl?.value, 10) || 0;
+  let tempHp = parseInt(tempHpEl?.value, 10) || 0;
+
+  if (action === "damage") {
+    let damageLeft = amt;
+    if (tempHp > 0) {
+      if (tempHp >= damageLeft) {
+        tempHp -= damageLeft;
+        damageLeft = 0;
+      } else {
+        damageLeft -= tempHp;
+        tempHp = 0;
+      }
+    }
+    curHp = Math.max(0, curHp - damageLeft);
+    if (tempHpEl) tempHpEl.value = tempHp;
+    if (curHpEl) curHpEl.value = curHp;
+    showStatus(`Took ${amt} damage!`);
+  } else if (action === "heal") {
+    curHp = Math.min(maxHp, curHp + amt);
+    if (curHpEl) curHpEl.value = curHp;
+    showStatus(`Healed for ${amt} HP!`);
+  } else if (action === "temp") {
+    tempHp = Math.max(tempHp, amt); // In 5e, temp HP doesn't stack; highest applies
+    if (tempHpEl) tempHpEl.value = tempHp;
+    showStatus(`Gained ${amt} Temp HP!`);
+  }
+
+  amountInput.value = "";
+  closeModal("hpModal");
+  saveSheet(false);
 }
 
 function renderCharList() {
@@ -964,6 +1149,59 @@ document.addEventListener("click", async (e) => {
   }
   if (e.target.classList.contains("modal-backdrop")) {
     e.target.classList.remove("open");
+    return;
+  }
+
+  // HP Quick Modal Open / Actions
+  if (e.target.id === "openHpModalBtn" || e.target.closest("#openHpModalBtn")) {
+    const amtInput = document.getElementById("hpModalAmount");
+    if (amtInput) amtInput.value = "";
+    document.getElementById("hpModal")?.classList.add("open");
+    setTimeout(() => amtInput?.focus(), 50);
+    return;
+  }
+
+  if (e.target.id === "hpApplyDamageBtn") {
+    applyHpAdjustment("damage");
+    return;
+  }
+  if (e.target.id === "hpApplyHealBtn") {
+    applyHpAdjustment("heal");
+    return;
+  }
+  if (e.target.id === "hpApplyTempBtn") {
+    applyHpAdjustment("temp");
+    return;
+  }
+
+  // Rest Buttons
+  if (e.target.id === "shortRestBtn") {
+    applyShortRest();
+    return;
+  }
+  if (e.target.id === "longRestBtn") {
+    applyLongRest();
+    return;
+  }
+
+  // Interactive Spell Slot Pip click (Cast / Recover)
+  if (e.target.classList.contains("slot-pip")) {
+    const lvl = parseInt(e.target.dataset.slotLvl, 10);
+    const pipIdx = parseInt(e.target.dataset.pipIdx, 10);
+    const curEl = document.getElementById(`slot${lvl}_cur`);
+    if (curEl) {
+      let curVal = parseInt(curEl.value, 10) || 0;
+      if (e.target.classList.contains("active")) {
+        // Casting slot: deduct one slot
+        curVal = Math.max(0, pipIdx);
+      } else {
+        // Recovering slot: set to this slot index + 1
+        curVal = Math.max(curVal, pipIdx + 1);
+      }
+      curEl.value = curVal;
+      updateSlotPips(lvl);
+      saveSheet(true);
+    }
     return;
   }
 
@@ -1500,6 +1738,12 @@ document.addEventListener("input", (e) => {
   if (e.target.classList.contains("save-field") && e.target.type !== "checkbox") {
     recalculateAll();
     saveSheet(true);
+
+    // Sync pips if slot inputs were edited manually
+    if (e.target.id && e.target.id.startsWith("slot")) {
+      const lvl = e.target.id.replace(/\D/g, "");
+      if (lvl) updateSlotPips(lvl);
+    }
   }
 
   if (e.target.classList.contains("custom-spell-field")) {
