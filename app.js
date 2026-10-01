@@ -713,7 +713,7 @@ function applyShortRest() {
   const spend = confirm(`Take a Short Rest?\nYou have ${curHd} of ${maxHd} Hit Dice available.\nClick OK to spend 1 Hit Die and recover HP.`);
   if (spend) {
     const conMod = parseInt(document.getElementById("mod_con")?.textContent, 10) || 0;
-    const roll = Math.floor(Math.random() * 8) + 1; // Default to d8 if die size isn't parsed
+    const roll = Math.floor(Math.random() * 8) + 1;
     const healTotal = Math.max(1, roll + conMod);
 
     hdCurEl.value = Math.max(0, curHd - 1);
@@ -766,7 +766,7 @@ function applyHpAdjustment(action) {
     if (curHpEl) curHpEl.value = curHp;
     showStatus(`Healed for ${amt} HP!`);
   } else if (action === "temp") {
-    tempHp = Math.max(tempHp, amt); // In 5e, temp HP doesn't stack; highest applies
+    tempHp = Math.max(tempHp, amt);
     if (tempHpEl) tempHpEl.value = tempHp;
     showStatus(`Gained ${amt} Temp HP!`);
   }
@@ -1152,8 +1152,15 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // HP Quick Modal Open / Actions
-  if (e.target.id === "openHpModalBtn" || e.target.closest("#openHpModalBtn") || e.target.closest(".hp-corner-btn")) {
+  // HP Quick Modal Open / Actions (Handles corner ± button or title click)
+  if (
+    e.target.id === "openHpModalBtn" ||
+    e.target.closest("#openHpModalBtn") ||
+    e.target.id === "openHpModalBtnIcon" ||
+    e.target.closest("#openHpModalBtnIcon") ||
+    e.target.classList.contains("hp-corner-btn") ||
+    e.target.closest(".hp-corner-btn")
+  ) {
     const amtInput = document.getElementById("hpModalAmount");
     if (amtInput) amtInput.value = "";
     document.getElementById("hpModal")?.classList.add("open");
@@ -1192,10 +1199,8 @@ document.addEventListener("click", async (e) => {
     if (curEl) {
       let curVal = parseInt(curEl.value, 10) || 0;
       if (e.target.classList.contains("active")) {
-        // Casting slot: deduct one slot
         curVal = Math.max(0, pipIdx);
       } else {
-        // Recovering slot: set to this slot index + 1
         curVal = Math.max(curVal, pipIdx + 1);
       }
       curEl.value = curVal;
@@ -1739,7 +1744,6 @@ document.addEventListener("input", (e) => {
     recalculateAll();
     saveSheet(true);
 
-    // Sync pips if slot inputs were edited manually
     if (e.target.id && e.target.id.startsWith("slot")) {
       const lvl = e.target.id.replace(/\D/g, "");
       if (lvl) updateSlotPips(lvl);
