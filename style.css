@@ -73,6 +73,7 @@ body {
 .pill-title,
 .card-title,
 .tab-icon,
+.attr-header-abbr,
 .roll-output {
   font-family: 'Cinzel', serif;
 }
@@ -144,7 +145,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 .file-label,
 .slot-pip,
 .hp-corner-btn,
-.avatar-portal {
+.avatar-portal,
+.btn-rest-mini {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -162,7 +164,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 .spell-add-badge:hover,
 .btn-outline:hover,
 .file-label:hover,
-.avatar-portal:hover {
+.avatar-portal:hover,
+.btn-rest-mini:hover {
   transform: translateY(-2.5px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
@@ -176,7 +179,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 .spell-add-badge:active,
 .btn-outline:active,
 .file-label:active,
-.avatar-portal:active {
+.avatar-portal:active,
+.btn-rest-mini:active {
   transform: translateY(1.5px) scale(0.96) !important;
   filter: brightness(0.92);
 }
@@ -207,7 +211,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 }
 
 .sheet-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   background-color: var(--bg-surface);
   padding: 2.25rem;
@@ -401,7 +405,6 @@ textarea::-webkit-scrollbar-thumb:hover,
   flex-shrink: 0;
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.6);
 }
-
 .avatar-portal:hover {
   border-color: var(--primary-red);
   box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
@@ -496,7 +499,7 @@ textarea::-webkit-scrollbar-thumb:hover,
   width: 110px;
 }
 
-/* Orbs */
+/* Stat Orbs */
 .hero-orbs-rack {
   display: flex;
   gap: 0.75rem;
@@ -738,13 +741,13 @@ textarea::-webkit-scrollbar-thumb:hover,
 .center { text-align: center !important; }
 
 /* =========================================
-   VITALS HUD & RECOVERY HUB
+   VITALS HUD
    ========================================= */
 .vitals-hud {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.25rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .vitals-card {
@@ -895,81 +898,82 @@ textarea::-webkit-scrollbar-thumb:hover,
   color: var(--accent-purple) !important;
 }
 
-/* Relocated Recovery Hub */
-.recovery-hub-bar {
-  background: linear-gradient(145deg, #10192a 0%, #0a0f1b 100%);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-lg);
-  padding: 0.85rem 1.35rem;
-  margin-bottom: 2.25rem;
+/* =========================================
+   COMPACT SLIM REST STRIP
+   ========================================= */
+.compact-rest-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.recovery-hub-left {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-.recovery-hub-title {
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
-}
-
-.recovery-hitdice-box {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: var(--bg-input);
+  gap: 0.75rem;
+  background: rgba(11, 17, 32, 0.7);
   border: 1px solid var(--border-medium);
-  border-radius: var(--radius-sm);
-  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.85rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
-.recovery-hd-label {
-  font-size: 0.72rem;
-  font-weight: 700;
+
+.rest-hd-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
-.recovery-hd-divider {
-  color: var(--text-dim);
-  font-weight: 900;
-}
+.rest-hd-glyph { font-size: 0.95rem; }
+.rest-hd-text { font-weight: 700; color: var(--text-dim); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.04em; }
 
-.recovery-hub-actions {
+.rest-hd-indicator .hitdice-input {
+  width: 28px !important;
+  height: 24px !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  border-radius: var(--radius-xs) !important;
+}
+.rest-hd-slash { color: var(--text-dim); font-weight: 800; }
+
+.rest-actions-inline {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  gap: 0.45rem;
 }
 
-.btn-short-rest {
+.btn-rest-mini {
+  padding: 0.3rem 0.85rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.btn-rest-mini.btn-short-rest {
   background: rgba(245, 158, 11, 0.12) !important;
   color: var(--accent-gold) !important;
   border: 1px solid rgba(245, 158, 11, 0.35) !important;
 }
-.btn-short-rest:hover {
+.btn-rest-mini.btn-short-rest:hover {
   background: rgba(245, 158, 11, 0.25) !important;
   border-color: var(--accent-gold) !important;
 }
 
-.btn-long-rest {
+.btn-rest-mini.btn-long-rest {
   background: rgba(16, 185, 129, 0.12) !important;
   color: var(--accent-emerald) !important;
   border: 1px solid rgba(16, 185, 129, 0.35) !important;
 }
-.btn-long-rest:hover {
+.btn-rest-mini.btn-long-rest:hover {
   background: rgba(16, 185, 129, 0.25) !important;
   border-color: var(--accent-emerald) !important;
 }
 
 /* =========================================
-   TWO-COLUMN ARENA LAYOUT
+   TWO-COLUMN COMBAT ARENA
    ========================================= */
 .two-col-layout {
   display: grid;
@@ -977,7 +981,6 @@ textarea::-webkit-scrollbar-thumb:hover,
   gap: 2.5rem;
   margin-top: 1rem;
 }
-
 .left-pane { min-width: 0; }
 .right-pane { min-width: 0; width: 100%; }
 
@@ -986,13 +989,11 @@ textarea::-webkit-scrollbar-thumb:hover,
   padding-bottom: 0.4rem;
   margin-bottom: 1.15rem;
 }
-.skills-header { margin-top: 1.75rem; }
 .flex-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
 .section-title {
   font-size: 1.25rem;
   font-weight: 800;
@@ -1171,21 +1172,78 @@ textarea::-webkit-scrollbar-thumb:hover,
   margin-top: 0.15rem;
 }
 
-/* Skills */
-.skills-group {
+/* =========================================
+   HORIZONTAL SKILLS ATTRIBUTE MATRIX
+   ========================================= */
+.horizontal-skills-section {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.skills-attribute-matrix {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.skill-attr-column {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.65rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
+}
+
+.col-str { border-top: 3px solid var(--primary-red); }
+.col-dex { border-top: 3px solid var(--accent-emerald); }
+.col-int { border-top: 3px solid var(--accent-blue); }
+.col-wis { border-top: 3px solid var(--accent-purple); }
+.col-cha { border-top: 3px solid var(--accent-gold); }
+
+.attr-column-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0.25rem;
+}
+.attr-header-abbr {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+.col-str .attr-header-abbr { color: #f87171; }
+.col-dex .attr-header-abbr { color: #34d399; }
+.col-int .attr-header-abbr { color: #60a5fa; }
+.col-wis .attr-header-abbr { color: var(--accent-purple); }
+.col-cha .attr-header-abbr { color: #facc15; }
+
+.attr-header-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attr-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .skill-row {
   display: flex;
   align-items: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border-medium);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 0.45rem 0.8rem;
-  font-size: 0.92rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.85rem;
   transition: all var(--transition-fast);
 }
 .skill-row:hover {
@@ -1195,8 +1253,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 
 .skill-toggles {
   display: flex;
-  gap: 0.35rem;
-  margin-right: 0.85rem;
+  gap: 0.25rem;
+  margin-right: 0.45rem;
 }
 .skill-toggles label {
   cursor: pointer;
@@ -1207,52 +1265,51 @@ textarea::-webkit-scrollbar-thumb:hover,
 .skill-toggles input[type="checkbox"] { display: none; }
 
 .bubble {
-  width: 15px;
-  height: 15px;
-  border: 2px solid var(--border-medium);
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--border-medium);
   border-radius: 50%;
   transition: all var(--transition-fast);
 }
 .prof-cb:checked + .bubble {
   background-color: var(--primary-red);
   border-color: var(--primary-red);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
 }
 .exp-cb:checked + .bubble {
   background-color: var(--accent-purple);
   border-color: var(--accent-purple);
-  box-shadow: 0 0 8px rgba(192, 132, 252, 0.6);
+  box-shadow: 0 0 6px rgba(192, 132, 252, 0.6);
 }
 
 .skill-label {
   flex: 1;
   color: var(--text-main);
   font-weight: 600;
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.stat-tag {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  font-weight: 800;
-  border-radius: 3px;
-  padding: 0.05rem 0.3rem;
-}
-.str-tag { color: #f87171; background: rgba(239, 68, 68, 0.12); }
-.dex-tag { color: #34d399; background: rgba(16, 185, 129, 0.12); }
-.con-tag { color: #fb923c; background: rgba(249, 115, 22, 0.12); }
-.int-tag { color: #60a5fa; background: rgba(59, 130, 246, 0.12); }
-.wis-tag { color: var(--accent-purple); background: rgba(192, 132, 252, 0.12); }
-.cha-tag { color: #facc15; background: rgba(234, 179, 8, 0.12); }
 
 .skill-val {
-  width: 30px;
-  margin-right: 0.5rem;
+  width: 24px;
   font-weight: 800;
   color: #ffffff;
+  font-size: 0.85rem;
 }
+
+.attr-skills-list .hex-die {
+  width: 14px;
+  height: 16px;
+  margin-left: 0.25rem;
+  background-color: #475569;
+}
+.col-str .hex-die { background-color: var(--primary-red); }
+.col-dex .hex-die { background-color: var(--accent-emerald); }
+.col-int .hex-die { background-color: var(--accent-blue); }
+.col-wis .hex-die { background-color: var(--accent-purple); }
+.col-cha .hex-die { background-color: var(--accent-gold); }
 
 /* =========================================
    WEAPONS ARSENAL
@@ -2400,6 +2457,7 @@ textarea.block-text {
 @media (max-width: 1024px) {
   .vitals-hud { grid-template-columns: repeat(2, 1fr); }
   .two-col-layout { grid-template-columns: 1fr; }
+  .skills-attribute-matrix { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .slots-grid { grid-template-columns: repeat(5, 1fr); }
 }
 
@@ -2410,13 +2468,14 @@ textarea.block-text {
   .hero-name-input { font-size: 1.7rem; }
   .hero-orbs-rack { width: 100%; justify-content: space-between; }
   .vitals-hud { grid-template-columns: 1fr; }
+  .compact-rest-bar { flex-direction: column; align-items: flex-start; }
+  .rest-actions-inline { width: 100%; }
+  .rest-actions-inline .btn-rest-mini { flex: 1; }
+  .skills-attribute-matrix { grid-template-columns: 1fr; }
   .attacks-table { min-width: 480px; }
   .attacks-table-wrapper { overflow-x: auto; }
   .spells-grid-container { grid-template-columns: 1fr; }
   .slots-grid { grid-template-columns: repeat(3, 1fr); }
   .dice-station-bar { flex-direction: column; align-items: stretch; }
   .dice-history-drawer { max-width: 100%; }
-  .recovery-hub-bar { flex-direction: column; align-items: stretch; }
-  .recovery-hub-actions { width: 100%; }
-  .recovery-hub-actions .btn { flex: 1; }
 }
