@@ -31,6 +31,7 @@ const ACTIVE_CHAR_ID_KEY = "badman_active_char_id";
 
 let activeCharId = localStorage.getItem(ACTIVE_CHAR_ID_KEY) || "default";
 
+let myCharacterAvatar = "";
 let myCharacterSpells = [];
 let myCharacterTraits = [];
 let myCharacterWeapons = [
@@ -463,6 +464,22 @@ function updateSlotPips(lvl) {
   pipsBox.innerHTML = pipsHtml || '<span style="font-size:0.65rem; color:#475569;">No Slots</span>';
 }
 
+function renderAvatar() {
+  const imgEl = document.getElementById("charAvatarImg");
+  const placeholderEl = document.getElementById("avatarPlaceholder");
+  if (!imgEl || !placeholderEl) return;
+
+  if (myCharacterAvatar) {
+    imgEl.src = myCharacterAvatar;
+    imgEl.style.display = "block";
+    placeholderEl.style.display = "none";
+  } else {
+    imgEl.src = "";
+    imgEl.style.display = "none";
+    placeholderEl.style.display = "flex";
+  }
+}
+
 function addDiceHistory(desc, total) {
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   diceRollHistory.unshift({ desc, total, time });
@@ -550,6 +567,7 @@ function saveSheet(quiet = false) {
     name: name,
     summary: charClass ? `${charClass} (Lvl ${level})` : `Level ${level}`,
     updatedAt: Date.now(),
+    avatar: myCharacterAvatar,
     fields: fields,
     spells: myCharacterSpells,
     traits: myCharacterTraits,
@@ -574,6 +592,7 @@ function applyCharacterData(charData) {
     }
   });
 
+  myCharacterAvatar = charData.avatar || "";
   myCharacterSpells = charData.spells || [];
   myCharacterTraits = charData.traits || [];
   myActiveConditions = charData.conditions || [];
@@ -583,6 +602,7 @@ function applyCharacterData(charData) {
     { name: "", atk: "", dmg: "", notes: "" }
   ];
 
+  renderAvatar();
   renderWeapons();
   renderMySpells();
   renderMyTraits();
@@ -604,6 +624,7 @@ function loadSheet() {
       applyCharacterData(roster[activeCharId]);
     } else {
       recalculateAll();
+      renderAvatar();
       renderWeapons();
       renderMySpells();
       renderMyTraits();
@@ -637,6 +658,7 @@ function resetSheet() {
     else field.value = "";
   });
 
+  myCharacterAvatar = "";
   myCharacterSpells = [];
   myCharacterTraits = [];
   myActiveConditions = [];
@@ -647,6 +669,7 @@ function resetSheet() {
   ];
   diceRollHistory = [];
 
+  renderAvatar();
   renderDiceHistory();
   recalculateAll();
   renderWeapons();
@@ -1152,12 +1175,18 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // HP Quick Modal Open / Actions (Handles corner ± button or title click)
+  // Avatar Click -> Trigger File Picker
+  if (e.target.id === "avatarFrame" || e.target.closest("#avatarFrame")) {
+    document.getElementById("avatarFileInput")?.click();
+    return;
+  }
+
+  // HP Quick Modal Open / Actions
   if (
     e.target.id === "openHpModalBtn" ||
     e.target.closest("#openHpModalBtn") ||
-    e.target.id === "openHpModalBtnIcon" ||
-    e.target.closest("#openHpModalBtnIcon") ||
+    e.target.id === "hpTitleClick" ||
+    e.target.closest("#hpTitleClick") ||
     e.target.classList.contains("hp-corner-btn") ||
     e.target.closest(".hp-corner-btn")
   ) {
@@ -1373,6 +1402,7 @@ document.addEventListener("click", async (e) => {
     const currentChar = roster[activeCharId] || {
       id: activeCharId,
       name: "Character",
+      avatar: myCharacterAvatar,
       fields: getCurrentSheetData(),
       spells: myCharacterSpells,
       traits: myCharacterTraits,
@@ -1661,6 +1691,21 @@ document.addEventListener("click", async (e) => {
     showStatus("Character Loaded");
     return;
   }
+});
+
+// Avatar File Picker Change Handler
+document.getElementById("avatarFileInput")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    myCharacterAvatar = evt.target.result;
+    renderAvatar();
+    saveSheet(false);
+    showStatus("Avatar Updated!");
+  };
+  reader.readAsDataURL(file);
 });
 
 // Dropdown input listeners
