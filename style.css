@@ -66,7 +66,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Remove default number input spinner arrows */
+/* Remove default number input spinner arrows across all browsers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -115,7 +115,8 @@ textarea::-webkit-scrollbar-thumb:hover,
 .btn-outline,
 .btn-text-red,
 .file-label,
-.slot-pip {
+.slot-pip,
+.hp-corner-btn {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -698,6 +699,7 @@ textarea::-webkit-scrollbar-thumb:hover,
   gap: 0.65rem;
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition-fast);
+  position: relative; /* Anchor for corner buttons */
 }
 
 .vitals-card:hover {
@@ -723,46 +725,11 @@ textarea::-webkit-scrollbar-thumb:hover,
   flex-direction: column;
 }
 
-.card-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
 .card-title {
   font-size: 0.95rem;
   font-weight: 800;
   color: #ffffff;
   line-height: 1.2;
-}
-
-/* Subtle Interactive Button for Health Pool */
-.hp-title-btn {
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.hp-title-btn:hover {
-  color: #fca5a5;
-}
-
-.hp-subtle-btn {
-  background: rgba(239, 68, 68, 0.18);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fca5a5;
-  border-radius: var(--radius-xs);
-  font-size: 0.72rem;
-  font-weight: 900;
-  padding: 0 0.35rem;
-  cursor: pointer;
-  line-height: 1.2;
-  transition: all 0.15s ease;
-}
-
-.hp-subtle-btn:hover {
-  background: var(--primary-red);
-  color: #ffffff;
-  border-color: var(--primary-red);
 }
 
 .card-caption {
@@ -771,10 +738,17 @@ textarea::-webkit-scrollbar-thumb:hover,
   font-weight: 600;
 }
 
+/* Card Accent Borders */
 .ac-card { border-left: 4px solid var(--accent-blue); }
 .hp-card { border-left: 4px solid var(--primary-red); }
 .death-card { border-left: 4px solid var(--accent-amber); }
 .resource-card { border-left: 4px solid var(--accent-purple); }
+
+/* Armor Class Centering */
+.ac-card .card-main {
+  justify-content: center;
+  margin: auto 0;
+}
 
 .ac-input {
   width: 52px;
@@ -782,6 +756,47 @@ textarea::-webkit-scrollbar-thumb:hover,
   font-size: 1.35rem;
   font-weight: 800;
   text-align: center;
+  padding: 0 !important;
+  line-height: 44px;
+}
+
+/* Health Pool with Corner ± Button */
+.hp-corner-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hp-corner-btn:hover {
+  background: var(--primary-red);
+  color: #ffffff;
+  border-color: var(--primary-red);
+  transform: scale(1.12);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.hp-title-btn {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.hp-title-btn:hover {
+  color: #fca5a5;
 }
 
 .hp-gauge-box {
