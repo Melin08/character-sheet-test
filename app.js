@@ -28,9 +28,11 @@ try {
 
 const ROSTER_STORAGE_KEY = "badman_char_roster_v1";
 const ACTIVE_CHAR_ID_KEY = "badman_active_char_id";
+const THEME_STORAGE_KEY = "badman_active_theme";
 
 let activeCharId = localStorage.getItem(ACTIVE_CHAR_ID_KEY) || "default";
 
+let myCharacterAvatar = "";
 let myCharacterSpells = [];
 let myCharacterTraits = [];
 let myCharacterWeapons = [
@@ -217,6 +219,35 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
+/* Theme Switcher Engine */
+function applyTheme(themeName) {
+  const themes = ["theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald"];
+  themes.forEach((t) => document.body.classList.remove(t));
+  const validTheme = themes.includes(themeName) ? themeName : "theme-obsidian";
+  document.body.classList.add(validTheme);
+  localStorage.setItem(THEME_STORAGE_KEY, validTheme);
+  const sel = document.getElementById("themeSelect");
+  if (sel) sel.value = validTheme;
+}
+
+function updateXpBar() {
+  const xpInput = document.getElementById("charExp");
+  const fill = document.getElementById("xpBarFill");
+  if (!xpInput || !fill) return;
+
+  const raw = parseInt(xpInput.value.replace(/\D/g, ""), 10) || 0;
+  const level = parseInt(document.getElementById("charLevel")?.value, 10) || 1;
+  const xpThresholds = [
+    0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+    85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000
+  ];
+  const curTier = xpThresholds[level - 1] || 0;
+  const nextTier = xpThresholds[level] || curTier + 10000;
+  const span = Math.max(1, nextTier - curTier);
+  const progress = Math.min(100, Math.max(0, ((raw - curTier) / span) * 100));
+  fill.style.width = `${progress}%`;
+}
+
 function recalculateAll() {
   const levelInput = document.getElementById("charLevel");
   const level = parseInt(levelInput?.value, 10) || 1;
@@ -264,12 +295,13 @@ function recalculateAll() {
     if (row.id === "row_ins") insBonus = total;
   });
 
-  // Passive Senses Update
   const passPercEl = document.getElementById("passivePerception");
   if (passPercEl) passPercEl.textContent = 10 + percBonus;
 
   const passInsEl = document.getElementById("passiveInsight");
   if (passInsEl) passInsEl.textContent = 10 + insBonus;
+
+  updateXpBar();
 }
 
 function renderWeapons() {
@@ -300,7 +332,7 @@ function renderMyTraits() {
   if (!container) return;
 
   if (myCharacterTraits.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 0.5rem 0;">No abilities added yet. Click "+ Add Ability" above to browse the compendium.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 1.5rem 0; text-align: center;">No abilities added yet. Click "+ Add Ability" above to browse the compendium.</p>`;
     return;
   }
 
@@ -333,7 +365,7 @@ function renderMySpells() {
   if (!container) return;
 
   if (myCharacterSpells.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; text-align: center; font-style: italic; padding: 1rem 0;">No spells added yet. Click "+ Add Spell" above to browse the compendium.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; text-align: center; font-style: italic; padding: 1.5rem 0;">No spells added yet. Click "+ Add Spell" above to browse the compendium.</p>`;
     return;
   }
 
@@ -412,7 +444,6 @@ function attachSpellDragEvents() {
   });
 }
 
-/* Interactive Spell Slot Pips Renderer */
 function renderSpellSlotGrid() {
   const container = document.getElementById("slotsGridContainer");
   if (!container) return;
@@ -463,6 +494,22 @@ function updateSlotPips(lvl) {
   pipsBox.innerHTML = pipsHtml || '<span style="font-size:0.65rem; color:#475569;">No Slots</span>';
 }
 
+function renderAvatar() {
+  const imgEl = document.getElementById("charAvatarImg");
+  const placeholderEl = document.getElementById("avatarPlaceholder");
+  if (!imgEl || !placeholderEl) return;
+
+  if (myCharacterAvatar) {
+    imgEl.src = myCharacterAvatar;
+    imgEl.style.display = "block";
+    placeholderEl.style.display = "none";
+  } else {
+    imgEl.src = "";
+    imgEl.style.display = "none";
+    placeholderEl.style.display = "flex";
+  }
+}
+
 function addDiceHistory(desc, total) {
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   diceRollHistory.unshift({ desc, total, time });
@@ -496,10 +543,10 @@ function renderConditionChips() {
 }
 
 function renderBlurredPills() {
-  document.querySelectorAll(".field-pill[data-blur-id]").forEach((pill) => {
-    const blurId = pill.dataset.blurId;
-    if (myBlurredPills.includes(blurId)) pill.classList.add("blurred");
-    else pill.classList.remove("blurred");
+  document.querySelectorAll("[data-blur-id]").forEach((el) => {
+    const blurId = el.dataset.blurId;
+    if (myBlurredPills.includes(blurId)) el.classList.add("blurred");
+    else el.classList.remove("blurred");
   });
 }
 
@@ -550,6 +597,7 @@ function saveSheet(quiet = false) {
     name: name,
     summary: charClass ? `${charClass} (Lvl ${level})` : `Level ${level}`,
     updatedAt: Date.now(),
+    avatar: myCharacterAvatar,
     fields: fields,
     spells: myCharacterSpells,
     traits: myCharacterTraits,
@@ -574,6 +622,7 @@ function applyCharacterData(charData) {
     }
   });
 
+  myCharacterAvatar = charData.avatar || "";
   myCharacterSpells = charData.spells || [];
   myCharacterTraits = charData.traits || [];
   myActiveConditions = charData.conditions || [];
@@ -583,6 +632,7 @@ function applyCharacterData(charData) {
     { name: "", atk: "", dmg: "", notes: "" }
   ];
 
+  renderAvatar();
   renderWeapons();
   renderMySpells();
   renderMyTraits();
@@ -604,6 +654,7 @@ function loadSheet() {
       applyCharacterData(roster[activeCharId]);
     } else {
       recalculateAll();
+      renderAvatar();
       renderWeapons();
       renderMySpells();
       renderMyTraits();
@@ -637,6 +688,7 @@ function resetSheet() {
     else field.value = "";
   });
 
+  myCharacterAvatar = "";
   myCharacterSpells = [];
   myCharacterTraits = [];
   myActiveConditions = [];
@@ -647,6 +699,7 @@ function resetSheet() {
   ];
   diceRollHistory = [];
 
+  renderAvatar();
   renderDiceHistory();
   recalculateAll();
   renderWeapons();
@@ -669,14 +722,12 @@ function applyLongRest() {
   if (maxHpEl && curHpEl) curHpEl.value = maxHpEl.value;
   if (tempHpEl) tempHpEl.value = 0;
 
-  // Restore Spell Slots to max
   for (let lvl = 1; lvl <= 9; lvl++) {
     const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
     const curEl = document.getElementById(`slot${lvl}_cur`);
     if (curEl) curEl.value = maxVal;
   }
 
-  // Restore Hit Dice (regain half of max, minimum 1)
   const hdCurEl = document.getElementById("hitDiceCur");
   const hdMaxEl = document.getElementById("hitDiceMax");
   const maxHd = parseInt(hdMaxEl?.value, 10) || 1;
@@ -684,13 +735,11 @@ function applyLongRest() {
   const regained = Math.max(1, Math.floor(maxHd / 2));
   if (hdCurEl) hdCurEl.value = Math.min(maxHd, curHd + regained);
 
-  // Reset Death Saves
   const succEl = document.getElementById("deathSucc");
   const failEl = document.getElementById("deathFail");
   if (succEl) succEl.value = 0;
   if (failEl) failEl.value = 0;
 
-  // Reset Class Points to max
   const classMaxEl = document.getElementById("classPtsMax");
   const classCurEl = document.getElementById("classPtsCur");
   if (classMaxEl && classCurEl) classCurEl.value = classMaxEl.value;
@@ -1152,12 +1201,18 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // HP Quick Modal Open / Actions (Handles corner ± button or title click)
+  // Avatar Click -> Trigger File Picker
+  if (e.target.id === "avatarFrame" || e.target.closest("#avatarFrame")) {
+    document.getElementById("avatarFileInput")?.click();
+    return;
+  }
+
+  // HP Quick Modal Open / Actions
   if (
     e.target.id === "openHpModalBtn" ||
     e.target.closest("#openHpModalBtn") ||
-    e.target.id === "openHpModalBtnIcon" ||
-    e.target.closest("#openHpModalBtnIcon") ||
+    e.target.id === "hpTitleClick" ||
+    e.target.closest("#hpTitleClick") ||
     e.target.classList.contains("hp-corner-btn") ||
     e.target.closest(".hp-corner-btn")
   ) {
@@ -1182,11 +1237,11 @@ document.addEventListener("click", async (e) => {
   }
 
   // Rest Buttons
-  if (e.target.id === "shortRestBtn") {
+  if (e.target.id === "shortRestBtn" || e.target.closest("#shortRestBtn")) {
     applyShortRest();
     return;
   }
-  if (e.target.id === "longRestBtn") {
+  if (e.target.id === "longRestBtn" || e.target.closest("#longRestBtn")) {
     applyLongRest();
     return;
   }
@@ -1212,11 +1267,11 @@ document.addEventListener("click", async (e) => {
 
   // Blur Toggle
   if (e.target.closest(".blur-toggle-btn")) {
-    const pill = e.target.closest(".blur-toggle-btn").closest(".field-pill");
-    if (pill) {
-      pill.classList.toggle("blurred");
-      const blurId = pill.dataset.blurId;
-      if (pill.classList.contains("blurred")) {
+    const wrapper = e.target.closest(".blur-toggle-btn").closest("[data-blur-id]");
+    if (wrapper) {
+      wrapper.classList.toggle("blurred");
+      const blurId = wrapper.dataset.blurId;
+      if (wrapper.classList.contains("blurred")) {
         if (!myBlurredPills.includes(blurId)) myBlurredPills.push(blurId);
       } else {
         myBlurredPills = myBlurredPills.filter((id) => id !== blurId);
@@ -1373,6 +1428,7 @@ document.addEventListener("click", async (e) => {
     const currentChar = roster[activeCharId] || {
       id: activeCharId,
       name: "Character",
+      avatar: myCharacterAvatar,
       fields: getCurrentSheetData(),
       spells: myCharacterSpells,
       traits: myCharacterTraits,
@@ -1397,8 +1453,9 @@ document.addEventListener("click", async (e) => {
   }
 
   // Tabs
-  if (e.target.classList.contains("main-tab")) {
-    switchMainTab(e.target.dataset.target);
+  if (e.target.classList.contains("main-tab") || e.target.closest(".main-tab")) {
+    const tabBtn = e.target.closest(".main-tab");
+    switchMainTab(tabBtn.dataset.target);
     return;
   }
 
@@ -1414,9 +1471,9 @@ document.addEventListener("click", async (e) => {
     switchMainTab(e.target.dataset.tab);
     const map = {
       attr: ".attributes-group",
-      skills: ".skills-group",
-      traits: "#abilitiesSection",
-      spells: "#spellsSection",
+      skills: ".skills-attribute-matrix",
+      traits: "#tab-traits",
+      spells: "#tab-spells",
       journal: "#tab-journal"
     };
     document.querySelector(map[e.target.dataset.scroll])?.scrollIntoView({ behavior: "smooth" });
@@ -1663,6 +1720,26 @@ document.addEventListener("click", async (e) => {
   }
 });
 
+// Theme Selector Listener
+document.getElementById("themeSelect")?.addEventListener("change", (e) => {
+  applyTheme(e.target.value);
+});
+
+// Avatar File Picker Change Handler
+document.getElementById("avatarFileInput")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    myCharacterAvatar = evt.target.result;
+    renderAvatar();
+    saveSheet(false);
+    showStatus("Avatar Updated!");
+  };
+  reader.readAsDataURL(file);
+});
+
 // Dropdown input listeners
 document.getElementById("charClass")?.addEventListener("focus", (e) => {
   renderClassDropdown(e.target.value);
@@ -1834,6 +1911,7 @@ document.getElementById("restoreFile")?.addEventListener("change", (e) => {
 });
 
 // Initialization
+applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "theme-obsidian");
 loadSheet();
 loadAllSpells();
 loadAllTraits();
