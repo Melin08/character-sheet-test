@@ -51,8 +51,12 @@ const apiCache = {};
 let allSpellsCache = [];
 let allTraitsCache = [];
 
-// DM Real-Time Listener Unsubscribe Handle
+// DM Real-Time Listener & Inspection State
 let dmListenerUnsubscribe = null;
+let playerDocUnsubscribe = null;
+let activeDMRoomCode = "";
+let currentInspectedMemberId = null;
+let cachedRoomMembers = [];
 
 const DND_CLASSES = [
   "Barbarian", "Bard", "Cleric", "Druid", "Fighter",
@@ -224,7 +228,6 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
-/* Theme Switcher Engine */
 function applyTheme(themeName) {
   const themes = ["theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald"];
   themes.forEach((t) => document.body.classList.remove(t));
@@ -563,31 +566,76 @@ function getRoster() {
   }
 }
 
-/* Real-Time Party Sync Engine (Player Side) */
-async function syncToLiveCampaign(charData) {
-  if (!db || !connectedCampaignRoom || !charData) return;
-
+/* ==========================================================================
+   PARTY & DM REAL-TIME SYNC ENGINE (FULL TACTICAL DATA BROADCAST)
+   ========================================================================== */
+function extractFullCharacterPayload(charData) {
   const f = charData.fields || {};
+
+  const stats = ["str", "dex", "con", "int", "wis", "cha"];
+  const attributes = {};
+  stats.forEach((s) => {
+    const score = parseInt(f[`attr_${s}`], 10) || 10;
+    const mod = getModifier(score);
+    const save = f[`save_${s}`] ? mod + getProfBonus(parseInt(f.charLevel, 10) || 1) : mod;
+    attributes[s] = { score, mod, save, isSaveProf: !!f[`save_${s}`] };
+  });
+
+  const spellSlots = {};
+  for (let lvl = 1; lvl <= 9; lvl++) {
+    spellSlots[lvl] = {
+      cur: parseInt(f[`slot${lvl}_cur`], 10) || 0,
+      max: parseInt(f[`slot${lvl}_max`], 10) || 0
+    };
+  }
+
   const curHp = parseInt(f.curHp, 10) || 0;
   const maxHp = parseInt(f.maxHp, 10) || 10;
   const tempHp = parseInt(f.tempHp, 10) || 0;
 
+  return {
+    id: activeCharId,
+    name: charData.name || "Unnamed Adventurer",
+    charClass: f.charClass || "",
+    charRace: f.charRace || "",
+    charBackground: f.charBackground || "",
+    charAlignment: f.charAlignment || "",
+    level: parseInt(f.charLevel, 10) || 1,
+    avatar: myCharacterAvatar || "",
+    hp: { cur: curHp, max: maxHp, temp: tempHp },
+    ac: parseInt(f.ac, 10) || 10,
+    speed: parseInt(f.charSpeed, 10) || 30,
+    deathSaves: {
+      succ: parseInt(f.deathSucc, 10) || 0,
+      fail: parseInt(f.deathFail, 10) || 0
+    },
+    classPoints: {
+      cur: parseInt(f.classPtsCur, 10) || 0,
+      max: parseInt(f.classPtsMax, 10) || 0
+    },
+    hitDice: {
+      cur: f.hitDiceCur || "1",
+      max: f.hitDiceMax || "1"
+    },
+    attributes,
+    spellSlots,
+    spells: myCharacterSpells || [],
+    traits: myCharacterTraits || [],
+    weapons: myCharacterWeapons || [],
+    conditions: myActiveConditions || [],
+    otherProfs: f.otherProfs || "",
+    passivePerception: parseInt(document.getElementById("passivePerception")?.textContent, 10) || 10,
+    passiveInsight: parseInt(document.getElementById("passiveInsight")?.textContent, 10) || 10,
+    inspiration: f.charInspiration || "",
+    updatedAt: Date.now()
+  };
+}
+
+async function syncToLiveCampaign(charData) {
+  if (!db || !connectedCampaignRoom || !charData) return;
   try {
-    await db.collection("campaigns").doc(connectedCampaignRoom).collection("members").doc(activeCharId).set({
-      id: activeCharId,
-      name: charData.name || "Unnamed Adventurer",
-      charClass: f.charClass || "",
-      charRace: f.charRace || "",
-      level: parseInt(f.charLevel, 10) || 1,
-      avatar: myCharacterAvatar || "",
-      hp: { cur: curHp, max: maxHp, temp: tempHp },
-      ac: parseInt(f.ac, 10) || 10,
-      passivePerception: parseInt(document.getElementById("passivePerception")?.textContent, 10) || 10,
-      passiveInsight: parseInt(document.getElementById("passiveInsight")?.textContent, 10) || 10,
-      conditions: myActiveConditions || [],
-      inspiration: f.charInspiration || "",
-      updatedAt: Date.now()
-    }, { merge: true });
+    const payload = extractFullCharacterPayload(charData);
+    await db.collection("campaigns").doc(connectedCampaignRoom).collection("members").doc(activeCharId).set(payload, { merge: true });
   } catch (err) {
     console.warn("Live party sync warning:", err);
   }
@@ -751,7 +799,7 @@ function resetSheet() {
 }
 
 /* ==========================================================================
-   PARTY & DM LIVE DASHBOARD ENGINE
+   PARTY & DM REAL-TIME DASHBOARD (LISTENERS, KICK & INSPECTION)
    ========================================================================== */
 
 function updatePartyStatusUI() {
@@ -763,7 +811,7 @@ function updatePartyStatusUI() {
   if (!box || !txt) return;
 
   if (connectedCampaignRoom) {
-    box.innerHTML = `<span class="status-dot connected"></span><span>Connected to Room: <strong>${escapeHtml(connectedCampaignRoom)}</strong></span>`;
+    box.innerHTML = `<span class="status-dot connected"></span><span>Connected to Campaign: <strong>${escapeHtml(connectedCampaignRoom)}</strong></span>`;
     if (leaveBtn) leaveBtn.style.display = "inline-flex";
     if (joinInput) joinInput.value = connectedCampaignRoom;
   } else {
@@ -783,11 +831,31 @@ async function joinCampaignRoom(roomCode) {
   if (roster[activeCharId]) {
     await syncToLiveCampaign(roster[activeCharId]);
   }
+
+  // Listen to self document to detect if the DM kicks or removes the character
+  if (playerDocUnsubscribe) playerDocUnsubscribe();
+  if (db) {
+    playerDocUnsubscribe = db.collection("campaigns").doc(cleanCode).collection("members").doc(activeCharId)
+      .onSnapshot((doc) => {
+        if (!doc.exists && connectedCampaignRoom === cleanCode) {
+          // Player was kicked by DM or room disbanded
+          connectedCampaignRoom = "";
+          localStorage.removeItem(CAMPAIGN_ROOM_KEY);
+          updatePartyStatusUI();
+          showStatus("Removed from Campaign Room");
+        }
+      });
+  }
+
   showStatus(`Joined ${cleanCode}!`);
 }
 
 async function leaveCampaignRoom() {
   if (!connectedCampaignRoom) return;
+  if (playerDocUnsubscribe) {
+    playerDocUnsubscribe();
+    playerDocUnsubscribe = null;
+  }
   if (db && activeCharId) {
     try {
       await db.collection("campaigns").doc(connectedCampaignRoom).collection("members").doc(activeCharId).delete();
@@ -799,7 +867,7 @@ async function leaveCampaignRoom() {
   showStatus("Disconnected from Party");
 }
 
-/* DM Live Listener Engine */
+/* DM Room Creation, Closure & Kicking */
 function startDMLiveListener(roomCode) {
   if (!db) {
     alert("Firebase database is not connected.");
@@ -810,28 +878,31 @@ function startDMLiveListener(roomCode) {
     dmListenerUnsubscribe = null;
   }
 
+  activeDMRoomCode = roomCode;
   const grid = document.getElementById("dmPartyGrid");
   const counter = document.getElementById("dmMemberCount");
   const codeEl = document.getElementById("dmActiveRoomCode");
   const copyBtn = document.getElementById("copyRoomCodeBtn");
+  const closeBtn = document.getElementById("closeCampaignBtn");
 
   if (codeEl) codeEl.textContent = roomCode;
   if (copyBtn) copyBtn.style.display = "inline-flex";
+  if (closeBtn) closeBtn.style.display = "inline-flex";
 
   dmListenerUnsubscribe = db.collection("campaigns").doc(roomCode).collection("members")
     .onSnapshot((snapshot) => {
-      const members = [];
-      snapshot.forEach((doc) => members.push(doc.data()));
+      cachedRoomMembers = [];
+      snapshot.forEach((doc) => cachedRoomMembers.push(doc.data()));
 
-      if (counter) counter.textContent = `${members.length} Active`;
+      if (counter) counter.textContent = `${cachedRoomMembers.length} Active`;
 
-      if (members.length === 0) {
-        if (grid) grid.innerHTML = `<p class="dm-empty-msg">Room <strong>${escapeHtml(roomCode)}</strong> is open! Waiting for players to link their sheets...</p>`;
+      if (cachedRoomMembers.length === 0) {
+        if (grid) grid.innerHTML = `<p class="dm-empty-msg">Room <strong>${escapeHtml(roomCode)}</strong> is open! Waiting for adventurers to connect...</p>`;
         return;
       }
 
       if (grid) {
-        grid.innerHTML = members.map((m) => {
+        grid.innerHTML = cachedRoomMembers.map((m) => {
           const curHp = m.hp?.cur ?? 0;
           const maxHp = m.hp?.max ?? 10;
           const tempHp = m.hp?.temp ?? 0;
@@ -841,7 +912,7 @@ function startDMLiveListener(roomCode) {
           const condsHtml = (m.conditions || []).map(c => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("");
 
           return `
-            <div class="dm-player-card ${isDown ? 'unconscious' : ''}">
+            <div class="dm-player-card ${isDown ? 'unconscious' : ''}" data-member-id="${escapeHtml(m.id || '')}">
               <div class="dm-card-header">
                 ${m.avatar ? `<img src="${m.avatar}" class="dm-player-avatar" alt="Avatar" />` : `<div class="dm-avatar-placeholder">⚔</div>`}
                 <div class="dm-player-info">
@@ -868,6 +939,12 @@ function startDMLiveListener(roomCode) {
           `;
         }).join("");
       }
+
+      // If DM currently has a player inspected, update the inspect modal in real time
+      if (currentInspectedMemberId) {
+        const inspected = cachedRoomMembers.find(m => m.id === currentInspectedMemberId);
+        if (inspected) renderInspectModalContent(inspected);
+      }
     }, (err) => {
       console.error("DM live listener failed:", err);
     });
@@ -881,7 +958,234 @@ function createNewCampaignRoom() {
   startDMLiveListener(newCode);
 }
 
-/* Rest Logic Engines */
+async function closeDMCampaignRoom() {
+  if (!activeDMRoomCode) return;
+  if (!confirm(`Are you sure you want to close and disband room "${activeDMRoomCode}" for all players?`)) return;
+
+  if (dmListenerUnsubscribe) {
+    dmListenerUnsubscribe();
+    dmListenerUnsubscribe = null;
+  }
+
+  // Delete all members in the room so their clients detect the closure
+  try {
+    const snap = await db.collection("campaigns").doc(activeDMRoomCode).collection("members").get();
+    const batch = db.batch();
+    snap.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+  } catch (err) {
+    console.warn("Disband cleanup warning:", err);
+  }
+
+  activeDMRoomCode = "";
+  cachedRoomMembers = [];
+  closeModal("dmInspectModal");
+
+  const codeEl = document.getElementById("dmActiveRoomCode");
+  const copyBtn = document.getElementById("copyRoomCodeBtn");
+  const closeBtn = document.getElementById("closeCampaignBtn");
+  const grid = document.getElementById("dmPartyGrid");
+  const counter = document.getElementById("dmMemberCount");
+
+  if (codeEl) codeEl.textContent = "NONE";
+  if (copyBtn) copyBtn.style.display = "none";
+  if (closeBtn) closeBtn.style.display = "none";
+  if (counter) counter.textContent = "0 Active";
+  if (grid) grid.innerHTML = `<p class="dm-empty-msg">Room closed. Create or connect to a campaign room to start a live session.</p>`;
+
+  showStatus("Campaign Room Closed");
+}
+
+async function kickPlayerFromRoom(memberId) {
+  if (!activeDMRoomCode || !memberId) return;
+  const member = cachedRoomMembers.find(m => m.id === memberId);
+  const name = member ? member.name : "this player";
+
+  if (!confirm(`Are you sure you want to kick "${name}" from the party?`)) return;
+
+  try {
+    await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).delete();
+    showStatus(`Kicked ${name}`);
+    closeModal("dmInspectModal");
+    currentInspectedMemberId = null;
+  } catch (err) {
+    console.error("Failed to kick player:", err);
+  }
+}
+
+/* ==========================================================================
+   DM DETAILED PLAYER INSPECTION MODAL RENDERER
+   ========================================================================== */
+function openInspectModal(memberId) {
+  const member = cachedRoomMembers.find(m => m.id === memberId);
+  if (!member) return;
+
+  currentInspectedMemberId = memberId;
+  const titleEl = document.getElementById("inspectCharTitle");
+  if (titleEl) titleEl.textContent = `${member.name || "Adventurer"} — Full Codex`;
+
+  renderInspectModalContent(member);
+  document.getElementById("dmInspectModal")?.classList.add("open");
+}
+
+function renderInspectModalContent(m) {
+  const container = document.getElementById("dmInspectContent");
+  if (!container) return;
+
+  const curHp = m.hp?.cur ?? 0;
+  const maxHp = m.hp?.max ?? 10;
+  const tempHp = m.hp?.temp ?? 0;
+  const attrs = m.attributes || {};
+
+  // Build Abilities Grid
+  const stats = ["str", "dex", "con", "int", "wis", "cha"];
+  const abilityCells = stats.map((s) => {
+    const a = attrs[s] || { score: 10, mod: 0, save: 0, isSaveProf: false };
+    const modStr = a.mod >= 0 ? `+${a.mod}` : `${a.mod}`;
+    const saveStr = a.save >= 0 ? `+${a.save}` : `${a.save}`;
+    return `
+      <div class="inspect-ability-cell">
+        <span class="inspect-attr-tag">${s.toUpperCase()}</span>
+        <span class="inspect-attr-mod">${modStr}</span>
+        <span class="inspect-attr-score">(${a.score})</span>
+        <span class="inspect-attr-save">${a.isSaveProf ? '🛡 ' : ''}Save: ${saveStr}</span>
+      </div>
+    `;
+  }).join("");
+
+  // Build Weapons List
+  const weaponsHtml = (m.weapons || []).filter(w => w.name).map((w) => `
+    <div class="inspect-weapon-row">
+      <span class="inspect-wpn-name">${escapeHtml(w.name)}</span>
+      <span class="inspect-wpn-type">${escapeHtml(w.atk || "-")}</span>
+      <span class="inspect-wpn-dmg">${escapeHtml(w.dmg || "-")}</span>
+      <span class="inspect-wpn-notes">${escapeHtml(w.notes || "-")}</span>
+    </div>
+  `).join("") || `<p style="font-size:0.8rem; color:#64748b; font-style:italic;">No weapons equipped.</p>`;
+
+  // Build Spell Slots Matrix
+  const slots = m.spellSlots || {};
+  const slotTiles = [];
+  for (let lvl = 1; lvl <= 9; lvl++) {
+    const s = slots[lvl] || { cur: 0, max: 0 };
+    slotTiles.push(`
+      <div class="inspect-slot-tile">
+        <span class="inspect-slot-lvl">${lvl}st</span>
+        <span class="inspect-slot-count">${s.cur} / ${s.max}</span>
+      </div>
+    `);
+  }
+
+  // Spells List
+  const spellsHtml = (m.spells || []).map((s) => `
+    <div class="inspect-mini-card">
+      <span class="inspect-mini-title">${escapeHtml(s.name)}</span>
+      <span class="inspect-mini-tag">${escapeHtml(s.type || "Spell")} • ${escapeHtml(s.casting_time || "1 Action")}</span>
+      <p class="inspect-mini-desc">${escapeHtml(s.desc || "")}</p>
+    </div>
+  `).join("") || `<p style="font-size:0.8rem; color:#64748b; font-style:italic;">No spells logged.</p>`;
+
+  // Features List
+  const traitsHtml = (m.traits || []).map((t) => `
+    <div class="inspect-mini-card">
+      <span class="inspect-mini-title">${escapeHtml(t.name)}</span>
+      <span class="inspect-mini-tag">${escapeHtml(t.type || "Feature")}</span>
+      <p class="inspect-mini-desc">${escapeHtml(t.desc || "")}</p>
+    </div>
+  `).join("") || `<p style="font-size:0.8rem; color:#64748b; font-style:italic;">No features logged.</p>`;
+
+  // Conditions badges
+  const condsHtml = (m.conditions || []).map(c => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("") || "None";
+
+  container.innerHTML = `
+    <!-- Top Character Banner -->
+    <div class="inspect-char-banner">
+      <div class="inspect-avatar-wrap">
+        ${m.avatar ? `<img src="${m.avatar}" class="inspect-avatar-img" alt="Avatar" />` : `<div class="dm-avatar-placeholder" style="width:100%;height:100%;">⚔</div>`}
+      </div>
+      <div class="inspect-char-info">
+        <span class="inspect-char-name">${escapeHtml(m.name || "Adventurer")}</span>
+        <span class="inspect-char-meta-line">Level ${m.level || 1} • ${escapeHtml(m.charRace || "Race")} • ${escapeHtml(m.charClass || "Class")} (${escapeHtml(m.charBackground || "Background")})</span>
+      </div>
+    </div>
+
+    <!-- Vitals Ribbon -->
+    <div class="inspect-vitals-ribbon">
+      <div class="inspect-stat-card">
+        <span class="inspect-stat-card-label">Hit Points</span>
+        <span class="inspect-stat-card-val" style="color:#f87171;">${curHp} / ${maxHp} ${tempHp > 0 ? `(+${tempHp})` : ""}</span>
+      </div>
+      <div class="inspect-stat-card">
+        <span class="inspect-stat-card-label">Armor Class</span>
+        <span class="inspect-stat-card-val" style="color:#38bdf8;">${m.ac ?? 10}</span>
+      </div>
+      <div class="inspect-stat-card">
+        <span class="inspect-stat-card-label">Speed</span>
+        <span class="inspect-stat-card-val">${m.speed ?? 30} ft</span>
+      </div>
+      <div class="inspect-stat-card">
+        <span class="inspect-stat-card-label">Pass. Perception</span>
+        <span class="inspect-stat-card-val">${m.passivePerception ?? 10}</span>
+      </div>
+      <div class="inspect-stat-card">
+        <span class="inspect-stat-card-label">Pass. Insight</span>
+        <span class="inspect-stat-card-val">${m.passiveInsight ?? 10}</span>
+      </div>
+      <div class="inspect-stat-card">
+        <span class="inspect-stat-card-label">Death Saves</span>
+        <span class="inspect-stat-card-val" style="font-size:0.9rem;">✓${m.deathSaves?.succ ?? 0} | ✗${m.deathSaves?.fail ?? 0}</span>
+      </div>
+    </div>
+
+    <!-- Active Conditions -->
+    <div class="inspect-section">
+      <span class="inspect-section-title">Active Conditions</span>
+      <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">${condsHtml}</div>
+    </div>
+
+    <!-- Ability Scores & Saves -->
+    <div class="inspect-section">
+      <span class="inspect-section-title">Ability Scores &amp; Saves</span>
+      <div class="inspect-ability-grid">${abilityCells}</div>
+    </div>
+
+    <!-- Weapons & Attacks -->
+    <div class="inspect-section">
+      <span class="inspect-section-title">Attack Arsenal</span>
+      <div class="inspect-weapons-list">${weaponsHtml}</div>
+    </div>
+
+    <!-- Spell Slots -->
+    <div class="inspect-section">
+      <span class="inspect-section-title">Spell Slots Availability</span>
+      <div class="inspect-slots-matrix">${slotTiles.join("")}</div>
+    </div>
+
+    <!-- Known Spells -->
+    <div class="inspect-section">
+      <span class="inspect-section-title">Grimoire (Known Spells)</span>
+      <div class="inspect-grid-blocks">${spellsHtml}</div>
+    </div>
+
+    <!-- Features & Traits -->
+    <div class="inspect-section">
+      <span class="inspect-section-title">Features &amp; Abilities</span>
+      <div class="inspect-grid-blocks">${traitsHtml}</div>
+    </div>
+
+    <!-- Other Proficiencies & Equipment -->
+    ${m.otherProfs ? `
+      <div class="inspect-section">
+        <span class="inspect-section-title">Proficiencies &amp; Languages</span>
+        <p style="font-size:0.85rem; color:#cbd5e1; white-space:pre-wrap;">${escapeHtml(m.otherProfs)}</p>
+      </div>
+    ` : ""}
+  `;
+}
+
+/* ==========================================================================
+   REST & HP ENGINES
+   ========================================================================== */
 function applyLongRest() {
   if (!confirm("Take a Long Rest? This will restore HP to max, refill all spell slots, recover class points, clear death saves, and regain up to half your total Hit Dice.")) return;
 
@@ -948,7 +1252,6 @@ function applyShortRest() {
   }
 }
 
-/* HP Quick Calculator Engine */
 function applyHpAdjustment(action) {
   const amountInput = document.getElementById("hpModalAmount");
   const amt = parseInt(amountInput?.value, 10);
@@ -1360,13 +1663,15 @@ if (auth) {
 
 // Master Click Event Delegation
 document.addEventListener("click", async (e) => {
-  // Modal Close
+  // Modal Close Buttons
   if (e.target.classList.contains("modal-close-btn") || e.target.closest(".modal-close-btn")) {
     e.target.closest(".modal-backdrop")?.classList.remove("open");
+    if (e.target.closest("#dmInspectModal")) currentInspectedMemberId = null;
     return;
   }
   if (e.target.classList.contains("modal-backdrop")) {
     e.target.classList.remove("open");
+    if (e.target.id === "dmInspectModal") currentInspectedMemberId = null;
     return;
   }
 
@@ -1377,7 +1682,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Party Player Mode: Connect to Room
+  // Connect to Party Room (Player Side)
   if (e.target.id === "joinCampaignBtn") {
     const input = document.getElementById("campaignRoomInput");
     if (input && input.value.trim()) {
@@ -1388,23 +1693,45 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Party Player Mode: Disconnect from Room
+  // Disconnect from Party Room (Player Side)
   if (e.target.id === "leaveCampaignBtn") {
     await leaveCampaignRoom();
     return;
   }
 
-  // DM Mode: Create new Live Room
+  // Create Campaign Room (DM Side)
   if (e.target.id === "createCampaignBtn") {
     createNewCampaignRoom();
     return;
   }
 
-  // DM Mode: Copy Room Code
+  // Copy Room Code (DM Side)
   if (e.target.id === "copyRoomCodeBtn") {
     const code = document.getElementById("dmActiveRoomCode")?.textContent;
     if (code && code !== "NONE") {
       navigator.clipboard.writeText(code).then(() => showStatus("Room Code Copied!"));
+    }
+    return;
+  }
+
+  // Close / Disband Campaign Room (DM Side)
+  if (e.target.id === "closeCampaignBtn") {
+    await closeDMCampaignRoom();
+    return;
+  }
+
+  // Click on a Player Card in DM view to inspect
+  const dmPlayerCard = e.target.closest(".dm-player-card");
+  if (dmPlayerCard) {
+    const memberId = dmPlayerCard.dataset.memberId;
+    if (memberId) openInspectModal(memberId);
+    return;
+  }
+
+  // Kick Player from inside the Inspection Modal
+  if (e.target.id === "inspectKickBtn") {
+    if (currentInspectedMemberId) {
+      await kickPlayerFromRoom(currentInspectedMemberId);
     }
     return;
   }
@@ -1515,7 +1842,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Conditions
+  // Conditions Chips
   if (e.target.classList.contains("cond-chip")) {
     const cond = e.target.dataset.cond;
     if (myActiveConditions.includes(cond)) {
@@ -1660,13 +1987,14 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Tabs
+  // Main Tabs Routing
   if (e.target.classList.contains("main-tab") || e.target.closest(".main-tab")) {
     const tabBtn = e.target.closest(".main-tab");
     switchMainTab(tabBtn.dataset.target);
     return;
   }
 
+  // Subtabs Routing
   if (e.target.classList.contains("sub-tab")) {
     const parentContainer = e.target.closest(".subtab-controls");
     if (parentContainer) {
@@ -2086,7 +2414,10 @@ document.addEventListener("focusout", (e) => {
 
 // Escape key closes modals
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeAllModals();
+  if (e.key === "Escape") {
+    closeAllModals();
+    currentInspectedMemberId = null;
+  }
 });
 
 // File Restore handler
