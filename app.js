@@ -1163,9 +1163,9 @@ function renderInspectModalContent(m) {
     </div>
 
     <div class="inspect-section">
-      <span class="inspect-section-title">Attack Arsenal</span>
-      <div class="inspect-weapons-list">${weaponsHtml}</div>
-    </div>
+   <span class="inspect-section-title">Weapons Arsenal</span>
+   <div class="inspect-weapons-list">$</div>
+  </div>
 
     <div class="inspect-section">
       <span class="inspect-section-title">Spell Slots Availability</span>
