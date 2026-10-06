@@ -29,8 +29,10 @@ try {
 const ROSTER_STORAGE_KEY = "badman_char_roster_v1";
 const ACTIVE_CHAR_ID_KEY = "badman_active_char_id";
 const THEME_STORAGE_KEY = "badman_active_theme";
+const CAMPAIGN_ROOM_KEY = "badman_active_campaign_room";
 
 let activeCharId = localStorage.getItem(ACTIVE_CHAR_ID_KEY) || "default";
+let connectedCampaignRoom = localStorage.getItem(CAMPAIGN_ROOM_KEY) || "";
 
 let myCharacterAvatar = "";
 let myCharacterSpells = [];
@@ -48,6 +50,9 @@ const apiCache = {};
 
 let allSpellsCache = [];
 let allTraitsCache = [];
+
+// DM Real-Time Listener Unsubscribe Handle
+let dmListenerUnsubscribe = null;
 
 const DND_CLASSES = [
   "Barbarian", "Bard", "Cleric", "Druid", "Fighter",
@@ -332,7 +337,7 @@ function renderMyTraits() {
   if (!container) return;
 
   if (myCharacterTraits.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 1.5rem 0; text-align: center;">No abilities added yet. Click "+ Add Ability" above to browse the compendium.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 2rem 0; text-align: center;">No abilities added yet. Click "+ Add Ability" above to browse the compendium.</p>`;
     return;
   }
 
@@ -558,6 +563,36 @@ function getRoster() {
   }
 }
 
+/* Real-Time Party Sync Engine (Player Side) */
+async function syncToLiveCampaign(charData) {
+  if (!db || !connectedCampaignRoom || !charData) return;
+
+  const f = charData.fields || {};
+  const curHp = parseInt(f.curHp, 10) || 0;
+  const maxHp = parseInt(f.maxHp, 10) || 10;
+  const tempHp = parseInt(f.tempHp, 10) || 0;
+
+  try {
+    await db.collection("campaigns").doc(connectedCampaignRoom).collection("members").doc(activeCharId).set({
+      id: activeCharId,
+      name: charData.name || "Unnamed Adventurer",
+      charClass: f.charClass || "",
+      charRace: f.charRace || "",
+      level: parseInt(f.charLevel, 10) || 1,
+      avatar: myCharacterAvatar || "",
+      hp: { cur: curHp, max: maxHp, temp: tempHp },
+      ac: parseInt(f.ac, 10) || 10,
+      passivePerception: parseInt(document.getElementById("passivePerception")?.textContent, 10) || 10,
+      passiveInsight: parseInt(document.getElementById("passiveInsight")?.textContent, 10) || 10,
+      conditions: myActiveConditions || [],
+      inspiration: f.charInspiration || "",
+      updatedAt: Date.now()
+    }, { merge: true });
+  } catch (err) {
+    console.warn("Live party sync warning:", err);
+  }
+}
+
 async function syncRosterToCloud(roster) {
   if (!currentUser || !db) return;
   try {
@@ -592,7 +627,7 @@ function saveSheet(quiet = false) {
   const charClass = fields.charClass?.trim() || "";
   const level = fields.charLevel || 1;
 
-  roster[activeCharId] = {
+  const charRecord = {
     id: activeCharId,
     name: name,
     summary: charClass ? `${charClass} (Lvl ${level})` : `Level ${level}`,
@@ -606,8 +641,10 @@ function saveSheet(quiet = false) {
     blurredPills: myBlurredPills
   };
 
+  roster[activeCharId] = charRecord;
   saveRoster(roster);
   localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
+  syncToLiveCampaign(charRecord);
   if (!quiet) showStatus("Saved!");
 }
 
@@ -640,6 +677,7 @@ function applyCharacterData(charData) {
   renderBlurredPills();
   recalculateAll();
   renderSpellSlotGrid();
+  syncToLiveCampaign(charData);
 }
 
 function loadSheet() {
@@ -710,6 +748,137 @@ function resetSheet() {
   renderSpellSlotGrid();
   saveSheet(false);
   showStatus("New Sheet Created!");
+}
+
+/* ==========================================================================
+   PARTY & DM LIVE DASHBOARD ENGINE
+   ========================================================================== */
+
+function updatePartyStatusUI() {
+  const box = document.getElementById("partyStatusBox");
+  const txt = document.getElementById("partyStatusText");
+  const leaveBtn = document.getElementById("leaveCampaignBtn");
+  const joinInput = document.getElementById("campaignRoomInput");
+
+  if (!box || !txt) return;
+
+  if (connectedCampaignRoom) {
+    box.innerHTML = `<span class="status-dot connected"></span><span>Connected to Room: <strong>${escapeHtml(connectedCampaignRoom)}</strong></span>`;
+    if (leaveBtn) leaveBtn.style.display = "inline-flex";
+    if (joinInput) joinInput.value = connectedCampaignRoom;
+  } else {
+    box.innerHTML = `<span class="status-dot disconnected"></span><span>Not connected to any campaign room.</span>`;
+    if (leaveBtn) leaveBtn.style.display = "none";
+  }
+}
+
+async function joinCampaignRoom(roomCode) {
+  if (!roomCode) return;
+  const cleanCode = roomCode.toUpperCase().trim();
+  connectedCampaignRoom = cleanCode;
+  localStorage.setItem(CAMPAIGN_ROOM_KEY, cleanCode);
+  updatePartyStatusUI();
+
+  const roster = getRoster();
+  if (roster[activeCharId]) {
+    await syncToLiveCampaign(roster[activeCharId]);
+  }
+  showStatus(`Joined ${cleanCode}!`);
+}
+
+async function leaveCampaignRoom() {
+  if (!connectedCampaignRoom) return;
+  if (db && activeCharId) {
+    try {
+      await db.collection("campaigns").doc(connectedCampaignRoom).collection("members").doc(activeCharId).delete();
+    } catch (e) {}
+  }
+  connectedCampaignRoom = "";
+  localStorage.removeItem(CAMPAIGN_ROOM_KEY);
+  updatePartyStatusUI();
+  showStatus("Disconnected from Party");
+}
+
+/* DM Live Listener Engine */
+function startDMLiveListener(roomCode) {
+  if (!db) {
+    alert("Firebase database is not connected.");
+    return;
+  }
+  if (dmListenerUnsubscribe) {
+    dmListenerUnsubscribe();
+    dmListenerUnsubscribe = null;
+  }
+
+  const grid = document.getElementById("dmPartyGrid");
+  const counter = document.getElementById("dmMemberCount");
+  const codeEl = document.getElementById("dmActiveRoomCode");
+  const copyBtn = document.getElementById("copyRoomCodeBtn");
+
+  if (codeEl) codeEl.textContent = roomCode;
+  if (copyBtn) copyBtn.style.display = "inline-flex";
+
+  dmListenerUnsubscribe = db.collection("campaigns").doc(roomCode).collection("members")
+    .onSnapshot((snapshot) => {
+      const members = [];
+      snapshot.forEach((doc) => members.push(doc.data()));
+
+      if (counter) counter.textContent = `${members.length} Active`;
+
+      if (members.length === 0) {
+        if (grid) grid.innerHTML = `<p class="dm-empty-msg">Room <strong>${escapeHtml(roomCode)}</strong> is open! Waiting for players to link their sheets...</p>`;
+        return;
+      }
+
+      if (grid) {
+        grid.innerHTML = members.map((m) => {
+          const curHp = m.hp?.cur ?? 0;
+          const maxHp = m.hp?.max ?? 10;
+          const tempHp = m.hp?.temp ?? 0;
+          const hpPercent = Math.min(100, Math.max(0, (curHp / Math.max(1, maxHp)) * 100));
+          const isDown = curHp <= 0;
+
+          const condsHtml = (m.conditions || []).map(c => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("");
+
+          return `
+            <div class="dm-player-card ${isDown ? 'unconscious' : ''}">
+              <div class="dm-card-header">
+                ${m.avatar ? `<img src="${m.avatar}" class="dm-player-avatar" alt="Avatar" />` : `<div class="dm-avatar-placeholder">⚔</div>`}
+                <div class="dm-player-info">
+                  <span class="dm-player-name">${escapeHtml(m.name || "Adventurer")}</span>
+                  <span class="dm-player-sub">${escapeHtml(m.charClass || "Class")} (Lvl ${m.level || 1})</span>
+                </div>
+              </div>
+              <div class="dm-health-gauge">
+                <div class="dm-health-labels">
+                  <span class="dm-hp-val">HP: ${curHp} / ${maxHp}</span>
+                  ${tempHp > 0 ? `<span class="dm-temp-val">+${tempHp} Temp</span>` : ""}
+                </div>
+                <div class="dm-health-track">
+                  <div class="dm-health-fill" style="width: ${hpPercent}%;"></div>
+                </div>
+              </div>
+              <div class="dm-stats-strip">
+                <span class="dm-stat-item">AC: <strong>${m.ac ?? 10}</strong></span>
+                <span class="dm-stat-item">Perc: <strong>${m.passivePerception ?? 10}</strong></span>
+                <span class="dm-stat-item">Ins: <strong>${m.passiveInsight ?? 10}</strong></span>
+              </div>
+              ${condsHtml ? `<div class="dm-conditions-list">${condsHtml}</div>` : ""}
+            </div>
+          `;
+        }).join("");
+      }
+    }, (err) => {
+      console.error("DM live listener failed:", err);
+    });
+}
+
+function createNewCampaignRoom() {
+  const words = ["DRAGON", "DUNGEON", "TAVERN", "PHANDALIN", "BAROVIA", "SWORD", "ARCANE", "SHADOW", "WIZARD"];
+  const randomWord = words[Math.floor(Math.random() * words.length)];
+  const randomNum = Math.floor(Math.random() * 90) + 10;
+  const newCode = `${randomWord}-${randomNum}`;
+  startDMLiveListener(newCode);
 }
 
 /* Rest Logic Engines */
@@ -1201,6 +1370,45 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
+  // Open Party / DM Modal
+  if (e.target.id === "partyModalBtn" || e.target.closest("#partyModalBtn")) {
+    updatePartyStatusUI();
+    document.getElementById("partyModal")?.classList.add("open");
+    return;
+  }
+
+  // Party Player Mode: Connect to Room
+  if (e.target.id === "joinCampaignBtn") {
+    const input = document.getElementById("campaignRoomInput");
+    if (input && input.value.trim()) {
+      await joinCampaignRoom(input.value.trim());
+    } else {
+      alert("Please enter a room code (e.g. TAVERN-42).");
+    }
+    return;
+  }
+
+  // Party Player Mode: Disconnect from Room
+  if (e.target.id === "leaveCampaignBtn") {
+    await leaveCampaignRoom();
+    return;
+  }
+
+  // DM Mode: Create new Live Room
+  if (e.target.id === "createCampaignBtn") {
+    createNewCampaignRoom();
+    return;
+  }
+
+  // DM Mode: Copy Room Code
+  if (e.target.id === "copyRoomCodeBtn") {
+    const code = document.getElementById("dmActiveRoomCode")?.textContent;
+    if (code && code !== "NONE") {
+      navigator.clipboard.writeText(code).then(() => showStatus("Room Code Copied!"));
+    }
+    return;
+  }
+
   // Avatar Click -> Trigger File Picker
   if (e.target.id === "avatarFrame" || e.target.closest("#avatarFrame")) {
     document.getElementById("avatarFileInput")?.click();
@@ -1460,10 +1668,14 @@ document.addEventListener("click", async (e) => {
   }
 
   if (e.target.classList.contains("sub-tab")) {
-    document.querySelectorAll(".sub-tab").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".subtab-page").forEach((p) => p.classList.remove("active"));
-    e.target.classList.add("active");
-    document.getElementById(e.target.dataset.sub)?.classList.add("active");
+    const parentContainer = e.target.closest(".subtab-controls");
+    if (parentContainer) {
+      parentContainer.querySelectorAll(".sub-tab").forEach((b) => b.classList.remove("active"));
+      const parentBlock = parentContainer.parentElement;
+      parentBlock.querySelectorAll(".subtab-page").forEach((p) => p.classList.remove("active"));
+      e.target.classList.add("active");
+      document.getElementById(e.target.dataset.sub)?.classList.add("active");
+    }
     return;
   }
 
@@ -1915,3 +2127,4 @@ applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "theme-obsidian");
 loadSheet();
 loadAllSpells();
 loadAllTraits();
+updatePartyStatusUI();
