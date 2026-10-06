@@ -567,8 +567,9 @@ function getRoster() {
 }
 
 /* ==========================================================================
-   PARTY & DM REAL-TIME SYNC ENGINE (FULL TACTICAL DATA BROADCAST)
+   PARTY & DM REAL-TIME SYNC ENGINE (FULL LIVE STAT BROADCAST)
    ========================================================================== */
+
 function extractFullCharacterPayload(charData) {
   const f = charData.fields || {};
 
@@ -631,13 +632,25 @@ function extractFullCharacterPayload(charData) {
   };
 }
 
+async function ensureAuthenticated() {
+  if (!auth) return;
+  if (!auth.currentUser) {
+    try {
+      await auth.signInAnonymously();
+    } catch (e) {
+      console.warn("Auto-authentication note:", e);
+    }
+  }
+}
+
 async function syncToLiveCampaign(charData) {
   if (!db || !connectedCampaignRoom || !charData) return;
   try {
+    await ensureAuthenticated();
     const payload = extractFullCharacterPayload(charData);
     await db.collection("campaigns").doc(connectedCampaignRoom).collection("members").doc(activeCharId).set(payload, { merge: true });
   } catch (err) {
-    console.warn("Live party sync warning:", err);
+    console.error("Live party sync failed:", err);
   }
 }
 
@@ -804,11 +817,10 @@ function resetSheet() {
 
 function updatePartyStatusUI() {
   const box = document.getElementById("partyStatusBox");
-  const txt = document.getElementById("partyStatusText");
   const leaveBtn = document.getElementById("leaveCampaignBtn");
   const joinInput = document.getElementById("campaignRoomInput");
 
-  if (!box || !txt) return;
+  if (!box) return;
 
   if (connectedCampaignRoom) {
     box.innerHTML = `<span class="status-dot connected"></span><span>Connected to Campaign: <strong>${escapeHtml(connectedCampaignRoom)}</strong></span>`;
@@ -827,18 +839,28 @@ async function joinCampaignRoom(roomCode) {
   localStorage.setItem(CAMPAIGN_ROOM_KEY, cleanCode);
   updatePartyStatusUI();
 
+  await ensureAuthenticated();
+
   const roster = getRoster();
   if (roster[activeCharId]) {
     await syncToLiveCampaign(roster[activeCharId]);
   }
 
-  // Listen to self document to detect if the DM kicks or removes the character
-  if (playerDocUnsubscribe) playerDocUnsubscribe();
+  // Monitor membership (Ignore first snapshot so initial write doesn't trigger false kick)
+  if (playerDocUnsubscribe) {
+    playerDocUnsubscribe();
+    playerDocUnsubscribe = null;
+  }
+
   if (db) {
+    let hasInitialized = false;
     playerDocUnsubscribe = db.collection("campaigns").doc(cleanCode).collection("members").doc(activeCharId)
       .onSnapshot((doc) => {
+        if (!hasInitialized) {
+          if (doc.exists) hasInitialized = true;
+          return;
+        }
         if (!doc.exists && connectedCampaignRoom === cleanCode) {
-          // Player was kicked by DM or room disbanded
           connectedCampaignRoom = "";
           localStorage.removeItem(CAMPAIGN_ROOM_KEY);
           updatePartyStatusUI();
@@ -868,11 +890,13 @@ async function leaveCampaignRoom() {
 }
 
 /* DM Room Creation, Closure & Kicking */
-function startDMLiveListener(roomCode) {
+async function startDMLiveListener(roomCode) {
   if (!db) {
     alert("Firebase database is not connected.");
     return;
   }
+  await ensureAuthenticated();
+
   if (dmListenerUnsubscribe) {
     dmListenerUnsubscribe();
     dmListenerUnsubscribe = null;
@@ -940,7 +964,7 @@ function startDMLiveListener(roomCode) {
         }).join("");
       }
 
-      // If DM currently has a player inspected, update the inspect modal in real time
+      // If DM is inspecting this player, update inspect modal in real time
       if (currentInspectedMemberId) {
         const inspected = cachedRoomMembers.find(m => m.id === currentInspectedMemberId);
         if (inspected) renderInspectModalContent(inspected);
@@ -967,7 +991,6 @@ async function closeDMCampaignRoom() {
     dmListenerUnsubscribe = null;
   }
 
-  // Delete all members in the room so their clients detect the closure
   try {
     const snap = await db.collection("campaigns").doc(activeDMRoomCode).collection("members").get();
     const batch = db.batch();
@@ -1037,7 +1060,6 @@ function renderInspectModalContent(m) {
   const tempHp = m.hp?.temp ?? 0;
   const attrs = m.attributes || {};
 
-  // Build Abilities Grid
   const stats = ["str", "dex", "con", "int", "wis", "cha"];
   const abilityCells = stats.map((s) => {
     const a = attrs[s] || { score: 10, mod: 0, save: 0, isSaveProf: false };
@@ -1053,7 +1075,6 @@ function renderInspectModalContent(m) {
     `;
   }).join("");
 
-  // Build Weapons List
   const weaponsHtml = (m.weapons || []).filter(w => w.name).map((w) => `
     <div class="inspect-weapon-row">
       <span class="inspect-wpn-name">${escapeHtml(w.name)}</span>
@@ -1063,7 +1084,6 @@ function renderInspectModalContent(m) {
     </div>
   `).join("") || `<p style="font-size:0.8rem; color:#64748b; font-style:italic;">No weapons equipped.</p>`;
 
-  // Build Spell Slots Matrix
   const slots = m.spellSlots || {};
   const slotTiles = [];
   for (let lvl = 1; lvl <= 9; lvl++) {
@@ -1076,7 +1096,6 @@ function renderInspectModalContent(m) {
     `);
   }
 
-  // Spells List
   const spellsHtml = (m.spells || []).map((s) => `
     <div class="inspect-mini-card">
       <span class="inspect-mini-title">${escapeHtml(s.name)}</span>
@@ -1085,7 +1104,6 @@ function renderInspectModalContent(m) {
     </div>
   `).join("") || `<p style="font-size:0.8rem; color:#64748b; font-style:italic;">No spells logged.</p>`;
 
-  // Features List
   const traitsHtml = (m.traits || []).map((t) => `
     <div class="inspect-mini-card">
       <span class="inspect-mini-title">${escapeHtml(t.name)}</span>
@@ -1094,11 +1112,9 @@ function renderInspectModalContent(m) {
     </div>
   `).join("") || `<p style="font-size:0.8rem; color:#64748b; font-style:italic;">No features logged.</p>`;
 
-  // Conditions badges
   const condsHtml = (m.conditions || []).map(c => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("") || "None";
 
   container.innerHTML = `
-    <!-- Top Character Banner -->
     <div class="inspect-char-banner">
       <div class="inspect-avatar-wrap">
         ${m.avatar ? `<img src="${m.avatar}" class="inspect-avatar-img" alt="Avatar" />` : `<div class="dm-avatar-placeholder" style="width:100%;height:100%;">⚔</div>`}
@@ -1109,7 +1125,6 @@ function renderInspectModalContent(m) {
       </div>
     </div>
 
-    <!-- Vitals Ribbon -->
     <div class="inspect-vitals-ribbon">
       <div class="inspect-stat-card">
         <span class="inspect-stat-card-label">Hit Points</span>
@@ -1137,43 +1152,36 @@ function renderInspectModalContent(m) {
       </div>
     </div>
 
-    <!-- Active Conditions -->
     <div class="inspect-section">
       <span class="inspect-section-title">Active Conditions</span>
       <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">${condsHtml}</div>
     </div>
 
-    <!-- Ability Scores & Saves -->
     <div class="inspect-section">
       <span class="inspect-section-title">Ability Scores &amp; Saves</span>
       <div class="inspect-ability-grid">${abilityCells}</div>
     </div>
 
-    <!-- Weapons & Attacks -->
     <div class="inspect-section">
       <span class="inspect-section-title">Attack Arsenal</span>
       <div class="inspect-weapons-list">${weaponsHtml}</div>
     </div>
 
-    <!-- Spell Slots -->
     <div class="inspect-section">
       <span class="inspect-section-title">Spell Slots Availability</span>
       <div class="inspect-slots-matrix">${slotTiles.join("")}</div>
     </div>
 
-    <!-- Known Spells -->
     <div class="inspect-section">
       <span class="inspect-section-title">Grimoire (Known Spells)</span>
       <div class="inspect-grid-blocks">${spellsHtml}</div>
     </div>
 
-    <!-- Features & Traits -->
     <div class="inspect-section">
       <span class="inspect-section-title">Features &amp; Abilities</span>
       <div class="inspect-grid-blocks">${traitsHtml}</div>
     </div>
 
-    <!-- Other Proficiencies & Equipment -->
     ${m.otherProfs ? `
       <div class="inspect-section">
         <span class="inspect-section-title">Proficiencies &amp; Languages</span>
@@ -1184,7 +1192,7 @@ function renderInspectModalContent(m) {
 }
 
 /* ==========================================================================
-   REST & HP ENGINES
+   REST & HP CALC ENGINES
    ========================================================================== */
 function applyLongRest() {
   if (!confirm("Take a Long Rest? This will restore HP to max, refill all spell slots, recover class points, clear death saves, and regain up to half your total Hit Dice.")) return;
@@ -1624,7 +1632,7 @@ function updateAuthUI(user) {
   const loggedInView = document.getElementById("authLoggedInView");
   const userText = document.getElementById("currentUserText");
 
-  if (user) {
+  if (user && !user.isAnonymous) {
     if (authBtn) authBtn.textContent = user.displayName || user.email.split("@")[0];
     if (loggedOutView) loggedOutView.style.display = "none";
     if (loggedInView) loggedInView.style.display = "block";
@@ -1642,7 +1650,7 @@ if (auth) {
     currentUser = user;
     updateAuthUI(user);
 
-    if (user && db) {
+    if (user && !user.isAnonymous && db) {
       try {
         const doc = await db.collection("users").doc(user.uid).get();
         if (doc.exists && doc.data()?.roster) {
@@ -1702,6 +1710,17 @@ document.addEventListener("click", async (e) => {
   // Create Campaign Room (DM Side)
   if (e.target.id === "createCampaignBtn") {
     createNewCampaignRoom();
+    return;
+  }
+
+  // Open Specific Room (DM Side)
+  if (e.target.id === "openDMRoomBtn") {
+    const input = document.getElementById("dmRoomCodeInput");
+    if (input && input.value.trim()) {
+      startDMLiveListener(input.value.trim().toUpperCase());
+    } else {
+      alert("Please enter a room code to open.");
+    }
     return;
   }
 
