@@ -210,7 +210,7 @@ textarea {
   border-radius: var(--radius-sm) !important;
   color: var(--text-main) !important;
   outline: none !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, filter 0.28s ease, opacity 0.28s ease !important;
 }
 
 input:focus,
@@ -678,6 +678,7 @@ textarea::-webkit-scrollbar-thumb,
   font-size: 1.25rem;
   font-weight: 900;
   color: var(--accent-blue);
+  transition: filter 0.28s ease, opacity 0.28s ease;
 }
 .orb-unit-wrap {
   display: flex;
@@ -775,7 +776,7 @@ textarea::-webkit-scrollbar-thumb,
 .codex-external-links a:hover { text-decoration: underline; }
 .codex-external-links .sep { color: var(--text-dim); }
 
-/* Blur Toggle & Complete Pill Blur */
+/* Blur Toggle Button */
 .blur-toggle-btn {
   background: transparent;
   border: none;
@@ -791,37 +792,24 @@ textarea::-webkit-scrollbar-thumb,
   position: relative;
   z-index: 5;
   cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 [data-blur-id]:hover .blur-toggle-btn { opacity: 1; pointer-events: auto; }
 [data-blur-id].blurred .blur-toggle-btn { opacity: 1; pointer-events: auto; color: var(--primary-red); }
 .blur-toggle-btn:hover { color: var(--primary-red); }
 
-/* Blurs the entire container & its contents */
-[data-blur-id].blurred {
-  position: relative;
-}
-
-[data-blur-id].blurred::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(5, 8, 17, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: inherit;
-  z-index: 2;
-  pointer-events: none;
-}
-
-[data-blur-id].blurred > *:not(.blur-toggle-btn):not(.dropdown-menu) {
-  filter: blur(6px);
+/* Targeted Text Field Blur with Fade Animation */
+[data-blur-id].blurred input,
+[data-blur-id].blurred .orb-val {
+  filter: blur(7px);
+  opacity: 0.25;
   user-select: none;
   pointer-events: none;
 }
 
 /* ==========================================================================
    5. NAVIGATION DOCK
-   ========================================================================= */
+   ========================================================================== */
 .codex-navigation-dock {
   display: flex;
   gap: 0.45rem;
