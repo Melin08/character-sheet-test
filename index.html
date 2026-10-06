@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=34" />
+  <link rel="stylesheet" href="style.css?v=35" />
 </head>
 <body id="top">
 
@@ -978,11 +978,12 @@
             <div class="dm-action-btns">
               <button type="button" class="btn btn-primary" id="createCampaignBtn">Create Room</button>
               <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy Code</button>
+              <button type="button" class="btn btn-danger-ghost" id="closeCampaignBtn" style="display: none;">Close Room</button>
             </div>
           </div>
           <div class="dm-party-section">
             <div class="dm-party-header-bar">
-              <span class="dm-party-heading">Active Adventurers</span>
+              <span class="dm-party-heading">Active Adventurers (Click to Inspect)</span>
               <span class="dm-member-counter" id="dmMemberCount">0 Active</span>
             </div>
             <div class="dm-party-cards-grid" id="dmPartyGrid">
@@ -990,6 +991,22 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DM FULL CHARACTER INSPECTION MODAL -->
+  <div id="dmInspectModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box dm-inspect-box">
+      <div class="modal-header">
+        <h3 id="inspectCharTitle">Adventurer Codex: Inspection</h3>
+        <div class="inspect-header-actions">
+          <button type="button" class="btn btn-danger-ghost" id="inspectKickBtn">Kick Player</button>
+          <button id="closeInspectModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+        </div>
+      </div>
+      <div class="inspect-modal-content" id="dmInspectContent">
+        <!-- Dynamically rendered full live character stats -->
       </div>
     </div>
   </div>
@@ -1105,6 +1122,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
 </body>
 </html>
