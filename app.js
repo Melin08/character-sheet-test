@@ -253,7 +253,7 @@ function updateXpBar() {
   const nextTier = xpThresholds[level] || curTier + 10000;
   const span = Math.max(1, nextTier - curTier);
   const progress = Math.min(100, Math.max(0, ((raw - curTier) / span) * 100));
-  fill.style.width = `${progress}%`;
+  fill.style.width = `${}%`;
 }
 
 function recalculateAll() {
@@ -262,24 +262,24 @@ function recalculateAll() {
   const prof = getProfBonus(level);
 
   const profBonusDisplay = document.getElementById("profBonusDisplay");
-  if (profBonusDisplay) profBonusDisplay.textContent = prof >= 0 ? `+${prof}` : `${prof}`;
+  if (profBonusDisplay) profBonusDisplay.textContent = prof >= 0 ? `+${}` : `${}`;
 
   const stats = ["str", "dex", "con", "int", "wis", "cha"];
   const mods = {};
 
   stats.forEach((stat) => {
-    const scoreVal = parseInt(document.getElementById(`attr_${stat}`)?.value, 10) || 10;
+    const scoreVal = parseInt(document.getElementById(`attr_${}`)?.value, 10) || 10;
     const mod = getModifier(scoreVal);
     mods[stat] = mod;
 
-    const modElem = document.getElementById(`mod_${stat}`);
-    if (modElem) modElem.textContent = mod >= 0 ? `+${mod}` : mod;
+    const modElem = document.getElementById(`mod_${}`);
+    if (modElem) modElem.textContent = mod >= 0 ? `+${}` : mod;
 
-    const isSaveChecked = document.getElementById(`save_${stat}`)?.checked;
-    const saveValElem = document.getElementById(`save_val_${stat}`);
+    const isSaveChecked = document.getElementById(`save_${}`)?.checked;
+    const saveValElem = document.getElementById(`save_val_${}`);
     if (saveValElem) {
       const saveTotal = isSaveChecked ? mod + prof : mod;
-      saveValElem.textContent = saveTotal >= 0 ? `+${saveTotal}` : saveTotal;
+      saveValElem.textContent = saveTotal >= 0 ? `+${}` : saveTotal;
     }
   });
 
@@ -297,7 +297,7 @@ function recalculateAll() {
     if (isExp) total += prof;
 
     const valElem = row.querySelector(".skill-val");
-    if (valElem) valElem.textContent = total >= 0 ? `+${total}` : total;
+    if (valElem) valElem.textContent = total >= 0 ? `+${}` : total;
 
     if (row.id === "row_perc") percBonus = total;
     if (row.id === "row_ins") insBonus = total;
@@ -325,12 +325,12 @@ function renderWeapons() {
   }
 
   container.innerHTML = myCharacterWeapons.map((wpn, idx) => `
-    <div class="attack-entry weapon-row-card" data-index="${idx}">
+    <div class="attack-entry weapon-row-card" data-index="${}">
       <input type="text" class="save-field wpn-field wpn-name-input" data-prop="name" value="${escapeHtml(wpn.name || "")}" placeholder="Weapon name..." />
       <input type="text" class="save-field wpn-field wpn-type-input center" data-prop="atk" value="${escapeHtml(wpn.atk || "")}" placeholder="Type" />
       <input type="text" class="save-field wpn-field wpn-dmg-input center" data-prop="dmg" value="${escapeHtml(wpn.dmg || "")}" placeholder="1d8" />
       <input type="text" class="save-field wpn-field wpn-notes-input" data-prop="notes" value="${escapeHtml(wpn.notes || "")}" placeholder="Range, properties, notes..." />
-      <button type="button" class="weapon-delete-btn" data-index="${idx}" title="Delete weapon">&times;</button>
+      <button type="button" class="weapon-delete-btn" data-index="${}" title="Delete weapon">&times;</button>
     </div>
   `).join("");
 }
@@ -348,10 +348,10 @@ function renderMyTraits() {
     if (!trait) return "";
     const isExpanded = !!trait.isExpanded;
     return `
-      <div class="trait-card ${isExpanded ? 'expanded' : ''}" data-index="${idx}">
+      <div class="trait-card ${isExpanded ? 'expanded' : ''}" data-index="${}">
         <div class="trait-card-header">
           <input type="text" class="trait-name-input custom-trait-field" data-prop="name" value="${escapeHtml(trait.name || '')}" placeholder="Ability Name" />
-          <button class="trait-card-delete" data-index="${idx}" type="button" title="Delete ability">&times;</button>
+          <button class="trait-card-delete" data-index="${}" type="button" title="Delete ability">&times;</button>
         </div>
         <div class="trait-type-wrap">
           <input type="text" class="trait-type-input custom-trait-field" data-prop="type" value="${escapeHtml(trait.type || 'FEATURE')}" placeholder="Category" />
@@ -382,11 +382,11 @@ function renderMySpells() {
     const typeVal = spell.type || spell.levelTag || "Cantrip";
     const descVal = Array.isArray(spell.desc) ? spell.desc.join("\n\n") : (spell.desc || "");
     return `
-      <div class="spell-card" draggable="true" data-index="${idx}">
+      <div class="spell-card" draggable="true" data-index="${}">
         <div class="spell-card-header">
           <span class="spell-drag-handle" title="Drag to reorder">⋮⋮</span>
           <input type="text" class="spell-custom-title-input custom-spell-field" data-prop="name" value="${escapeHtml(spell.name || "")}" placeholder="Spell Name" />
-          <button class="spell-card-delete" data-index="${idx}" type="button" title="Delete spell">&times;</button>
+          <button class="spell-card-delete" data-index="${}" type="button" title="Delete spell">&times;</button>
         </div>
         <div class="spell-card-meta">
           <div class="spell-meta-badge">
@@ -460,25 +460,25 @@ function renderSpellSlotGrid() {
   let html = "";
 
   for (let lvl = 1; lvl <= 9; lvl++) {
-    const curVal = parseInt(document.getElementById(`slot${lvl}_cur`)?.value, 10) || 0;
-    const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
+    const curVal = parseInt(document.getElementById(`slot${}_cur`)?.value, 10) || 0;
+    const maxVal = parseInt(document.getElementById(`slot${}_max`)?.value, 10) || 0;
 
     let pipsHtml = "";
     for (let i = 0; i < maxVal; i++) {
       const isAvailable = i < curVal;
-      pipsHtml += `<span class="slot-pip ${isAvailable ? 'active' : ''}" data-slot-lvl="${lvl}" data-pip-idx="${i}" title="${isAvailable ? 'Click to Cast' : 'Click to Recover'}"></span>`;
+      pipsHtml += `<span class="slot-pip ${isAvailable ? 'active' : ''}" data-slot-lvl="${}" data-pip-idx="${}" title="${isAvailable ? 'Click to Cast' : 'Click to Recover'}"></span>`;
     }
 
     html += `
-      <div class="slot-tile" data-slot-lvl="${lvl}">
+      <div class="slot-tile" data-slot-lvl="${}">
         <span class="slot-level">${suffixes[lvl - 1]}</span>
         <div class="slot-pips-container">
           ${pipsHtml || '<span style="font-size:0.65rem; color:#475569;">No Slots</span>'}
         </div>
         <div class="slot-counter">
-          <input type="number" id="slot${lvl}_cur" class="save-field slot-input center" value="${curVal}" min="0" />
+          <input type="number" id="slot${}_cur" class="save-field slot-input center" value="${}" min="0" />
           <span class="slot-divider">/</span>
-          <input type="number" id="slot${lvl}_max" class="save-field slot-input center" value="${maxVal}" min="0" />
+          <input type="number" id="slot${}_max" class="save-field slot-input center" value="${}" min="0" />
         </div>
       </div>
     `;
@@ -487,17 +487,17 @@ function renderSpellSlotGrid() {
 }
 
 function updateSlotPips(lvl) {
-  const tile = document.querySelector(`.slot-tile[data-slot-lvl="${lvl}"]`);
+  const tile = document.querySelector(`.slot-tile[data-slot-lvl="${}"]`);
   if (!tile) return;
-  const cur = parseInt(document.getElementById(`slot${lvl}_cur`)?.value, 10) || 0;
-  const max = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
+  const cur = parseInt(document.getElementById(`slot${}_cur`)?.value, 10) || 0;
+  const max = parseInt(document.getElementById(`slot${}_max`)?.value, 10) || 0;
   const pipsBox = tile.querySelector(".slot-pips-container");
   if (!pipsBox) return;
 
   let pipsHtml = "";
   for (let i = 0; i < max; i++) {
     const isAvailable = i < cur;
-    pipsHtml += `<span class="slot-pip ${isAvailable ? 'active' : ''}" data-slot-lvl="${lvl}" data-pip-idx="${i}" title="${isAvailable ? 'Click to Cast' : 'Click to Recover'}"></span>`;
+    pipsHtml += `<span class="slot-pip ${isAvailable ? 'active' : ''}" data-slot-lvl="${}" data-pip-idx="${}" title="${isAvailable ? 'Click to Cast' : 'Click to Recover'}"></span>`;
   }
   pipsBox.innerHTML = pipsHtml || '<span style="font-size:0.65rem; color:#475569;">No Slots</span>';
 }
@@ -567,8 +567,8 @@ function getRoster() {
 }
 
 /* ==========================================================================
-   PARTY & DM REAL-TIME SYNC ENGINE (FULL LIVE STAT BROADCAST)
-   ========================================================================== */
+  PARTY & DM REAL-TIME SYNC ENGINE (FULL LIVE STAT BROADCAST)
+  ========================================================================== */
 
 function extractFullCharacterPayload(charData) {
   const f = charData.fields || {};
@@ -576,17 +576,17 @@ function extractFullCharacterPayload(charData) {
   const stats = ["str", "dex", "con", "int", "wis", "cha"];
   const attributes = {};
   stats.forEach((s) => {
-    const score = parseInt(f[`attr_${s}`], 10) || 10;
+    const score = parseInt(f[`attr_${}`], 10) || 10;
     const mod = getModifier(score);
-    const save = f[`save_${s}`] ? mod + getProfBonus(parseInt(f.charLevel, 10) || 1) : mod;
-    attributes[s] = { score, mod, save, isSaveProf: !!f[`save_${s}`] };
+    const save = f[`save_${}`] ? mod + getProfBonus(parseInt(f.charLevel, 10) || 1) : mod;
+    attributes[s] = { score, mod, save, isSaveProf: !!f[`save_${}`] };
   });
 
   const spellSlots = {};
   for (let lvl = 1; lvl <= 9; lvl++) {
     spellSlots[lvl] = {
-      cur: parseInt(f[`slot${lvl}_cur`], 10) || 0,
-      max: parseInt(f[`slot${lvl}_max`], 10) || 0
+      cur: parseInt(f[`slot${}_cur`], 10) || 0,
+      max: parseInt(f[`slot${}_max`], 10) || 0
     };
   }
 
@@ -691,7 +691,7 @@ function saveSheet(quiet = false) {
   const charRecord = {
     id: activeCharId,
     name: name,
-    summary: charClass ? `${charClass} (Lvl ${level})` : `Level ${level}`,
+    summary: charClass ? `${} (Lvl ${})` : `Level ${}`,
     updatedAt: Date.now(),
     avatar: myCharacterAvatar,
     fields: fields,
@@ -727,7 +727,7 @@ function applyCharacterData(charData) {
   myBlurredPills = charData.blurredPills || [];
   myCharacterWeapons = charData.weapons && charData.weapons.length >= 2 ? charData.weapons : [
     { name: "", atk: "", dmg: "", notes: "" },
-    { name: "", atk: "", dmg: "", notes: "" }
+    { name: "", atk: "", dmg: "" , notes: "" }
   ];
 
   renderAvatar();
@@ -812,8 +812,8 @@ function resetSheet() {
 }
 
 /* ==========================================================================
-   PARTY & DM REAL-TIME DASHBOARD (LISTENERS, KICK & INSPECTION)
-   ========================================================================== */
+  PARTY & DM REAL-TIME DASHBOARD (LISTENERS, KICK & INSPECTION)
+  ========================================================================== */
 
 function updatePartyStatusUI() {
   const box = document.getElementById("partyStatusBox");
@@ -846,7 +846,7 @@ async function joinCampaignRoom(roomCode) {
     await syncToLiveCampaign(roster[activeCharId]);
   }
 
-  // Monitor membership (Ignore first snapshot so initial write doesn't trigger false kick)
+  // Monitor membership
   if (playerDocUnsubscribe) {
     playerDocUnsubscribe();
     playerDocUnsubscribe = null;
@@ -869,7 +869,7 @@ async function joinCampaignRoom(roomCode) {
       });
   }
 
-  showStatus(`Joined ${cleanCode}!`);
+  showStatus(`Joined ${}!`);
 }
 
 async function leaveCampaignRoom() {
@@ -946,11 +946,11 @@ async function startDMLiveListener(roomCode) {
               </div>
               <div class="dm-health-gauge">
                 <div class="dm-health-labels">
-                  <span class="dm-hp-val">HP: ${curHp} / ${maxHp}</span>
-                  ${tempHp > 0 ? `<span class="dm-temp-val">+${tempHp} Temp</span>` : ""}
+                  <span class="dm-hp-val">HP: ${} / ${}</span>
+                  ${tempHp > 0 ? `<span class="dm-temp-val">+${} Temp</span>` : ""}
                 </div>
                 <div class="dm-health-track">
-                  <div class="dm-health-fill" style="width: ${hpPercent}%;"></div>
+                  <div class="dm-health-fill" style="width: ${}%;"></div>
                 </div>
               </div>
               <div class="dm-stats-strip">
@@ -958,13 +958,12 @@ async function startDMLiveListener(roomCode) {
                 <span class="dm-stat-item">Perc: <strong>${m.passivePerception ?? 10}</strong></span>
                 <span class="dm-stat-item">Ins: <strong>${m.passiveInsight ?? 10}</strong></span>
               </div>
-              ${condsHtml ? `<div class="dm-conditions-list">${condsHtml}</div>` : ""}
+              ${condsHtml ? `<div class="dm-conditions-list">${}</div>` : ""}
             </div>
           `;
         }).join("");
       }
 
-      // If DM is inspecting this player, update inspect modal in real time
       if (currentInspectedMemberId) {
         const inspected = cachedRoomMembers.find(m => m.id === currentInspectedMemberId);
         if (inspected) renderInspectModalContent(inspected);
@@ -978,13 +977,13 @@ function createNewCampaignRoom() {
   const words = ["DRAGON", "DUNGEON", "TAVERN", "PHANDALIN", "BAROVIA", "SWORD", "ARCANE", "SHADOW", "WIZARD"];
   const randomWord = words[Math.floor(Math.random() * words.length)];
   const randomNum = Math.floor(Math.random() * 90) + 10;
-  const newCode = `${randomWord}-${randomNum}`;
+  const newCode = `${}-${}`;
   startDMLiveListener(newCode);
 }
 
 async function closeDMCampaignRoom() {
   if (!activeDMRoomCode) return;
-  if (!confirm(`Are you sure you want to close and disband room "${activeDMRoomCode}" for all players?`)) return;
+  if (!confirm(`Are you sure you want to close and disband room "${}" for all players?`)) return;
 
   if (dmListenerUnsubscribe) {
     dmListenerUnsubscribe();
@@ -1024,11 +1023,11 @@ async function kickPlayerFromRoom(memberId) {
   const member = cachedRoomMembers.find(m => m.id === memberId);
   const name = member ? member.name : "this player";
 
-  if (!confirm(`Are you sure you want to kick "${name}" from the party?`)) return;
+  if (!confirm(`Are you sure you want to kick "${}" from the party?`)) return;
 
   try {
     await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).delete();
-    showStatus(`Kicked ${name}`);
+    showStatus(`Kicked ${}`);
     closeModal("dmInspectModal");
     currentInspectedMemberId = null;
   } catch (err) {
@@ -1037,8 +1036,8 @@ async function kickPlayerFromRoom(memberId) {
 }
 
 /* ==========================================================================
-   DM DETAILED PLAYER INSPECTION MODAL RENDERER
-   ========================================================================== */
+  DM DETAILED PLAYER INSPECTION MODAL RENDERER
+  ========================================================================== */
 function openInspectModal(memberId) {
   const member = cachedRoomMembers.find(m => m.id === memberId);
   if (!member) return;
@@ -1068,9 +1067,9 @@ function renderInspectModalContent(m) {
     return `
       <div class="inspect-ability-cell">
         <span class="inspect-attr-tag">${s.toUpperCase()}</span>
-        <span class="inspect-attr-mod">${modStr}</span>
+        <span class="inspect-attr-mod">${}</span>
         <span class="inspect-attr-score">(${a.score})</span>
-        <span class="inspect-attr-save">${a.isSaveProf ? '🛡 ' : ''}Save: ${saveStr}</span>
+        <span class="inspect-attr-save">${a.isSaveProf ? '🛡 ' : ''}Save: ${}</span>
       </div>
     `;
   }).join("");
@@ -1086,11 +1085,12 @@ function renderInspectModalContent(m) {
 
   const slots = m.spellSlots || {};
   const slotTiles = [];
+  const suffixes = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"];
   for (let lvl = 1; lvl <= 9; lvl++) {
     const s = slots[lvl] || { cur: 0, max: 0 };
     slotTiles.push(`
       <div class="inspect-slot-tile">
-        <span class="inspect-slot-lvl">${lvl}st</span>
+        <span class="inspect-slot-lvl">${suffixes[lvl - 1]}</span>
         <span class="inspect-slot-count">${s.cur} / ${s.max}</span>
       </div>
     `);
@@ -1128,7 +1128,7 @@ function renderInspectModalContent(m) {
     <div class="inspect-vitals-ribbon">
       <div class="inspect-stat-card">
         <span class="inspect-stat-card-label">Hit Points</span>
-        <span class="inspect-stat-card-val" style="color:#f87171;">${curHp} / ${maxHp} ${tempHp > 0 ? `(+${tempHp})` : ""}</span>
+        <span class="inspect-stat-card-val" style="color:#f87171;">${} / ${} ${tempHp > 0 ? `(+${})` : ""}</span>
       </div>
       <div class="inspect-stat-card">
         <span class="inspect-stat-card-label">Armor Class</span>
@@ -1154,18 +1154,18 @@ function renderInspectModalContent(m) {
 
     <div class="inspect-section">
       <span class="inspect-section-title">Active Conditions</span>
-      <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">${condsHtml}</div>
+      <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">${}</div>
     </div>
 
     <div class="inspect-section">
       <span class="inspect-section-title">Ability Scores &amp; Saves</span>
-      <div class="inspect-ability-grid">${abilityCells}</div>
+      <div class="inspect-ability-grid">${}</div>
     </div>
 
     <div class="inspect-section">
-   <span class="inspect-section-title">Weapons Arsenal</span>
-   <div class="inspect-weapons-list">$</div>
-  </div>
+      <span class="inspect-section-title">Weapons Arsenal</span>
+      <div class="inspect-weapons-list">${}</div>
+    </div>
 
     <div class="inspect-section">
       <span class="inspect-section-title">Spell Slots Availability</span>
@@ -1174,12 +1174,12 @@ function renderInspectModalContent(m) {
 
     <div class="inspect-section">
       <span class="inspect-section-title">Grimoire (Known Spells)</span>
-      <div class="inspect-grid-blocks">${spellsHtml}</div>
+      <div class="inspect-grid-blocks">${}</div>
     </div>
 
     <div class="inspect-section">
       <span class="inspect-section-title">Features &amp; Abilities</span>
-      <div class="inspect-grid-blocks">${traitsHtml}</div>
+      <div class="inspect-grid-blocks">${}</div>
     </div>
 
     ${m.otherProfs ? `
@@ -1192,8 +1192,8 @@ function renderInspectModalContent(m) {
 }
 
 /* ==========================================================================
-   REST & HP CALC ENGINES
-   ========================================================================== */
+  REST & HP CALC ENGINES
+  ========================================================================== */
 function applyLongRest() {
   if (!confirm("Take a Long Rest? This will restore HP to max, refill all spell slots, recover class points, clear death saves, and regain up to half your total Hit Dice.")) return;
 
@@ -1204,8 +1204,8 @@ function applyLongRest() {
   if (tempHpEl) tempHpEl.value = 0;
 
   for (let lvl = 1; lvl <= 9; lvl++) {
-    const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
-    const curEl = document.getElementById(`slot${lvl}_cur`);
+    const maxVal = parseInt(document.getElementById(`slot${}_max`)?.value, 10) || 0;
+    const curEl = document.getElementById(`slot${}_cur`);
     if (curEl) curEl.value = maxVal;
   }
 
@@ -1240,7 +1240,7 @@ function applyShortRest() {
     return;
   }
 
-  const spend = confirm(`Take a Short Rest?\nYou have ${curHd} of ${maxHd} Hit Dice available.\nClick OK to spend 1 Hit Die and recover HP.`);
+  const spend = confirm(`Take a Short Rest?\nYou have ${} of ${} Hit Dice available.\nClick OK to spend 1 Hit Die and recover HP.`);
   if (spend) {
     const conMod = parseInt(document.getElementById("mod_con")?.textContent, 10) || 0;
     const roll = Math.floor(Math.random() * 8) + 1;
@@ -1254,9 +1254,9 @@ function applyShortRest() {
     const newHp = Math.min(maxHp, curHp + healTotal);
     if (curHpEl) curHpEl.value = newHp;
 
-    addDiceHistory(`Short Rest Hit Die (1d8 + ${conMod})`, healTotal);
+    addDiceHistory(`Short Rest Hit Die (1d8 + ${})`, healTotal);
     saveSheet(false);
-    showStatus(`Regained ${healTotal} HP!`);
+    showStatus(`Regained ${} HP!`);
   }
 }
 
@@ -1289,15 +1289,15 @@ function applyHpAdjustment(action) {
     curHp = Math.max(0, curHp - damageLeft);
     if (tempHpEl) tempHpEl.value = tempHp;
     if (curHpEl) curHpEl.value = curHp;
-    showStatus(`Took ${amt} damage!`);
+    showStatus(`Took ${} damage!`);
   } else if (action === "heal") {
     curHp = Math.min(maxHp, curHp + amt);
     if (curHpEl) curHpEl.value = curHp;
-    showStatus(`Healed for ${amt} HP!`);
+    showStatus(`Healed for ${} HP!`);
   } else if (action === "temp") {
     tempHp = Math.max(tempHp, amt);
     if (tempHpEl) tempHpEl.value = tempHp;
-    showStatus(`Gained ${amt} Temp HP!`);
+    showStatus(`Gained ${} Temp HP!`);
   }
 
   amountInput.value = "";
@@ -1320,7 +1320,7 @@ function renderCharList() {
     const char = roster[id];
     const isActive = id === activeCharId;
     return `
-      <div class="char-item-row" data-id="${id}">
+      <div class="char-item-row" data-id="${}">
         <div class="char-item-info">
           <span class="char-item-name">${escapeHtml(char.name || "Unnamed Character")}</span>
           <span class="char-item-sub">${escapeHtml(char.summary || "")}</span>
@@ -1401,7 +1401,7 @@ function getSpellLevelTag(s) {
     lvl = SRD_SPELL_LEVELS[key];
   }
   if (lvl === 0) return "Cantrip";
-  if (lvl !== undefined && lvl !== null) return `Level ${lvl}`;
+  if (lvl !== undefined && lvl !== null) return `Level ${}`;
   return "Spell";
 }
 
@@ -1480,8 +1480,8 @@ async function syncClassAndRaceFeatureTags() {
   const classes = ["barbarian", "bard", "cleric", "druid", "fighter", "monk", "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"];
   const races = ["dragonborn", "dwarf", "elf", "gnome", "half-elf", "half-orc", "halfling", "human", "tiefling"];
 
-  const classFetches = classes.map((c) => fetchAPI(`https://www.dnd5eapi.co/api/classes/${c}/features`));
-  const raceFetches = races.map((r) => fetchAPI(`https://www.dnd5eapi.co/api/races/${r}/traits`));
+  const classFetches = classes.map((c) => fetchAPI(`https://www.dnd5eapi.co/api/classes/${}/features`));
+  const raceFetches = races.map((r) => fetchAPI(`https://www.dnd5eapi.co/api/races/${}/traits`));
 
   const [classResults, raceResults] = await Promise.all([
     Promise.all(classFetches),
@@ -1542,7 +1542,7 @@ function renderModalSpells(list) {
     const isCantrip = levelStr.toLowerCase().includes("cantrip");
     const lvlClass = isCantrip ? "tag-cantrip" : "tag-level";
 
-    let tagsHtml = `<span class="tag-pill ${lvlClass}">${escapeHtml(levelStr)}</span>`;
+    let tagsHtml = `<span class="tag-pill ${}">${escapeHtml(levelStr)}</span>`;
 
     if (s.schoolTag) {
       tagsHtml += `<span class="tag-pill ${getSchoolCssClass(s.schoolTag)}">${escapeHtml(s.schoolTag)}</span>`;
@@ -1553,7 +1553,7 @@ function renderModalSpells(list) {
       cList.forEach((cls) => {
         const isRace = ["elf", "dwarf", "tiefling", "dragonborn", "halfling", "half-orc", "gnome", "half-elf", "human", "drow", "genasi", "aasimar", "triton"].some(r => cls.toLowerCase().includes(r));
         const pillClass = isRace ? getRaceCssClass(cls) : getClassCssClass(cls);
-        tagsHtml += `<span class="tag-pill ${pillClass}">${escapeHtml(cls)}</span>`;
+        tagsHtml += `<span class="tag-pill ${}">${escapeHtml(cls)}</span>`;
       });
     }
 
@@ -1561,7 +1561,7 @@ function renderModalSpells(list) {
       <div class="spell-option-item spell-pick-row" data-url="${s.url || ''}" data-name="${escapeHtml(s.name)}">
         <div class="spell-option-details">
           <div class="spell-option-title">${escapeHtml(s.name)}</div>
-          <div class="spell-meta-tags">${tagsHtml}</div>
+          <div class="spell-meta-tags">${}</div>
         </div>
         <button type="button" class="spell-add-badge">+ Add</button>
       </div>
@@ -1598,7 +1598,7 @@ function renderModalTraits(list) {
       <div class="spell-option-item trait-pick-row" data-url="${t.url || ''}" data-name="${escapeHtml(t.name)}" data-type="${escapeHtml(t.type || 'Feature')}">
         <div class="spell-option-details">
           <div class="spell-option-title">${escapeHtml(t.name)}</div>
-          <div class="spell-meta-tags">${tagsHtml}</div>
+          <div class="spell-meta-tags">${}</div>
         </div>
         <button type="button" class="spell-add-badge">+ Add</button>
       </div>
@@ -1617,7 +1617,7 @@ function closeAllModals() {
 function switchMainTab(targetId) {
   document.querySelectorAll(".main-tab").forEach((b) => b.classList.remove("active"));
   document.querySelectorAll(".tab-page").forEach((p) => p.classList.remove("active"));
-  document.querySelector(`.main-tab[data-target="${targetId}"]`)?.classList.add("active");
+  document.querySelector(`.main-tab[data-target="${}"]`)?.classList.add("active");
   document.getElementById(targetId)?.classList.add("active");
 }
 
@@ -1804,7 +1804,7 @@ document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("slot-pip")) {
     const lvl = parseInt(e.target.dataset.slotLvl, 10);
     const pipIdx = parseInt(e.target.dataset.pipIdx, 10);
-    const curEl = document.getElementById(`slot${lvl}_cur`);
+    const curEl = document.getElementById(`slot${}_cur`);
     if (curEl) {
       let curVal = parseInt(curEl.value, 10) || 0;
       if (e.target.classList.contains("active")) {
@@ -2045,7 +2045,7 @@ document.addEventListener("click", async (e) => {
     const roll = Math.floor(Math.random() * sides) + 1;
     const out = document.getElementById("rollResult");
     if (out) out.textContent = roll;
-    addDiceHistory(`1d${sides}`, roll);
+    addDiceHistory(`1d${}`, roll);
     return;
   }
 
@@ -2056,7 +2056,7 @@ document.addEventListener("click", async (e) => {
 
     if (e.target.dataset.type === "save") {
       const attr = e.target.dataset.attr;
-      bonus = parseInt(document.getElementById(`save_val_${attr}`)?.textContent, 10) || 0;
+      bonus = parseInt(document.getElementById(`save_val_${}`)?.textContent, 10) || 0;
       label = `${attr.toUpperCase()} Save`;
     } else if (e.target.dataset.type === "skill") {
       const row = e.target.closest(".skill-row");
@@ -2067,7 +2067,7 @@ document.addEventListener("click", async (e) => {
     const total = roll + bonus;
     const out = document.getElementById("rollResult");
     if (out) out.textContent = total;
-    addDiceHistory(`${label} (${roll} ${bonus >= 0 ? `+ ${bonus}` : `- ${Math.abs(bonus)}`})`, total);
+    addDiceHistory(`${} (${} ${bonus >= 0 ? `+ ${}` : `- ${Math.abs(bonus)}`})`, total);
     return;
   }
 
