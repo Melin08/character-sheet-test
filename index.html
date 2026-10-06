@@ -71,7 +71,7 @@
       </div>
     </header>
 
-    <!-- HERO CODEX BANNER (EXPANDABLE BOXES) -->
+    <!-- HERO CODEX BANNER -->
     <section class="hero-codex-card">
       <div class="hero-codex-main">
         <!-- Interactive Circular Avatar Token -->
@@ -88,50 +88,58 @@
           <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
         </div>
 
-        <!-- Identity & Descriptor Badges (Freely Expandable) -->
+        <!-- Identity & Descriptor Badges -->
         <div class="hero-identity-cluster">
           <input type="text" id="charName" class="save-field hero-name-input" placeholder="Character Name..." />
 
           <div class="hero-badges-strip">
-            <div class="codex-field-pill dropdown-pill-wrapper expandable-pill" data-blur-id="class" title="Drag corner to expand width">
-              <div class="pill-inner-content">
-                <span class="pill-title">Class</span>
-                <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Select class..." />
-              </div>
+            <!-- Class Pill -->
+            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="class">
+              <span class="pill-title">Class</span>
+              <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Select class..." />
               <div id="classDropdown" class="dropdown-menu"></div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
               </button>
             </div>
 
-            <div class="codex-field-pill dropdown-pill-wrapper expandable-pill" data-blur-id="race" title="Drag corner to expand width">
-              <div class="pill-inner-content">
-                <span class="pill-title">Race</span>
-                <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Select race..." />
-              </div>
+            <!-- Race Pill -->
+            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="race">
+              <span class="pill-title">Race</span>
+              <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Select race..." />
               <div id="raceDropdown" class="dropdown-menu"></div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
               </button>
             </div>
 
-            <div class="codex-field-pill expandable-pill" data-blur-id="background" title="Drag corner to expand width">
-              <div class="pill-inner-content">
-                <span class="pill-title">Background</span>
-                <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Soldier" />
-              </div>
+            <!-- Background Pill -->
+            <div class="codex-field-pill" data-blur-id="background">
+              <span class="pill-title">Background</span>
+              <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Soldier" />
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
               </button>
             </div>
 
-            <div class="codex-field-pill expandable-pill" data-blur-id="alignment" title="Drag corner to expand width">
-              <div class="pill-inner-content">
-                <span class="pill-title">Alignment</span>
-                <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
-              </div>
+            <!-- Alignment Pill -->
+            <div class="codex-field-pill" data-blur-id="alignment">
+              <span class="pill-title">Alignment</span>
+              <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
               </button>
             </div>
           </div>
@@ -143,7 +151,10 @@
             <span class="orb-caption">Level</span>
             <input type="number" id="charLevel" class="save-field orb-number center" value="1" min="1" max="20" />
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
             </button>
           </div>
 
@@ -151,7 +162,10 @@
             <span class="orb-caption">Proficiency</span>
             <span id="profBonusDisplay" class="orb-val">+2</span>
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
             </button>
           </div>
 
@@ -162,7 +176,10 @@
               <span class="orb-unit">ft</span>
             </div>
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
             </button>
           </div>
         </div>
@@ -175,7 +192,10 @@
           <input type="text" id="charExp" class="save-field xp-input" placeholder="0 XP" />
           <div class="xp-progress-bar"><div class="xp-fill-line" id="xpBarFill" style="width: 20%;"></div></div>
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </button>
         </div>
 
@@ -184,7 +204,10 @@
           <span class="insp-title">Inspiration:</span>
           <input type="text" id="charInspiration" class="save-field insp-input" placeholder="None" />
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </button>
         </div>
 
@@ -196,7 +219,7 @@
       </div>
     </section>
 
-    <!-- 5 REIMAGINED WORKSPACE TABS -->
+    <!-- 5 WORKSPACE TABS -->
     <nav class="codex-navigation-dock">
       <button class="main-tab active" data-target="tab-stats" type="button">
         <span class="tab-icon">⚔</span> Combat &amp; Core
@@ -205,13 +228,13 @@
         <span class="tab-icon">⚡</span> Features &amp; Traits
       </button>
       <button class="main-tab" data-target="tab-spells" type="button">
-        <span class="tab-icon">✨</span> Spells &amp; Cantrips
+        <span class="tab-icon">✨</span> Grimoire &amp; Spells
       </button>
       <button class="main-tab" data-target="tab-inventory" type="button">
         <span class="tab-icon">🎒</span> Inventory &amp; Vault
       </button>
       <button class="main-tab" data-target="tab-journal" type="button">
-        <span class="tab-icon">📜</span> Notes &amp; Lore
+        <span class="tab-icon">📜</span> Chronicle &amp; Lore
       </button>
     </nav>
 
@@ -301,7 +324,10 @@
           <span class="rest-hd-slash">/</span>
           <input type="text" id="hitDiceMax" class="save-field hitdice-input center" value="1" placeholder="Max" />
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </button>
         </div>
         <div class="rest-actions-inline">
@@ -528,7 +554,6 @@
         </div>
 
         <div class="skills-attribute-matrix">
-
           <!-- STRENGTH SKILLS -->
           <div class="skill-attr-column col-str">
             <div class="attr-column-header">
@@ -753,10 +778,8 @@
               </div>
             </div>
           </div>
-
         </div>
       </section>
-
     </div>
 
     <!-- ========================================== -->
@@ -774,7 +797,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 3: SPELLS & CANTRIPS (RENAMED)         -->
+    <!-- TAB 3: GRIMOIRE & SPELLS                   -->
     <!-- ========================================== -->
     <div id="tab-spells" class="tab-page">
       <div class="spell-basics">
@@ -851,7 +874,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 5: NOTES & LORE (RENAMED)              -->
+    <!-- TAB 5: CHRONICLE & LORE                    -->
     <!-- ========================================== -->
     <div id="tab-journal" class="tab-page">
       <div class="subtab-controls">
