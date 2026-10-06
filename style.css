@@ -594,7 +594,10 @@ textarea::-webkit-scrollbar-thumb,
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: flex-start;
 }
+
+/* Freely Expandable Character Info Pills */
 .codex-field-pill {
   position: relative;
   display: inline-flex;
@@ -604,15 +607,29 @@ textarea::-webkit-scrollbar-thumb,
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   padding: 0.35rem 0.65rem;
+  min-height: 38px;
   height: 38px;
+  min-width: 140px;
+  max-width: 100%;
+  resize: both;
+  overflow: hidden;
+  box-sizing: border-box;
 }
+
+/* Ensure dropdown menu floats out unclipped when opened */
+.codex-field-pill:has(.dropdown-menu.open) {
+  overflow: visible !important;
+}
+
 .pill-title {
   font-size: 0.68rem;
   font-weight: 800;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  flex-shrink: 0;
 }
+
 .pill-input {
   background: transparent !important;
   border: none !important;
@@ -620,7 +637,9 @@ textarea::-webkit-scrollbar-thumb,
   color: #ffffff !important;
   font-size: 0.85rem;
   font-weight: 700;
-  width: 110px;
+  flex: 1 1 auto;
+  min-width: 60px;
+  width: 100%;
 }
 
 .hero-orbs-rack {
@@ -756,6 +775,7 @@ textarea::-webkit-scrollbar-thumb,
 .codex-external-links a:hover { text-decoration: underline; }
 .codex-external-links .sep { color: var(--text-dim); }
 
+/* Blur Toggle & Complete Pill Blur */
 .blur-toggle-btn {
   background: transparent;
   border: none;
@@ -768,20 +788,40 @@ textarea::-webkit-scrollbar-thumb,
   opacity: 0;
   pointer-events: none;
   margin-left: auto;
+  position: relative;
+  z-index: 5;
+  cursor: pointer;
 }
 [data-blur-id]:hover .blur-toggle-btn { opacity: 1; pointer-events: auto; }
 [data-blur-id].blurred .blur-toggle-btn { opacity: 1; pointer-events: auto; color: var(--primary-red); }
 .blur-toggle-btn:hover { color: var(--primary-red); }
 
-[data-blur-id].blurred input,
-[data-blur-id].blurred .orb-val {
+/* Blurs the entire container & its contents */
+[data-blur-id].blurred {
+  position: relative;
+}
+
+[data-blur-id].blurred::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 17, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: inherit;
+  z-index: 2;
+  pointer-events: none;
+}
+
+[data-blur-id].blurred > *:not(.blur-toggle-btn):not(.dropdown-menu) {
   filter: blur(6px);
   user-select: none;
+  pointer-events: none;
 }
 
 /* ==========================================================================
    5. NAVIGATION DOCK
-   ========================================================================== */
+   ========================================================================= */
 .codex-navigation-dock {
   display: flex;
   gap: 0.45rem;
