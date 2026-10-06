@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=36" />
+  <link rel="stylesheet" href="style.css?v=37" />
 </head>
 <body id="top">
 
@@ -37,7 +37,7 @@
           <span class="btn-icon">👥</span> Party
         </button>
 
-        <!-- Account Button (Moved here) -->
+        <!-- Account Button -->
         <div class="auth-box">
           <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
         </div>
@@ -57,7 +57,7 @@
           <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
         </div>
 
-        <!-- Theme Selector Control (Moved to the end) -->
+        <!-- Theme Selector Control -->
         <div class="theme-selector-wrapper" title="Change Sheet Theme">
           <span class="theme-icon">🎨</span>
           <select id="themeSelect" class="theme-select" aria-label="Select Theme">
@@ -71,7 +71,7 @@
       </div>
     </header>
 
-    <!-- HERO CODEX BANNER -->
+    <!-- HERO CODEX BANNER (EXPANDABLE BOXES) -->
     <section class="hero-codex-card">
       <div class="hero-codex-main">
         <!-- Interactive Circular Avatar Token -->
@@ -88,40 +88,48 @@
           <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
         </div>
 
-        <!-- Identity & Descriptor Badges -->
+        <!-- Identity & Descriptor Badges (Freely Expandable) -->
         <div class="hero-identity-cluster">
           <input type="text" id="charName" class="save-field hero-name-input" placeholder="Character Name..." />
 
           <div class="hero-badges-strip">
-            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="class">
-              <span class="pill-title">Class</span>
-              <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Select class..." />
+            <div class="codex-field-pill dropdown-pill-wrapper expandable-pill" data-blur-id="class" title="Drag corner to expand width">
+              <div class="pill-inner-content">
+                <span class="pill-title">Class</span>
+                <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Select class..." />
+              </div>
               <div id="classDropdown" class="dropdown-menu"></div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
             </div>
 
-            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="race">
-              <span class="pill-title">Race</span>
-              <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Select race..." />
+            <div class="codex-field-pill dropdown-pill-wrapper expandable-pill" data-blur-id="race" title="Drag corner to expand width">
+              <div class="pill-inner-content">
+                <span class="pill-title">Race</span>
+                <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Select race..." />
+              </div>
               <div id="raceDropdown" class="dropdown-menu"></div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
             </div>
 
-            <div class="codex-field-pill" data-blur-id="background">
-              <span class="pill-title">Background</span>
-              <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Soldier" />
+            <div class="codex-field-pill expandable-pill" data-blur-id="background" title="Drag corner to expand width">
+              <div class="pill-inner-content">
+                <span class="pill-title">Background</span>
+                <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Soldier" />
+              </div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
             </div>
 
-            <div class="codex-field-pill" data-blur-id="alignment">
-              <span class="pill-title">Alignment</span>
-              <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
+            <div class="codex-field-pill expandable-pill" data-blur-id="alignment" title="Drag corner to expand width">
+              <div class="pill-inner-content">
+                <span class="pill-title">Alignment</span>
+                <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
+              </div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
@@ -188,7 +196,7 @@
       </div>
     </section>
 
-    <!-- 5 WORKSPACE TABS -->
+    <!-- 5 REIMAGINED WORKSPACE TABS -->
     <nav class="codex-navigation-dock">
       <button class="main-tab active" data-target="tab-stats" type="button">
         <span class="tab-icon">⚔</span> Combat &amp; Core
@@ -197,13 +205,13 @@
         <span class="tab-icon">⚡</span> Features &amp; Traits
       </button>
       <button class="main-tab" data-target="tab-spells" type="button">
-        <span class="tab-icon">✨</span> Grimoire &amp; Spells
+        <span class="tab-icon">✨</span> Spells &amp; Cantrips
       </button>
       <button class="main-tab" data-target="tab-inventory" type="button">
         <span class="tab-icon">🎒</span> Inventory &amp; Vault
       </button>
       <button class="main-tab" data-target="tab-journal" type="button">
-        <span class="tab-icon">📜</span> Chronicle &amp; Lore
+        <span class="tab-icon">📜</span> Notes &amp; Lore
       </button>
     </nav>
 
@@ -766,7 +774,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 3: GRIMOIRE & SPELLS                   -->
+    <!-- TAB 3: SPELLS & CANTRIPS (RENAMED)         -->
     <!-- ========================================== -->
     <div id="tab-spells" class="tab-page">
       <div class="spell-basics">
@@ -843,7 +851,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 5: CHRONICLE & LORE                    -->
+    <!-- TAB 5: NOTES & LORE (RENAMED)              -->
     <!-- ========================================== -->
     <div id="tab-journal" class="tab-page">
       <div class="subtab-controls">
@@ -1125,6 +1133,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=36"></script>
+  <script src="app.js?v=37"></script>
 </body>
 </html>
