@@ -846,7 +846,7 @@ async function joinCampaignRoom(roomCode) {
     await syncToLiveCampaign(roster[activeCharId]);
   }
 
-  // Monitor membership (Ignore first snapshot so initial write doesn't trigger false kick)
+  // Monitor membership
   if (playerDocUnsubscribe) {
     playerDocUnsubscribe();
     playerDocUnsubscribe = null;
@@ -964,7 +964,6 @@ async function startDMLiveListener(roomCode) {
         }).join("");
       }
 
-      // If DM is inspecting this player, update inspect modal in real time
       if (currentInspectedMemberId) {
         const inspected = cachedRoomMembers.find(m => m.id === currentInspectedMemberId);
         if (inspected) renderInspectModalContent(inspected);
@@ -1819,9 +1818,12 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Blur Toggle
-  if (e.target.closest(".blur-toggle-btn")) {
-    const wrapper = e.target.closest(".blur-toggle-btn").closest("[data-blur-id]");
+  // Blur Toggle - Stops propagation so clicking the button never focuses the inputs
+  const blurBtn = e.target.closest(".blur-toggle-btn");
+  if (blurBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const wrapper = blurBtn.closest("[data-blur-id]");
     if (wrapper) {
       wrapper.classList.toggle("blurred");
       const blurId = wrapper.dataset.blurId;
