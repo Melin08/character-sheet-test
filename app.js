@@ -1172,7 +1172,7 @@ function renderInspectModalContent(m) {
     </div>
 
     <div class="inspect-section">
-      <span class="inspect-section-title">Grimoire (Known Spells)</span>
+      <span class="inspect-section-title">Spells &amp; Cantrips (Known Spells)</span>
       <div class="inspect-grid-blocks">${spellsHtml}</div>
     </div>
 
@@ -1818,7 +1818,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Blur Toggle - Stops propagation so clicking the button never focuses the inputs
+  // Blur Toggle - Stops propagation and dismisses open dropdowns
   const blurBtn = e.target.closest(".blur-toggle-btn");
   if (blurBtn) {
     e.preventDefault();
@@ -1829,6 +1829,7 @@ document.addEventListener("click", async (e) => {
       const blurId = wrapper.dataset.blurId;
       if (wrapper.classList.contains("blurred")) {
         if (!myBlurredPills.includes(blurId)) myBlurredPills.push(blurId);
+        wrapper.querySelectorAll(".dropdown-menu").forEach(d => d.classList.remove("open"));
       } else {
         myBlurredPills = myBlurredPills.filter((id) => id !== blurId);
       }
