@@ -194,7 +194,8 @@ body {
 .card-title,
 .tab-icon,
 .attr-header-abbr,
-.roll-output {
+.roll-output,
+.inspect-section-title {
   font-family: 'Cinzel', serif;
 }
 
@@ -231,14 +232,18 @@ input[type="number"] {
 textarea::-webkit-scrollbar,
 .modal-list::-webkit-scrollbar,
 .dice-history-list::-webkit-scrollbar,
-.attacks-table-wrapper::-webkit-scrollbar {
+.attacks-table-wrapper::-webkit-scrollbar,
+.inspect-modal-content::-webkit-scrollbar,
+.dm-party-cards-grid::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 textarea::-webkit-scrollbar-thumb,
 .modal-list::-webkit-scrollbar-thumb,
 .dice-history-list::-webkit-scrollbar-thumb,
-.attacks-table-wrapper::-webkit-scrollbar-thumb {
+.attacks-table-wrapper::-webkit-scrollbar-thumb,
+.inspect-modal-content::-webkit-scrollbar-thumb,
+.dm-party-cards-grid::-webkit-scrollbar-thumb {
   background: var(--border-medium);
   border-radius: 999px;
 }
@@ -256,7 +261,8 @@ textarea::-webkit-scrollbar-thumb,
 .slot-pip,
 .hp-corner-btn,
 .avatar-portal,
-.btn-rest-mini {
+.btn-rest-mini,
+.dm-player-card {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -2408,6 +2414,8 @@ textarea.block-text {
   gap: 0.65rem;
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  position: relative;
 }
 .dm-player-card:hover {
   transform: translateY(-2px);
@@ -2516,6 +2524,279 @@ textarea.block-text {
   padding: 0.1rem 0.35rem;
 }
 
+/* ==========================================================================
+   15. DM LIVE PLAYER INSPECTOR MODAL
+   ========================================================================== */
+.dm-inspect-box {
+  max-width: 920px;
+  width: 95%;
+  max-height: 90vh;
+}
+
+.inspect-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.inspect-modal-content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Character Summary Banner inside Inspection */
+.inspect-char-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.inspect-avatar-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--primary-red);
+  flex-shrink: 0;
+}
+
+.inspect-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.inspect-char-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.inspect-char-name {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.inspect-char-meta-line {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Vitals Ribbon */
+.inspect-vitals-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+}
+
+.inspect-stat-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.inspect-stat-card-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.inspect-stat-card-val {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+/* Sub-sections */
+.inspect-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.inspect-section-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.35rem;
+}
+
+/* Abilities Grid inside Inspection */
+.inspect-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+}
+
+.inspect-ability-cell {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.inspect-attr-tag {
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.inspect-attr-mod {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.inspect-attr-score {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.inspect-attr-save {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  margin-top: 0.2rem;
+}
+
+/* Skills Flow in Inspection */
+.inspect-skills-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.inspect-skill-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.inspect-skill-chip.proficient {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
+}
+.inspect-skill-chip.expert {
+  border-color: rgba(192, 132, 252, 0.4);
+  background: rgba(192, 132, 252, 0.12);
+}
+.inspect-skill-chip strong {
+  color: #ffffff;
+}
+
+/* Weapons List in Inspection */
+.inspect-weapons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.inspect-weapon-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2.5fr;
+  gap: 0.5rem;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+}
+.inspect-wpn-name { font-weight: 800; color: #ffffff; }
+.inspect-wpn-type { color: var(--accent-blue); font-weight: 700; }
+.inspect-wpn-dmg { color: #fca5a5; font-weight: 800; }
+.inspect-wpn-notes { color: var(--text-muted); font-size: 0.76rem; }
+
+/* Spell Slots in Inspection */
+.inspect-slots-matrix {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.4rem;
+}
+
+.inspect-slot-tile {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.35rem 0.2rem;
+  text-align: center;
+}
+.inspect-slot-lvl {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.inspect-slot-count {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--accent-blue);
+}
+
+/* Spells / Traits Compact Cards */
+.inspect-grid-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.inspect-mini-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.inspect-mini-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+.inspect-mini-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-emerald);
+  text-transform: uppercase;
+}
+.inspect-mini-desc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
 /* HP Modal */
 .hp-modal-box { max-width: 440px; }
 .hp-modal-content {
@@ -2616,7 +2897,7 @@ textarea.block-text {
 .auth-logout-btn { width: 100%; }
 .auth-error-msg { color: #f87171; font-size: 0.85rem; text-align: center; min-height: 1.2rem; }
 
-/* Dropdowns */
+/* Dropdown Menus */
 .dropdown-pill-wrapper { position: relative; }
 .dropdown-menu {
   display: none;
@@ -2657,99 +2938,15 @@ textarea.block-text {
   z-index: 2;
 }
 
-/* Modals General */
-.modal-search-bar {
-  padding: 1rem 1.35rem;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  background: var(--bg-input);
-}
-.modal-search-bar input {
-  width: 100%;
-  padding: 0.6rem 0.95rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.92rem;
-}
-.modal-list {
-  padding: 0.85rem 1.35rem;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.spell-option-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.85rem 0.75rem;
-  border-bottom: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-}
-.spell-option-item:hover { background-color: var(--bg-hover); }
-.spell-option-details { display: flex; flex-direction: column; gap: 0.35rem; }
-.spell-option-title { font-weight: 800; font-size: 0.98rem; color: #ffffff; }
-.spell-meta-tags { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-
-.tag-pill {
-  font-size: 0.7rem;
-  font-weight: 800;
-  border-radius: 4px;
-  padding: 0.15rem 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border: 1px solid transparent;
-}
-.tag-cantrip { background: rgba(16, 185, 129, 0.18); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.4); }
-.tag-level { background: rgba(192, 132, 252, 0.18); color: var(--accent-purple); border-color: rgba(192, 132, 252, 0.4); }
-
-.school-abjuration { background: rgba(56, 189, 248, 0.16); color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); }
-.school-conjuration { background: rgba(16, 185, 129, 0.16); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
-.school-divination { background: rgba(6, 182, 212, 0.16); color: #22d3ee; border-color: rgba(6, 182, 212, 0.4); }
-.school-enchantment { background: rgba(244, 114, 182, 0.16); color: #f472b6; border-color: rgba(244, 114, 182, 0.4); }
-.school-evocation { background: rgba(239, 68, 68, 0.16); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
-.school-illusion { background: rgba(168, 85, 247, 0.16); color: #c084fc; border-color: rgba(168, 85, 247, 0.4); }
-.school-necromancy { background: rgba(163, 230, 53, 0.16); color: #a3e635; border-color: rgba(163, 230, 53, 0.4); }
-.school-transmutation { background: rgba(245, 158, 11, 0.16); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); }
-
-.class-barbarian { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
-.class-bard { background: rgba(232, 121, 249, 0.15); color: #e879f9; border-color: rgba(232, 121, 249, 0.35); }
-.class-cleric { background: rgba(250, 204, 21, 0.15); color: #facc15; border-color: rgba(250, 204, 21, 0.35); }
-.class-druid { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.35); }
-.class-fighter { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.35); }
-.class-monk { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); }
-.class-paladin { background: rgba(253, 224, 71, 0.15); color: #fef08a; border-color: rgba(253, 224, 71, 0.35); }
-.class-ranger { background: rgba(74, 222, 128, 0.15); color: #86efac; border-color: rgba(74, 222, 128, 0.35); }
-.class-rogue { background: rgba(100, 116, 139, 0.18); color: #94a3b8; border-color: rgba(100, 116, 139, 0.4); }
-.class-sorcerer { background: rgba(129, 140, 248, 0.15); color: #a5b4fc; border-color: rgba(129, 140, 248, 0.35); }
-.class-warlock { background: rgba(192, 132, 252, 0.15); color: #d8b4fe; border-color: rgba(192, 132, 252, 0.35); }
-.class-wizard { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.35); }
-.class-artificer { background: rgba(249, 115, 22, 0.15); color: #fb923c; border-color: rgba(249, 115, 22, 0.35); }
-
-.race-elf { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.35); }
-.race-dwarf { background: rgba(217, 119, 6, 0.15); color: #fbbf24; border-color: rgba(217, 119, 6, 0.35); }
-.race-tiefling { background: rgba(244, 63, 94, 0.15); color: #fb7185; border-color: rgba(244, 63, 94, 0.35); }
-.race-dragonborn { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
-.race-generic { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border-color: rgba(255, 255, 255, 0.15); }
-
-.spell-add-badge {
-  background: var(--primary-red);
-  color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 800;
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-sm);
-  border: none;
-}
-
 /* ==========================================================================
-   15. RESPONSIVE BREAKPOINTS
+   16. RESPONSIVENESS
    ========================================================================== */
 @media (max-width: 1024px) {
   .vitals-hud { grid-template-columns: repeat(2, 1fr); }
   .two-col-layout { grid-template-columns: 1fr; }
   .skills-attribute-matrix { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .slots-grid { grid-template-columns: repeat(5, 1fr); }
+  .inspect-ability-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -2769,4 +2966,6 @@ textarea.block-text {
   .slots-grid { grid-template-columns: repeat(3, 1fr); }
   .dice-station-bar { flex-direction: column; align-items: stretch; }
   .dice-history-drawer { max-width: 100%; }
+  .inspect-ability-grid { grid-template-columns: repeat(2, 1fr); }
+  .inspect-weapon-row { grid-template-columns: 1fr; }
 }
