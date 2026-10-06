@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=33" />
+  <link rel="stylesheet" href="style.css?v=34" />
 </head>
 <body id="top">
 
@@ -32,6 +32,11 @@
       </div>
 
       <div class="command-actions">
+        <!-- Live Party & DM Mode Trigger -->
+        <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Live Party Sync &amp; DM Screen">
+          <span class="btn-icon">👥</span> Party &amp; DM
+        </button>
+
         <!-- Theme Selector Control -->
         <div class="theme-selector-wrapper" title="Change Sheet Theme">
           <span class="theme-icon">🎨</span>
@@ -45,7 +50,7 @@
         </div>
 
         <div class="action-btn-group">
-          <button class="btn btn-primary" id="saveBtn" type="button">Save</button>
+          <button class="btn btn-ghost" id="saveBtn" type="button">Save</button>
           <button class="btn btn-ghost" id="loadBtn" type="button">Roster</button>
           <button class="btn btn-ghost" id="newBtn" type="button">+ New</button>
         </div>
@@ -935,6 +940,60 @@
 
   <!-- MODALS -->
 
+  <!-- Live Party & DM Dashboard Modal -->
+  <div id="partyModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box party-modal-box">
+      <div class="modal-header">
+        <h3 id="partyModalTitle">Party Realm &amp; DM Dashboard</h3>
+        <button id="closePartyModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="party-modal-content">
+        <!-- Sub-tabs: Player Link vs DM View -->
+        <div class="subtab-controls party-mode-tabs">
+          <button type="button" class="sub-tab active" data-sub="party-join-view">Player: Link to Party</button>
+          <button type="button" class="sub-tab" data-sub="party-dm-view">DM: Live Dashboard</button>
+        </div>
+
+        <!-- VIEW 1: Player Join Room -->
+        <div id="party-join-view" class="subtab-page active">
+          <p class="party-modal-desc">Link your active character to your Dungeon Master's campaign room to broadcast HP, AC, Spell Slots, and Conditions in real-time.</p>
+          <div class="party-action-row">
+            <input type="text" id="campaignRoomInput" class="party-room-input center" placeholder="ROOM CODE (e.g. TAVERN-42)" maxlength="15" autocomplete="off" />
+            <button type="button" class="btn btn-primary" id="joinCampaignBtn">Connect</button>
+            <button type="button" class="btn btn-danger-ghost" id="leaveCampaignBtn" style="display: none;">Leave Room</button>
+          </div>
+          <div class="party-status-indicator" id="partyStatusBox">
+            <span class="status-dot disconnected"></span>
+            <span id="partyStatusText">Not connected to any campaign room.</span>
+          </div>
+        </div>
+
+        <!-- VIEW 2: DM Live Party HUD -->
+        <div id="party-dm-view" class="subtab-page">
+          <div class="dm-command-strip">
+            <div class="dm-room-display">
+              <span class="dm-code-label">Room Code:</span>
+              <strong id="dmActiveRoomCode" class="dm-code-text">NONE</strong>
+            </div>
+            <div class="dm-action-btns">
+              <button type="button" class="btn btn-primary" id="createCampaignBtn">Create Room</button>
+              <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy Code</button>
+            </div>
+          </div>
+          <div class="dm-party-section">
+            <div class="dm-party-header-bar">
+              <span class="dm-party-heading">Active Adventurers</span>
+              <span class="dm-member-counter" id="dmMemberCount">0 Active</span>
+            </div>
+            <div class="dm-party-cards-grid" id="dmPartyGrid">
+              <p class="dm-empty-msg">No party active. Create or enter a room code to inspect your players live.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Interactive Damage / Heal / Temp HP Modal -->
   <div id="hpModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box hp-modal-box">
@@ -1046,6 +1105,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=33"></script>
+  <script src="app.js?v=34"></script>
 </body>
 </html>
