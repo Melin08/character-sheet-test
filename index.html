@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=35" />
+  <link rel="stylesheet" href="style.css?v=36" />
 </head>
 <body id="top">
 
@@ -32,21 +32,14 @@
       </div>
 
       <div class="command-actions">
-        <!-- Live Party & DM Mode Trigger -->
+        <!-- Live Party Button -->
         <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Live Party Sync &amp; DM Screen">
-          <span class="btn-icon">👥</span> Party &amp; DM
+          <span class="btn-icon">👥</span> Party
         </button>
 
-        <!-- Theme Selector Control -->
-        <div class="theme-selector-wrapper" title="Change Sheet Theme">
-          <span class="theme-icon">🎨</span>
-          <select id="themeSelect" class="theme-select" aria-label="Select Theme">
-            <option value="theme-obsidian" selected>Obsidian Dark</option>
-            <option value="theme-parchment">Ancient Parchment</option>
-            <option value="theme-eldritch">Eldritch Void</option>
-            <option value="theme-celestial">Celestial Light</option>
-            <option value="theme-emerald">Verdant Grove</option>
-          </select>
+        <!-- Account Button (Moved here) -->
+        <div class="auth-box">
+          <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
         </div>
 
         <div class="action-btn-group">
@@ -64,8 +57,16 @@
           <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
         </div>
 
-        <div class="auth-box">
-          <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
+        <!-- Theme Selector Control (Moved to the end) -->
+        <div class="theme-selector-wrapper" title="Change Sheet Theme">
+          <span class="theme-icon">🎨</span>
+          <select id="themeSelect" class="theme-select" aria-label="Select Theme">
+            <option value="theme-obsidian" selected>Obsidian Dark</option>
+            <option value="theme-parchment">Ancient Parchment</option>
+            <option value="theme-eldritch">Eldritch Void</option>
+            <option value="theme-celestial">Celestial Light</option>
+            <option value="theme-emerald">Verdant Grove</option>
+          </select>
         </div>
       </div>
     </header>
@@ -187,7 +188,7 @@
       </div>
     </section>
 
-    <!-- 5 REIMAGINED WORKSPACE TABS -->
+    <!-- 5 WORKSPACE TABS -->
     <nav class="codex-navigation-dock">
       <button class="main-tab active" data-target="tab-stats" type="button">
         <span class="tab-icon">⚔</span> Combat &amp; Core
@@ -948,9 +949,9 @@
         <button id="closePartyModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
       </div>
       <div class="party-modal-content">
-        <!-- Sub-tabs: Player Link vs DM View -->
+        <!-- Sub-tabs: Player Join vs DM View -->
         <div class="subtab-controls party-mode-tabs">
-          <button type="button" class="sub-tab active" data-sub="party-join-view">Player: Link to Party</button>
+          <button type="button" class="sub-tab active" data-sub="party-join-view">Player: Join Party</button>
           <button type="button" class="sub-tab" data-sub="party-dm-view">DM: Live Dashboard</button>
         </div>
 
@@ -976,8 +977,10 @@
               <strong id="dmActiveRoomCode" class="dm-code-text">NONE</strong>
             </div>
             <div class="dm-action-btns">
-              <button type="button" class="btn btn-primary" id="createCampaignBtn">Create Room</button>
-              <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy Code</button>
+              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="ENTER CODE" maxlength="15" autocomplete="off" style="width: 140px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
+              <button type="button" class="btn btn-primary" id="openDMRoomBtn">Open Room</button>
+              <button type="button" class="btn btn-ghost" id="createCampaignBtn">+ New</button>
+              <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy</button>
               <button type="button" class="btn btn-danger-ghost" id="closeCampaignBtn" style="display: none;">Close Room</button>
             </div>
           </div>
@@ -1122,6 +1125,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=35"></script>
+  <script src="app.js?v=36"></script>
 </body>
 </html>
