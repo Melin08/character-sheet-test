@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=39" />
+  <link rel="stylesheet" href="style.css?v=40" />
 </head>
 <body id="top">
 
@@ -54,8 +54,8 @@
             Restore
             <input type="file" id="restoreFile" accept=".json" />
           </label>
-          <!-- Import from PC on Parchment -->
-          <button class="btn btn-ghost" id="importParchmentBtn" type="button" title="Import Character from PC on Parchment">Parchment</button>
+          <!-- Universal Multi-Platform Importer Button -->
+          <button class="btn btn-ghost" id="importHubBtn" type="button" title="Import from External Sheet Platforms">Import</button>
           <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
         </div>
 
@@ -974,28 +974,79 @@
 
   <!-- MODALS -->
 
-  <!-- PC ON PARCHMENT IMPORTER MODAL -->
-  <div id="parchmentModal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-box" style="max-width: 600px;">
+  <!-- UNIVERSAL MULTI-PLATFORM IMPORTER MODAL -->
+  <div id="importHubModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 720px; width: 95%;">
       <div class="modal-header">
-        <h3>Import from PC on Parchment</h3>
-        <button id="closeParchmentModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+        <h3>Universal Character Importer</h3>
+        <button id="closeImportHubModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
       </div>
-      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
-          Paste the character JSON from <strong>PC on Parchment</strong> below, or select a saved JSON file to instantly convert and load your adventurer into Adventurer Codex.
-        </p>
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <label class="btn btn-ghost file-label" style="flex: 1; text-align: center;">
-            Choose File (.json)
-            <input type="file" id="parchmentFileInput" accept=".json" />
-          </label>
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto;">
+        
+        <!-- Platform Selection Tabs -->
+        <div class="subtab-controls" style="margin-bottom: 0;">
+          <button type="button" class="sub-tab active" data-sub="import-platform-parchment">PC on Parchment</button>
+          <button type="button" class="sub-tab" data-sub="import-platform-dndbeyond" title="D&amp;D Beyond Importer">D&amp;D Beyond</button>
+          <button type="button" class="sub-tab" data-sub="import-platform-roll20" title="Roll20 Importer">Roll20 / Other</button>
         </div>
-        <textarea id="parchmentJsonInput" class="block-text" rows="10" placeholder="Or paste the JSON response here (e.g. [{ &quot;name&quot;: &quot;...&quot;, &quot;data&quot;: { ... } }])..." style="font-family: monospace; font-size: 0.8rem;"></textarea>
-        <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
-          <button type="button" class="btn btn-ghost" id="cancelParchmentBtn">Cancel</button>
-          <button type="button" class="btn red" id="parseParchmentBtn">Convert &amp; Import</button>
+
+        <!-- TAB 1: PC on Parchment Panel -->
+        <div id="import-platform-parchment" class="subtab-page active">
+          <!-- Step-by-Step Guide Card -->
+          <details class="import-guide-accordion" open style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem;">
+            <summary style="font-weight: 800; font-size: 0.85rem; color: var(--accent-gold); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none;">
+              📖 How to obtain your character data from PC on Parchment
+            </summary>
+            <ol style="margin-top: 0.75rem; padding-left: 1.2rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: 0.35rem;">
+              <li>Go to <a href="https://pconparchment.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary-red); font-weight: 700;">pconparchment.com</a> and open the character sheet you want to export.</li>
+              <li>Press <kbd style="background: var(--bg-card); padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid var(--border-subtle); color: #fff;">F12</kbd> (or right-click anywhere on the page and select <strong>Inspect</strong>) to open Developer Tools.</li>
+              <li>Click the <strong>Network</strong> tab along the top of DevTools.</li>
+              <li>Ensure the <strong>Fetch/XHR</strong> sub-filter is selected, then refresh the page (<kbd style="background: var(--bg-card); padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid var(--border-subtle); color: #fff;">F5</kbd> or <kbd style="background: var(--bg-card); padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid var(--border-subtle); color: #fff;">Ctrl+R</kbd>).</li>
+              <li>Look through the network requests list on the left for one named <strong>characters</strong> or starting with <code>rest/v1/characters</code>.</li>
+              <li>Click on that request, then select the <strong>Response</strong> tab on the right side.</li>
+              <li>Select all the text (<kbd style="background: var(--bg-card); padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid var(--border-subtle); color: #fff;">Ctrl+A</kbd>) and copy it (<kbd style="background: var(--bg-card); padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid var(--border-subtle); color: #fff;">Ctrl+C</kbd>).</li>
+              <li>Paste the copied text into the box below (or save it as a <code>.json</code> file and upload it).</li>
+            </ol>
+          </details>
+
+          <!-- Input Options -->
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+            <label class="btn btn-ghost file-label" style="flex: 1; text-align: center;">
+              Upload Saved JSON File (.json)
+              <input type="file" id="parchmentFileInput" accept=".json" />
+            </label>
+          </div>
+
+          <textarea id="parchmentJsonInput" class="block-text" rows="8" placeholder="Paste the PC on Parchment JSON here (e.g. [{ &quot;name&quot;: &quot;...&quot;, &quot;data&quot;: { ... } }])..." style="font-family: monospace; font-size: 0.8rem; margin-bottom: 1rem !important;"></textarea>
+          
+          <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-ghost" id="cancelImportHubBtn">Cancel</button>
+            <button type="button" class="btn red" id="parseParchmentBtn">Convert &amp; Import</button>
+          </div>
         </div>
+
+        <!-- TAB 2: D&D Beyond Placeholder -->
+        <div id="import-platform-dndbeyond" class="subtab-page">
+          <div style="background: var(--bg-input); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 2rem; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🐉</div>
+            <h4 style="color: #ffffff; font-size: 1rem; margin-bottom: 0.4rem;">D&amp;D Beyond Importer</h4>
+            <p style="font-size: 0.82rem; max-width: 420px; margin: 0 auto; line-height: 1.5;">
+              Support for importing characters from D&amp;D Beyond character IDs / public campaign share links will be available here.
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 3: Roll20 / Other Placeholder -->
+        <div id="import-platform-roll20" class="subtab-page">
+          <div style="background: var(--bg-input); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 2rem; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🎲</div>
+            <h4 style="color: #ffffff; font-size: 1rem; margin-bottom: 0.4rem;">Roll20 &amp; Custom VTT Importers</h4>
+            <p style="font-size: 0.82rem; max-width: 420px; margin: 0 auto; line-height: 1.5;">
+              Support for Roll20 character JSON and other community character builders will be pluggable directly through this module.
+            </p>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1184,6 +1235,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=39"></script>
+  <script src="app.js?v=40"></script>
 </body>
 </html>
