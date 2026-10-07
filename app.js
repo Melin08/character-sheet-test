@@ -1198,13 +1198,35 @@ function cleanKey(str) {
   return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
+// 5E Skill Definitions with Multi-Platform Aliases
+const SKILL_DEFINITIONS = [
+  { code: "athl", name: "Athletics", stat: "str", aliases: ["athletics", "athletic", "athl"] },
+  { code: "acro", name: "Acrobatics", stat: "dex", aliases: ["acrobatics", "acrobatic", "acro"] },
+  { code: "slt", name: "Sleight of Hand", stat: "dex", aliases: ["sleightofhand", "sleight_of_hand", "sleight-of-hand", "sleight", "soh", "slt"] },
+  { code: "ste", name: "Stealth", stat: "dex", aliases: ["stealth", "ste"] },
+  { code: "arca", name: "Arcana", stat: "int", aliases: ["arcana", "arca", "arc"] },
+  { code: "hist", name: "History", stat: "int", aliases: ["history", "hist"] },
+  { code: "inv", name: "Investigation", stat: "int", aliases: ["investigation", "investigate", "inv"] },
+  { code: "nat", name: "Nature", stat: "int", aliases: ["nature", "nat"] },
+  { code: "rel", name: "Religion", stat: "int", aliases: ["religion", "rel"] },
+  { code: "anim", name: "Animal Handling", stat: "wis", aliases: ["animalhandling", "animal_handling", "animal-handling", "handleanimal", "handle_animal", "animal", "anim"] },
+  { code: "ins", name: "Insight", stat: "wis", aliases: ["insight", "ins"] },
+  { code: "med", name: "Medicine", stat: "wis", aliases: ["medicine", "med"] },
+  { code: "perc", name: "Perception", stat: "wis", aliases: ["perception", "perceive", "perc"] },
+  { code: "surv", name: "Survival", stat: "wis", aliases: ["survival", "surv"] },
+  { code: "dec", name: "Deception", stat: "cha", aliases: ["deception", "deceive", "dec"] },
+  { code: "intm", name: "Intimidation", stat: "cha", aliases: ["intimidation", "intimidate", "intm", "intim"] },
+  { code: "perf", name: "Performance", stat: "cha", aliases: ["performance", "perform", "perf"] },
+  { code: "pers", name: "Persuasion", stat: "cha", aliases: ["persuasion", "persuade", "pers"] }
+];
+
+/* 1. PC on Parchment Adapter */
 function importFromPconParchment(rawJson) {
   let source = rawJson;
   if (Array.isArray(source)) {
     source = source[0] || {};
   }
   const d = source.data || {};
-
   const fields = {};
 
   // Identity & Core Vitals
@@ -1239,7 +1261,7 @@ function importFromPconParchment(rawJson) {
     fields[`attr_${s}`] = ab[s] !== undefined && ab[s] !== "" ? ab[s] : 10;
   });
 
-  // Saving Throw Proficiencies (supports string arrays, objects, or key maps)
+  // Saving Throw Proficiencies
   const statNames = {
     str: ["str", "strength"],
     dex: ["dex", "dexterity"],
@@ -1314,7 +1336,7 @@ function importFromPconParchment(rawJson) {
   fields.campaignNotes = d.notes || "";
   fields.inventory = d.equipment || d.treasure || "";
 
-  // Proficiencies & Resistances Text Assembler (Armor, Weapons, Tools, Languages, Resistances)
+  // Proficiencies & Resistances Text Assembler
   const profSections = [];
   const stringifyList = (val) => {
     if (!val) return "";
@@ -1390,71 +1412,27 @@ function importFromPconParchment(rawJson) {
   // Features & Traits
   const convertedTraits = [];
   if (d.classFeatures && typeof d.classFeatures === "string") {
-    convertedTraits.push({
-      name: "Class Features",
-      type: "Class Feature",
-      desc: d.classFeatures,
-      isExpanded: false
-    });
+    convertedTraits.push({ name: "Class Features", type: "Class Feature", desc: d.classFeatures, isExpanded: false });
   }
   if (d.speciesTraits && typeof d.speciesTraits === "string") {
-    convertedTraits.push({
-      name: "Species Traits",
-      type: "Racial Trait",
-      desc: d.speciesTraits,
-      isExpanded: false
-    });
+    convertedTraits.push({ name: "Species Traits", type: "Racial Trait", desc: d.speciesTraits, isExpanded: false });
   }
   if (d.feats && typeof d.feats === "string") {
-    convertedTraits.push({
-      name: "Feats",
-      type: "Feat",
-      desc: d.feats,
-      isExpanded: false
-    });
+    convertedTraits.push({ name: "Feats", type: "Feat", desc: d.feats, isExpanded: false });
   }
 
-  // Full 5e Skills & Expertise Importer
-  const SKILL_DEFINITIONS = [
-    { code: "athl", name: "Athletics", stat: "str", aliases: ["athletics", "athletic", "athl"] },
-    { code: "acro", name: "Acrobatics", stat: "dex", aliases: ["acrobatics", "acrobatic", "acro"] },
-    { code: "slt", name: "Sleight of Hand", stat: "dex", aliases: ["sleightofhand", "sleight_of_hand", "sleight-of-hand", "sleight", "soh", "slt"] },
-    { code: "ste", name: "Stealth", stat: "dex", aliases: ["stealth", "ste"] },
-    { code: "arca", name: "Arcana", stat: "int", aliases: ["arcana", "arca", "arc"] },
-    { code: "hist", name: "History", stat: "int", aliases: ["history", "hist"] },
-    { code: "inv", name: "Investigation", stat: "int", aliases: ["investigation", "investigate", "inv"] },
-    { code: "nat", name: "Nature", stat: "int", aliases: ["nature", "nat"] },
-    { code: "rel", name: "Religion", stat: "int", aliases: ["religion", "rel"] },
-    { code: "anim", name: "Animal Handling", stat: "wis", aliases: ["animalhandling", "animal_handling", "animal-handling", "handleanimal", "handle_animal", "animal", "anim"] },
-    { code: "ins", name: "Insight", stat: "wis", aliases: ["insight", "ins"] },
-    { code: "med", name: "Medicine", stat: "wis", aliases: ["medicine", "med"] },
-    { code: "perc", name: "Perception", stat: "wis", aliases: ["perception", "perceive", "perc"] },
-    { code: "surv", name: "Survival", stat: "wis", aliases: ["survival", "surv"] },
-    { code: "dec", name: "Deception", stat: "cha", aliases: ["deception", "deceive", "dec"] },
-    { code: "intm", name: "Intimidation", stat: "cha", aliases: ["intimidation", "intimidate", "intm", "intim"] },
-    { code: "perf", name: "Performance", stat: "cha", aliases: ["performance", "perform", "perf"] },
-    { code: "pers", name: "Persuasion", stat: "cha", aliases: ["persuasion", "persuade", "pers"] }
-  ];
-
+  // Skills & Expertise
   SKILL_DEFINITIONS.forEach((def) => {
     let isProf = false;
     let isExpert = false;
+    const checkMatch = (candidate) => def.aliases.some((alias) => cleanKey(alias) === cleanKey(candidate));
 
-    const checkMatch = (candidate) => {
-      const c = cleanKey(candidate);
-      return def.aliases.some((alias) => cleanKey(alias) === c);
-    };
-
-    // 1. Check skillProficiencies array or object
     if (Array.isArray(d.skillProficiencies)) {
       d.skillProficiencies.forEach((item) => {
-        if (typeof item === "string" && checkMatch(item)) {
+        if (typeof item === "string" && checkMatch(item)) isProf = true;
+        else if (item && typeof item === "object" && checkMatch(item.name || item.key || item.id || item.skill)) {
           isProf = true;
-        } else if (item && typeof item === "object") {
-          if (checkMatch(item.name || item.key || item.id || item.skill)) {
-            isProf = true;
-            if (item.expertise || item.expert || item.level === 2 || item.rank === 2) isExpert = true;
-          }
+          if (item.expertise || item.expert || item.level === 2 || item.rank === 2) isExpert = true;
         }
       });
     } else if (d.skillProficiencies && typeof d.skillProficiencies === "object") {
@@ -1467,7 +1445,6 @@ function importFromPconParchment(rawJson) {
       });
     }
 
-    // 2. Check skillProfLevels object
     if (d.skillProfLevels && typeof d.skillProfLevels === "object") {
       Object.keys(d.skillProfLevels).forEach((k) => {
         if (checkMatch(k)) {
@@ -1481,7 +1458,6 @@ function importFromPconParchment(rawJson) {
       });
     }
 
-    // 3. Check d.skills
     if (Array.isArray(d.skills)) {
       d.skills.forEach((item) => {
         if (item && typeof item === "object") {
@@ -1500,17 +1476,290 @@ function importFromPconParchment(rawJson) {
     fields[`cb_${def.code}_e`] = isExpert;
   });
 
+  commitImportedCharacter(fields, convertedSpells, convertedTraits, convertedWeapons, d.portraitUrl || "");
+}
+
+/* 2. D&D Beyond Adapter */
+function importFromDnDBeyond(rawJson) {
+  let source = rawJson;
+  if (Array.isArray(source)) source = source[0] || {};
+  const d = source.data || source;
+
+  if (!d || (!d.name && !d.stats && !d.classes)) {
+    throw new Error("Invalid D&D Beyond structure. Expected character object.");
+  }
+
+  const fields = {};
+
+  // Character Name
+  fields.charName = d.name || "Unnamed Adventurer";
+
+  // Classes & Level
+  let totalLevel = 0;
+  const classNames = [];
+  if (Array.isArray(d.classes)) {
+    d.classes.forEach((c) => {
+      const cName = c.definition?.name || c.name || "";
+      const cLvl = parseInt(c.level, 10) || 1;
+      totalLevel += cLvl;
+      if (cName) classNames.push(c.subclassDefinition?.name ? `${cName} (${c.subclassDefinition.name})` : cName);
+    });
+  }
+  fields.charLevel = totalLevel || d.level || 1;
+  fields.charClass = classNames.join(" / ") || d.className || "";
+
+  // Race
+  fields.charRace = d.race?.fullName || d.race?.baseRaceName || d.species || "";
+
+  // Background
+  fields.charBackground = d.background?.definition?.name || d.background?.customBackground?.name || "";
+
+  // Alignment
+  const ALIGNMENT_MAP = {
+    1: "Lawful Good", 2: "Neutral Good", 3: "Chaotic Good",
+    4: "Lawful Neutral", 5: "True Neutral", 6: "Chaotic Neutral",
+    7: "Lawful Evil", 8: "Neutral Evil", 9: "Chaotic Evil"
+  };
+  fields.charAlignment = ALIGNMENT_MAP[d.alignmentId] || d.alignment || "";
+  fields.charInspiration = d.inspiration ? "Yes" : "None";
+
+  // Ability Scores (D&D Beyond: 1: STR, 2: DEX, 3: CON, 4: INT, 5: WIS, 6: CHA)
+  const STAT_ID_MAP = { 1: "str", 2: "dex", 3: "con", 4: "int", 5: "wis", 6: "cha" };
+  const baseScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
+
+  if (Array.isArray(d.stats)) {
+    d.stats.forEach((s) => {
+      const code = STAT_ID_MAP[s.id];
+      if (code && s.value !== null && s.value !== undefined) baseScores[code] = parseInt(s.value, 10) || 10;
+    });
+  }
+
+  // Apply stat bonuses from bonusStats / modifiers
+  if (Array.isArray(d.bonusStats)) {
+    d.bonusStats.forEach((b) => {
+      const code = STAT_ID_MAP[b.id];
+      if (code && b.value) baseScores[code] += parseInt(b.value, 10) || 0;
+    });
+  }
+
+  // Check stat overrides
+  if (Array.isArray(d.overrideStats)) {
+    d.overrideStats.forEach((o) => {
+      const code = STAT_ID_MAP[o.id];
+      if (code && o.value !== null && o.value !== undefined) baseScores[code] = parseInt(o.value, 10);
+    });
+  }
+
+  // Scan modifiers bucket for ability bonuses
+  const allModifiers = [];
+  if (d.modifiers && typeof d.modifiers === "object") {
+    Object.keys(d.modifiers).forEach((cat) => {
+      if (Array.isArray(d.modifiers[cat])) allModifiers.push(...d.modifiers[cat]);
+    });
+  }
+
+  allModifiers.forEach((m) => {
+    if (m.type === "bonus") {
+      const sub = cleanKey(m.subType);
+      Object.keys(baseScores).forEach((st) => {
+        if (sub === `${st}score` || sub === `${st}`) {
+          baseScores[st] += parseInt(m.value, 10) || 0;
+        }
+      });
+    }
+  });
+
+  Object.keys(baseScores).forEach((s) => {
+    fields[`attr_${s}`] = baseScores[s];
+  });
+
+  // Saving Throw Proficiencies
+  allModifiers.forEach((m) => {
+    if (m.type === "proficiency") {
+      const sub = cleanKey(m.subType);
+      Object.keys(STAT_ID_MAP).forEach((id) => {
+        const st = STAT_ID_MAP[id];
+        if (sub === `${st}savingthrows` || sub === `${st}`) {
+          fields[`save_${st}`] = true;
+        }
+      });
+    }
+  });
+
+  // Hit Points & Vitals
+  const conMod = getModifier(baseScores.con);
+  const baseHp = parseInt(d.baseHitPoints, 10) || 10;
+  const bonusHp = parseInt(d.bonusHitPoints, 10) || 0;
+  const maxHp = d.overrideHitPoints !== null && d.overrideHitPoints !== undefined
+    ? parseInt(d.overrideHitPoints, 10)
+    : Math.max(1, baseHp + bonusHp + (conMod * fields.charLevel));
+  const removedHp = parseInt(d.removedHitPoints, 10) || 0;
+
+  fields.maxHp = maxHp;
+  fields.curHp = Math.max(0, maxHp - removedHp);
+  fields.tempHp = parseInt(d.temporaryHitPoints, 10) || 0;
+
+  // Speed
+  const walkSpeed = d.race?.weightSpeeds?.normal?.walk || 30;
+  fields.charSpeed = parseInt(walkSpeed, 10) || 30;
+
+  // Armor Class
+  const dexMod = getModifier(baseScores.dex);
+  fields.ac = 10 + dexMod;
+
+  // Death Saves
+  fields.deathSucc = d.deathSaves?.successCount || 0;
+  fields.deathFail = d.deathSaves?.failCount || 0;
+
+  // Currency
+  const curr = d.currencies || {};
+  fields.coin_cp = curr.cp || 0;
+  fields.coin_sp = curr.sp || 0;
+  fields.coin_gp = curr.gp || 0;
+  fields.coin_pp = curr.pp || 0;
+
+  // Experience
+  fields.charExp = d.currentXp ? `${d.currentXp} XP` : "0 XP";
+
+  // Skills & Expertise
+  SKILL_DEFINITIONS.forEach((def) => {
+    let isProf = false;
+    let isExpert = false;
+
+    allModifiers.forEach((m) => {
+      const sub = cleanKey(m.subType);
+      const matches = def.aliases.some((a) => sub === cleanKey(a) || sub === `${cleanKey(a)}proficiency`);
+      if (matches) {
+        if (m.type === "proficiency") isProf = true;
+        if (m.type === "expertise") {
+          isProf = true;
+          isExpert = true;
+        }
+      }
+    });
+
+    fields[`cb_${def.code}_p`] = isProf;
+    fields[`cb_${def.code}_e`] = isExpert;
+  });
+
+  // Spell Slots
+  if (Array.isArray(d.spellSlots)) {
+    d.spellSlots.forEach((slot) => {
+      const lvl = slot.level;
+      if (lvl >= 1 && lvl <= 9) {
+        const total = slot.available || slot.total || 0;
+        const used = slot.used || 0;
+        fields[`slot${lvl}_max`] = total;
+        fields[`slot${lvl}_cur`] = Math.max(0, total - used);
+      }
+    });
+  }
+
+  // Hit Dice
+  fields.hitDiceMax = `${fields.charLevel}`;
+  fields.hitDiceCur = `${fields.charLevel}`;
+
+  // Roleplay & Notes
+  const traits = d.traits || {};
+  fields.traits = traits.personalityTraits || "";
+  fields.ideals = traits.ideals || "";
+  fields.bonds = traits.bonds || "";
+  fields.flaws = traits.flaws || "";
+
+  const notes = d.notes || {};
+  fields.backstory = notes.backstory || "";
+  fields.campaignNotes = [notes.allies, notes.enemies, notes.otherNotes].filter(Boolean).join("\n\n");
+
+  // Proficiencies Text
+  const profsList = [];
+  allModifiers.forEach((m) => {
+    if (m.type === "language") profsList.push(`Language: ${m.friendlySubtypeName || m.subType}`);
+    if (m.type === "proficiency" && (m.subType.includes("armor") || m.subType.includes("shield") || m.subType.includes("weapon") || m.subType.includes("tool"))) {
+      profsList.push(`${m.friendlySubtypeName || m.subType}`);
+    }
+  });
+  fields.otherProfs = Array.from(new Set(profsList)).join("\n");
+
+  // Weapons
+  const convertedWeapons = [];
+  if (Array.isArray(d.inventory)) {
+    d.inventory.forEach((item) => {
+      const def = item.definition || {};
+      if (def.filterType === "Weapon" && item.equipped) {
+        convertedWeapons.push({
+          name: def.name || "Weapon",
+          atk: def.attackType === 2 ? "Ranged" : "Melee",
+          dmg: def.damage?.diceString || "1d8",
+          notes: (def.properties || []).map((p) => p.name).join(", ")
+        });
+      }
+    });
+  }
+  while (convertedWeapons.length < 2) {
+    convertedWeapons.push({ name: "", atk: "", dmg: "", notes: "" });
+  }
+
+  // Spells
+  const convertedSpells = [];
+  const rawSpellLists = [
+    ...(d.spells?.class || []),
+    ...(d.spells?.race || []),
+    ...(d.spells?.feat || []),
+    ...(d.spells?.item || [])
+  ];
+
+  rawSpellLists.forEach((sp) => {
+    const sDef = sp.definition || {};
+    if (sDef.name) {
+      const lvl = sDef.level === 0 ? "Cantrip" : `Level ${sDef.level}`;
+      convertedSpells.push({
+        name: sDef.name,
+        type: lvl,
+        casting_time: sDef.activation?.activationType ? `${sDef.activation.activationTime || 1} Action` : "1 Action",
+        range: sDef.range?.rangeValue ? `${sDef.range.rangeValue} ft` : "30 ft",
+        duration: sDef.duration?.durationInterval ? `${sDef.duration.durationInterval} Round` : "Instantaneous",
+        desc: sDef.description ? sDef.description.replace(/<[^>]*>?/gm, "") : ""
+      });
+    }
+  });
+
+  // Features & Traits
+  const convertedTraits = [];
+  const classFeatures = [];
+  if (Array.isArray(d.classes)) {
+    d.classes.forEach((c) => {
+      (c.classFeatures || []).forEach((cf) => {
+        const def = cf.definition || {};
+        if (def.name) {
+          classFeatures.push({
+            name: def.name,
+            type: "Class Feature",
+            desc: def.description ? def.description.replace(/<[^>]*>?/gm, "") : "",
+            isExpanded: false
+          });
+        }
+      });
+    });
+  }
+  convertedTraits.push(...classFeatures.slice(0, 15));
+
+  const portrait = d.avatarUrl || d.decorations?.avatarUrl || "";
+  commitImportedCharacter(fields, convertedSpells, convertedTraits, convertedWeapons, portrait);
+}
+
+// Shared helper to persist imported character records
+function commitImportedCharacter(fields, spells, traits, weapons, avatarUrl) {
   const newId = "char_" + Date.now();
   const characterRecord = {
     id: newId,
-    name: fields.charName,
+    name: fields.charName || "Unnamed Adventurer",
     summary: fields.charClass ? `${fields.charClass} (Lvl ${fields.charLevel})` : `Level ${fields.charLevel}`,
     updatedAt: Date.now(),
-    avatar: d.portraitUrl || "",
+    avatar: avatarUrl || "",
     fields: fields,
-    spells: convertedSpells,
-    traits: convertedTraits,
-    weapons: convertedWeapons,
+    spells: spells || [],
+    traits: traits || [],
+    weapons: weapons || [],
     conditions: [],
     blurredPills: []
   };
@@ -1525,19 +1774,9 @@ function importFromPconParchment(rawJson) {
   showStatus(`Imported ${fields.charName}!`);
 }
 
-// Future Extensible Importer Stubs
-function importFromDnDBeyond(rawJson) {
-  alert("D&D Beyond importer format parser will be connected here.");
-}
-
-function importFromRoll20(rawJson) {
-  alert("Roll20 character importer format parser will be connected here.");
-}
-
 const CharacterImporters = {
   parchment: importFromPconParchment,
-  dndbeyond: importFromDnDBeyond,
-  roll20: importFromRoll20
+  dndbeyond: importFromDnDBeyond
 };
 
 /* ==========================================================================
@@ -2034,17 +2273,20 @@ document.addEventListener("click", async (e) => {
 
   // Universal Multi-Platform Importer Hub
   if (e.target.id === "importHubBtn" || e.target.closest("#importHubBtn")) {
-    const txt = document.getElementById("parchmentJsonInput");
-    if (txt) txt.value = "";
+    const pTxt = document.getElementById("parchmentJsonInput");
+    const dTxt = document.getElementById("dndbeyondJsonInput");
+    if (pTxt) pTxt.value = "";
+    if (dTxt) dTxt.value = "";
     document.getElementById("importHubModal")?.classList.add("open");
     return;
   }
 
-  if (e.target.id === "cancelImportHubBtn" || e.target.closest("#cancelImportHubBtn")) {
+  if (e.target.id === "cancelImportHubBtn" || e.target.closest("#cancelImportHubBtn") || e.target.id === "cancelDnDBeyondBtn") {
     closeModal("importHubModal");
     return;
   }
 
+  // Parse PC on Parchment
   if (e.target.id === "parseParchmentBtn") {
     const txt = document.getElementById("parchmentJsonInput")?.value.trim();
     if (!txt) {
@@ -2057,6 +2299,23 @@ document.addEventListener("click", async (e) => {
       closeModal("importHubModal");
     } catch (err) {
       alert("Invalid JSON format. Please verify the copied text.");
+    }
+    return;
+  }
+
+  // Parse D&D Beyond
+  if (e.target.id === "parseDnDBeyondBtn") {
+    const txt = document.getElementById("dndbeyondJsonInput")?.value.trim();
+    if (!txt) {
+      alert("Please paste the D&D Beyond character JSON or select a file first.");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(txt);
+      importFromDnDBeyond(parsed);
+      closeModal("importHubModal");
+    } catch (err) {
+      alert("Invalid D&D Beyond JSON format. Please verify the copied text.");
     }
     return;
   }
@@ -2867,6 +3126,24 @@ document.getElementById("parchmentFileInput")?.addEventListener("change", (e) =>
       closeModal("importHubModal");
     } catch (err) {
       alert("Invalid PC on Parchment JSON file.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+// D&D Beyond File input handler
+document.getElementById("dndbeyondFileInput")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const parsed = JSON.parse(evt.target.result);
+      importFromDnDBeyond(parsed);
+      closeModal("importHubModal");
+    } catch (err) {
+      alert("Invalid D&D Beyond JSON file.");
     }
   };
   reader.readAsText(file);
