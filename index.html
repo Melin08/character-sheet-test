@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=41" />
+  <link rel="stylesheet" href="style.css?v=42" />
 </head>
 <body id="top">
 
@@ -115,7 +115,7 @@
               <div id="raceDropdown" class="dropdown-menu"></div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
@@ -1042,9 +1042,9 @@
               <div>
                 <strong style="color: #ffffff; font-size: 0.85rem;">Option A (Fastest: Direct API URL)</strong>
                 <ol style="margin-top: 0.35rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.35rem;">
-                  <li>Open your character on D&amp;D Beyond and look at the web browser address bar (e.g. <code>https://www.dndbeyond.com/characters/<strong>12345678</strong></code>). The number at the end is your <strong>Character ID</strong>.</li>
-                  <li>In your character sheet preferences on D&amp;D Beyond, ensure your character privacy is set to <strong>Public</strong>.</li>
-                  <li>In a new browser tab, go directly to: <br /><code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 0.2rem;">https://character-service.dndbeyond.com/character/v2/character/YOUR_ID_HERE</code></li>
+                  <li>Open your character on D&amp;D Beyond and look at the web browser address bar (e.g. <code>https://www.dndbeyond.com/characters/<strong>172055522</strong></code>). The number at the end is your <strong>Character ID</strong>.</li>
+                  <li>In your character sheet preferences on D&amp;D Beyond (or character builder &gt; Home tab), make sure <strong>Character Privacy</strong> is set to <strong>Public</strong> (otherwise D&amp;D Beyond's server will deny access).</li>
+                  <li>In a new browser tab, go directly to: <br /><code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 0.2rem;">https://character-service.dndbeyond.com/character/v5/character/YOUR_ID_HERE</code></li>
                   <li>Select all the raw text (<kbd>Ctrl+A</kbd> or <kbd>Cmd+A</kbd>) and copy it (<kbd>Ctrl+C</kbd> or <kbd>Cmd+C</kbd>).</li>
                 </ol>
               </div>
@@ -1284,6 +1284,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=41"></script>
+  <script src="app.js?v=42"></script>
 </body>
 </html>
