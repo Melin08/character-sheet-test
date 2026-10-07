@@ -1191,6 +1191,219 @@ function renderInspectModalContent(m) {
 }
 
 /* ==========================================================================
+   PC ON PARCHMENT DATA ADAPTER & CONVERTER
+   ========================================================================== */
+function importFromPconParchment(rawJson) {
+  let source = rawJson;
+  if (Array.isArray(source)) {
+    source = source[0] || {};
+  }
+  const d = source.data || {};
+
+  const fields = {};
+
+  // Identity & Core Vitals
+  fields.charName = source.name || d.name || "Unnamed Adventurer";
+  fields.ac = d.ac !== undefined && d.ac !== "" ? d.ac : 10;
+  fields.charSpeed = d.speed !== undefined && d.speed !== "" ? d.speed : 30;
+  fields.charExp = d.xp !== undefined && d.xp !== "" ? `${d.xp} XP` : "0 XP";
+  fields.curHp = d.hpCurrent !== undefined && d.hpCurrent !== "" ? d.hpCurrent : (d.hpMax || 10);
+  fields.maxHp = d.hpMax !== undefined && d.hpMax !== "" ? d.hpMax : 10;
+  fields.tempHp = d.hpTemp || 0;
+
+  // Class & Level
+  if (Array.isArray(d.classes) && d.classes.length > 0) {
+    const primary = d.classes[0];
+    fields.charClass = primary.name || d.className || "";
+    fields.charLevel = primary.level || d.level || 1;
+  } else {
+    fields.charClass = d.className || "";
+    fields.charLevel = d.level || 1;
+  }
+
+  // Race, Background, Alignment
+  fields.charRace = d.species || d.race || "";
+  fields.charBackground = d.background || "";
+  fields.charAlignment = d.alignment || "";
+  fields.charInspiration = d.heroicInspiration ? "Yes" : "None";
+
+  // Ability Scores
+  const ab = d.abilities || {};
+  const stats = ["str", "dex", "con", "int", "wis", "cha"];
+  stats.forEach((s) => {
+    fields[`attr_${s}`] = ab[s] !== undefined && ab[s] !== "" ? ab[s] : 10;
+  });
+
+  // Saving Throw Proficiencies
+  const saveProfs = Array.isArray(d.saveProficiencies) ? d.saveProficiencies : [];
+  stats.forEach((s) => {
+    fields[`save_${s}`] = saveProfs.includes(s) || saveProfs.includes(s.toUpperCase());
+  });
+
+  // Death Saves
+  fields.deathSucc = d.deathSaveSuccesses || 0;
+  fields.deathFail = d.deathSaveFailures || 0;
+
+  // Currency
+  const c = d.coins || {};
+  fields.coin_cp = c.cp || 0;
+  fields.coin_sp = c.sp || 0;
+  fields.coin_gp = c.gp || 0;
+  fields.coin_pp = c.pp || 0;
+
+  // Spellcasting Ability & DC
+  fields.spellAbility = d.spellAbility ? d.spellAbility.toUpperCase() : "";
+
+  // Spell Slots
+  if (Array.isArray(d.spellSlots)) {
+    d.spellSlots.forEach((slot, idx) => {
+      const lvl = idx + 1;
+      if (lvl <= 9) {
+        const total = slot.total || 0;
+        const expended = slot.expended || 0;
+        fields[`slot${lvl}_max`] = total;
+        fields[`slot${lvl}_cur`] = Math.max(0, total - expended);
+      }
+    });
+  }
+
+  // Hit Dice
+  if (d.hitDiceMax) fields.hitDiceMax = d.hitDiceMax;
+  if (d.hitDiceAvailable !== undefined && d.hitDiceAvailable !== "") {
+    fields.hitDiceCur = d.hitDiceAvailable;
+  }
+
+  // Chronicle & Lore Tab fields
+  fields.traits = d.personality || "";
+  fields.ideals = d.ideals || "";
+  fields.bonds = d.bonds || "";
+  fields.flaws = d.flaws || "";
+  fields.backstory = d.backstory || "";
+  fields.campaignNotes = d.notes || "";
+  fields.inventory = d.equipment || d.treasure || "";
+  fields.otherProfs = [d.armorProfs, d.weaponProfs, d.toolProfs, d.languages].filter(Boolean).join("\n");
+
+  // Weapons / Attacks
+  const convertedWeapons = [];
+  if (Array.isArray(d.attacks)) {
+    d.attacks.forEach((atk) => {
+      if (atk.name) {
+        convertedWeapons.push({
+          name: atk.name || "",
+          atk: atk.bonus ? `${atk.bonus}` : "",
+          dmg: atk.damage || "",
+          notes: atk.notes || ""
+        });
+      }
+    });
+  }
+  while (convertedWeapons.length < 2) {
+    convertedWeapons.push({ name: "", atk: "", dmg: "", notes: "" });
+  }
+
+  // Spells
+  const convertedSpells = [];
+  if (Array.isArray(d.spells)) {
+    d.spells.forEach((sp) => {
+      if (sp.name) {
+        const lvlTag = sp.level === 0 || sp.level === "0" ? "Cantrip" : (sp.level ? `Level ${sp.level}` : "Spell");
+        convertedSpells.push({
+          name: sp.name,
+          type: lvlTag,
+          casting_time: sp.castingTime || "1 Action",
+          range: sp.range || "",
+          duration: sp.concentration ? "Concentration" : "Instantaneous",
+          desc: sp.description || sp.notes || ""
+        });
+      }
+    });
+  }
+
+  // Features & Traits
+  const convertedTraits = [];
+  if (d.classFeatures && typeof d.classFeatures === "string") {
+    convertedTraits.push({
+      name: "Class Features",
+      type: "Class Feature",
+      desc: d.classFeatures,
+      isExpanded: false
+    });
+  }
+  if (d.speciesTraits && typeof d.speciesTraits === "string") {
+    convertedTraits.push({
+      name: "Species Traits",
+      type: "Racial Trait",
+      desc: d.speciesTraits,
+      isExpanded: false
+    });
+  }
+  if (d.feats && typeof d.feats === "string") {
+    convertedTraits.push({
+      name: "Feats",
+      type: "Feat",
+      desc: d.feats,
+      isExpanded: false
+    });
+  }
+
+  // Skills mapping
+  const skillCodeMap = {
+    athletics: "athl",
+    acrobatics: "acro",
+    sleightofhand: "slt",
+    stealth: "ste",
+    arcana: "arca",
+    history: "hist",
+    investigation: "inv",
+    nature: "nat",
+    religion: "rel",
+    animalhandling: "anim",
+    insight: "ins",
+    medicine: "med",
+    perception: "perc",
+    survival: "surv",
+    deception: "dec",
+    intimidation: "intm",
+    performance: "perf",
+    persuasion: "pers"
+  };
+
+  const skillProfs = Array.isArray(d.skillProficiencies) ? d.skillProficiencies : [];
+  const skillLevels = d.skillProfLevels || {};
+
+  Object.keys(skillCodeMap).forEach((sk) => {
+    const code = skillCodeMap[sk];
+    const isProf = skillProfs.some((p) => p.toLowerCase().replace(/[\s_-]/g, "") === sk);
+    const lvlVal = skillLevels[sk] || 0;
+    fields[`cb_${code}_p`] = isProf || lvlVal >= 1;
+    fields[`cb_${code}_e`] = lvlVal === 2;
+  });
+
+  const newId = "char_" + Date.now();
+  const characterRecord = {
+    id: newId,
+    name: fields.charName,
+    summary: fields.charClass ? `${fields.charClass} (Lvl ${fields.charLevel})` : `Level ${fields.charLevel}`,
+    updatedAt: Date.now(),
+    avatar: d.portraitUrl || "",
+    fields: fields,
+    spells: convertedSpells,
+    traits: convertedTraits,
+    weapons: convertedWeapons,
+    conditions: [],
+    blurredPills: []
+  };
+
+  const roster = getRoster();
+  roster[newId] = characterRecord;
+  activeCharId = newId;
+  saveRoster(roster);
+  localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
+  applyCharacterData(characterRecord);
+  showStatus(`Imported ${fields.charName}!`);
+}
+
+/* ==========================================================================
    REST & HP CALC ENGINES
    ========================================================================== */
 function applyLongRest() {
@@ -1679,6 +1892,35 @@ document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("modal-backdrop")) {
     e.target.classList.remove("open");
     if (e.target.id === "dmInspectModal") currentInspectedMemberId = null;
+    return;
+  }
+
+  // Open PC on Parchment Import Modal
+  if (e.target.id === "importParchmentBtn" || e.target.closest("#importParchmentBtn")) {
+    const txt = document.getElementById("parchmentJsonInput");
+    if (txt) txt.value = "";
+    document.getElementById("parchmentModal")?.classList.add("open");
+    return;
+  }
+
+  if (e.target.id === "cancelParchmentBtn" || e.target.closest("#cancelParchmentBtn")) {
+    closeModal("parchmentModal");
+    return;
+  }
+
+  if (e.target.id === "parseParchmentBtn") {
+    const txt = document.getElementById("parchmentJsonInput")?.value.trim();
+    if (!txt) {
+      alert("Please paste the character JSON or select a file first.");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(txt);
+      importFromPconParchment(parsed);
+      closeModal("parchmentModal");
+    } catch (err) {
+      alert("Invalid JSON format. Please verify the copied text.");
+    }
     return;
   }
 
@@ -2470,6 +2712,24 @@ document.getElementById("restoreFile")?.addEventListener("change", (e) => {
       showStatus("Sheet Restored!");
     } catch (err) {
       alert("Invalid backup file.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+// PC on Parchment File input handler
+document.getElementById("parchmentFileInput")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const parsed = JSON.parse(evt.target.result);
+      importFromPconParchment(parsed);
+      closeModal("parchmentModal");
+    } catch (err) {
+      alert("Invalid PC on Parchment JSON file.");
     }
   };
   reader.readAsText(file);
