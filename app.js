@@ -1194,6 +1194,10 @@ function renderInspectModalContent(m) {
    UNIVERSAL MULTI-PLATFORM IMPORTERS & ADAPTERS
    ========================================================================== */
 
+function cleanKey(str) {
+  return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 function importFromPconParchment(rawJson) {
   let source = rawJson;
   if (Array.isArray(source)) {
@@ -1235,10 +1239,37 @@ function importFromPconParchment(rawJson) {
     fields[`attr_${s}`] = ab[s] !== undefined && ab[s] !== "" ? ab[s] : 10;
   });
 
-  // Saving Throw Proficiencies
-  const saveProfs = Array.isArray(d.saveProficiencies) ? d.saveProficiencies : [];
+  // Saving Throw Proficiencies (supports string arrays, objects, or key maps)
+  const statNames = {
+    str: ["str", "strength"],
+    dex: ["dex", "dexterity"],
+    con: ["con", "constitution"],
+    int: ["int", "intelligence"],
+    wis: ["wis", "wisdom"],
+    cha: ["cha", "charisma"]
+  };
+
+  const rawSaves = [];
+  if (Array.isArray(d.saveProficiencies)) {
+    d.saveProficiencies.forEach((p) => {
+      if (typeof p === "string") rawSaves.push(cleanKey(p));
+      else if (p && typeof p === "object") rawSaves.push(cleanKey(p.name || p.stat || p.ability || p.key));
+    });
+  } else if (d.saveProficiencies && typeof d.saveProficiencies === "object") {
+    Object.keys(d.saveProficiencies).forEach((k) => {
+      if (d.saveProficiencies[k]) rawSaves.push(cleanKey(k));
+    });
+  }
+  if (d.saves && typeof d.saves === "object" && !Array.isArray(d.saves)) {
+    Object.keys(d.saves).forEach((k) => {
+      if (d.saves[k] === true || d.saves[k]?.proficient || d.saves[k]?.prof) rawSaves.push(cleanKey(k));
+    });
+  }
+
   stats.forEach((s) => {
-    fields[`save_${s}`] = saveProfs.includes(s) || saveProfs.includes(s.toUpperCase());
+    const matches = statNames[s];
+    const isSaveProf = rawSaves.some((rs) => matches.some((m) => rs === m || rs.startsWith(m)));
+    fields[`save_${s}`] = isSaveProf;
   });
 
   // Death Saves
@@ -1282,7 +1313,43 @@ function importFromPconParchment(rawJson) {
   fields.backstory = d.backstory || "";
   fields.campaignNotes = d.notes || "";
   fields.inventory = d.equipment || d.treasure || "";
-  fields.otherProfs = [d.armorProfs, d.weaponProfs, d.toolProfs, d.languages].filter(Boolean).join("\n");
+
+  // Proficiencies & Resistances Text Assembler (Armor, Weapons, Tools, Languages, Resistances)
+  const profSections = [];
+  const stringifyList = (val) => {
+    if (!val) return "";
+    if (Array.isArray(val)) {
+      return val.map((item) => (typeof item === "string" ? item : (item.name || item.item || ""))).filter(Boolean).join(", ");
+    }
+    return String(val).trim();
+  };
+
+  const armors = [];
+  if (d.armorTraining && typeof d.armorTraining === "object") {
+    if (d.armorTraining.light) armors.push("Light Armor");
+    if (d.armorTraining.medium) armors.push("Medium Armor");
+    if (d.armorTraining.heavy) armors.push("Heavy Armor");
+    if (d.armorTraining.shields) armors.push("Shields");
+  }
+  const explicitArmor = stringifyList(d.armorProfs || d.armorProficiencies);
+  if (explicitArmor) armors.push(explicitArmor);
+  if (armors.length > 0) profSections.push("Armor: " + Array.from(new Set(armors)).join(", "));
+
+  const weapons = stringifyList(d.weaponProfs || d.weaponProficiencies);
+  if (weapons) profSections.push("Weapons: " + weapons);
+
+  const tools = stringifyList(d.toolProfs || d.toolProficiencies);
+  if (tools) profSections.push("Tools: " + tools);
+
+  const langs = stringifyList(d.languages || d.languageProficiencies);
+  if (langs) profSections.push("Languages: " + langs);
+
+  const resist = stringifyList(d.damageResistances || d.resistances);
+  if (resist) profSections.push("Resistances: " + resist);
+  const immun = stringifyList(d.damageImmunities || d.immunities);
+  if (immun) profSections.push("Immunities: " + immun);
+
+  fields.otherProfs = profSections.join("\n\n");
 
   // Weapons / Attacks
   const convertedWeapons = [];
@@ -1347,37 +1414,90 @@ function importFromPconParchment(rawJson) {
     });
   }
 
-  // Skills mapping
-  const skillCodeMap = {
-    athletics: "athl",
-    acrobatics: "acro",
-    sleightofhand: "slt",
-    stealth: "ste",
-    arcana: "arca",
-    history: "hist",
-    investigation: "inv",
-    nature: "nat",
-    religion: "rel",
-    animalhandling: "anim",
-    insight: "ins",
-    medicine: "med",
-    perception: "perc",
-    survival: "surv",
-    deception: "dec",
-    intimidation: "intm",
-    performance: "perf",
-    persuasion: "pers"
-  };
+  // Full 5e Skills & Expertise Importer
+  const SKILL_DEFINITIONS = [
+    { code: "athl", name: "Athletics", stat: "str", aliases: ["athletics", "athletic", "athl"] },
+    { code: "acro", name: "Acrobatics", stat: "dex", aliases: ["acrobatics", "acrobatic", "acro"] },
+    { code: "slt", name: "Sleight of Hand", stat: "dex", aliases: ["sleightofhand", "sleight_of_hand", "sleight-of-hand", "sleight", "soh", "slt"] },
+    { code: "ste", name: "Stealth", stat: "dex", aliases: ["stealth", "ste"] },
+    { code: "arca", name: "Arcana", stat: "int", aliases: ["arcana", "arca", "arc"] },
+    { code: "hist", name: "History", stat: "int", aliases: ["history", "hist"] },
+    { code: "inv", name: "Investigation", stat: "int", aliases: ["investigation", "investigate", "inv"] },
+    { code: "nat", name: "Nature", stat: "int", aliases: ["nature", "nat"] },
+    { code: "rel", name: "Religion", stat: "int", aliases: ["religion", "rel"] },
+    { code: "anim", name: "Animal Handling", stat: "wis", aliases: ["animalhandling", "animal_handling", "animal-handling", "handleanimal", "handle_animal", "animal", "anim"] },
+    { code: "ins", name: "Insight", stat: "wis", aliases: ["insight", "ins"] },
+    { code: "med", name: "Medicine", stat: "wis", aliases: ["medicine", "med"] },
+    { code: "perc", name: "Perception", stat: "wis", aliases: ["perception", "perceive", "perc"] },
+    { code: "surv", name: "Survival", stat: "wis", aliases: ["survival", "surv"] },
+    { code: "dec", name: "Deception", stat: "cha", aliases: ["deception", "deceive", "dec"] },
+    { code: "intm", name: "Intimidation", stat: "cha", aliases: ["intimidation", "intimidate", "intm", "intim"] },
+    { code: "perf", name: "Performance", stat: "cha", aliases: ["performance", "perform", "perf"] },
+    { code: "pers", name: "Persuasion", stat: "cha", aliases: ["persuasion", "persuade", "pers"] }
+  ];
 
-  const skillProfs = Array.isArray(d.skillProficiencies) ? d.skillProficiencies : [];
-  const skillLevels = d.skillProfLevels || {};
+  SKILL_DEFINITIONS.forEach((def) => {
+    let isProf = false;
+    let isExpert = false;
 
-  Object.keys(skillCodeMap).forEach((sk) => {
-    const code = skillCodeMap[sk];
-    const isProf = skillProfs.some((p) => p.toLowerCase().replace(/[\s_-]/g, "") === sk);
-    const lvlVal = skillLevels[sk] || 0;
-    fields[`cb_${code}_p`] = isProf || lvlVal >= 1;
-    fields[`cb_${code}_e`] = lvlVal === 2;
+    const checkMatch = (candidate) => {
+      const c = cleanKey(candidate);
+      return def.aliases.some((alias) => cleanKey(alias) === c);
+    };
+
+    // 1. Check skillProficiencies array or object
+    if (Array.isArray(d.skillProficiencies)) {
+      d.skillProficiencies.forEach((item) => {
+        if (typeof item === "string" && checkMatch(item)) {
+          isProf = true;
+        } else if (item && typeof item === "object") {
+          if (checkMatch(item.name || item.key || item.id || item.skill)) {
+            isProf = true;
+            if (item.expertise || item.expert || item.level === 2 || item.rank === 2) isExpert = true;
+          }
+        }
+      });
+    } else if (d.skillProficiencies && typeof d.skillProficiencies === "object") {
+      Object.keys(d.skillProficiencies).forEach((k) => {
+        if (checkMatch(k)) {
+          const val = d.skillProficiencies[k];
+          if (val) isProf = true;
+          if (val === 2 || val === "expert" || val === "expertise") isExpert = true;
+        }
+      });
+    }
+
+    // 2. Check skillProfLevels object
+    if (d.skillProfLevels && typeof d.skillProfLevels === "object") {
+      Object.keys(d.skillProfLevels).forEach((k) => {
+        if (checkMatch(k)) {
+          const lvl = d.skillProfLevels[k];
+          if (lvl === 1 || lvl === "proficient" || lvl === true) isProf = true;
+          if (lvl === 2 || lvl === "expert" || lvl === "expertise") {
+            isProf = true;
+            isExpert = true;
+          }
+        }
+      });
+    }
+
+    // 3. Check d.skills
+    if (Array.isArray(d.skills)) {
+      d.skills.forEach((item) => {
+        if (item && typeof item === "object") {
+          const sName = item.name || item.key || item.skill || item.id;
+          if (checkMatch(sName)) {
+            if (item.proficient || item.isProf || item.prof || item.classSkill || item.ranks > 0) isProf = true;
+            if (item.expert || item.expertise || item.level === 2) isExpert = true;
+          }
+        } else if (typeof item === "string" && checkMatch(item)) {
+          isProf = true;
+        }
+      });
+    }
+
+    fields[`cb_${def.code}_p`] = isProf;
+    fields[`cb_${def.code}_e`] = isExpert;
   });
 
   const newId = "char_" + Date.now();
@@ -1401,6 +1521,7 @@ function importFromPconParchment(rawJson) {
   saveRoster(roster);
   localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
   applyCharacterData(characterRecord);
+  saveSheet(true);
   showStatus(`Imported ${fields.charName}!`);
 }
 
@@ -2611,8 +2732,8 @@ document.getElementById("traitSearchInput")?.addEventListener("input", (e) => {
     const filtered = allTraitsCache.filter((t) => {
       const matchName = (t.name || "").toLowerCase().includes(query);
       const matchType = (t.type || "").toLowerCase().includes(query);
-      const matchClass = (t.classes || []).some(c => c.toLowerCase().includes(query));
-      const matchRace = (t.races || []).some(r => r.toLowerCase().includes(query));
+      const matchClass = (t.classes || []).some((c) => c.toLowerCase().includes(query));
+      const matchRace = (t.races || []).some((r) => r.toLowerCase().includes(query));
       return matchName || matchType || matchClass || matchRace;
     });
     renderModalTraits(filtered);
