@@ -1191,8 +1191,9 @@ function renderInspectModalContent(m) {
 }
 
 /* ==========================================================================
-   PC ON PARCHMENT DATA ADAPTER & CONVERTER
+   UNIVERSAL MULTI-PLATFORM IMPORTERS & ADAPTERS
    ========================================================================== */
+
 function importFromPconParchment(rawJson) {
   let source = rawJson;
   if (Array.isArray(source)) {
@@ -1273,7 +1274,7 @@ function importFromPconParchment(rawJson) {
     fields.hitDiceCur = d.hitDiceAvailable;
   }
 
-  // Chronicle & Lore Tab fields
+  // Notes & Lore Tab fields
   fields.traits = d.personality || "";
   fields.ideals = d.ideals || "";
   fields.bonds = d.bonds || "";
@@ -1402,6 +1403,21 @@ function importFromPconParchment(rawJson) {
   applyCharacterData(characterRecord);
   showStatus(`Imported ${fields.charName}!`);
 }
+
+// Future Extensible Importer Stubs
+function importFromDnDBeyond(rawJson) {
+  alert("D&D Beyond importer format parser will be connected here.");
+}
+
+function importFromRoll20(rawJson) {
+  alert("Roll20 character importer format parser will be connected here.");
+}
+
+const CharacterImporters = {
+  parchment: importFromPconParchment,
+  dndbeyond: importFromDnDBeyond,
+  roll20: importFromRoll20
+};
 
 /* ==========================================================================
    REST & HP CALC ENGINES
@@ -1895,16 +1911,16 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Open PC on Parchment Import Modal
-  if (e.target.id === "importParchmentBtn" || e.target.closest("#importParchmentBtn")) {
+  // Universal Multi-Platform Importer Hub
+  if (e.target.id === "importHubBtn" || e.target.closest("#importHubBtn")) {
     const txt = document.getElementById("parchmentJsonInput");
     if (txt) txt.value = "";
-    document.getElementById("parchmentModal")?.classList.add("open");
+    document.getElementById("importHubModal")?.classList.add("open");
     return;
   }
 
-  if (e.target.id === "cancelParchmentBtn" || e.target.closest("#cancelParchmentBtn")) {
-    closeModal("parchmentModal");
+  if (e.target.id === "cancelImportHubBtn" || e.target.closest("#cancelImportHubBtn")) {
+    closeModal("importHubModal");
     return;
   }
 
@@ -1917,7 +1933,7 @@ document.addEventListener("click", async (e) => {
     try {
       const parsed = JSON.parse(txt);
       importFromPconParchment(parsed);
-      closeModal("parchmentModal");
+      closeModal("importHubModal");
     } catch (err) {
       alert("Invalid JSON format. Please verify the copied text.");
     }
@@ -2684,7 +2700,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// File Restore handler
+// File Restore handler (Adventurer Codex Native Backups)
 document.getElementById("restoreFile")?.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -2727,7 +2743,7 @@ document.getElementById("parchmentFileInput")?.addEventListener("change", (e) =>
     try {
       const parsed = JSON.parse(evt.target.result);
       importFromPconParchment(parsed);
-      closeModal("parchmentModal");
+      closeModal("importHubModal");
     } catch (err) {
       alert("Invalid PC on Parchment JSON file.");
     }
