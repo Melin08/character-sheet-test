@@ -1774,7 +1774,7 @@ textarea::-webkit-scrollbar-thumb,
 .trait-card.expanded .trait-expand-icon { transform: rotate(180deg); }
 
 /* ==========================================================================
-   10. GRIMOIRE & SPELLS
+   10. SPELLS & CANTRIPS
    ========================================================================== */
 .spell-basics {
   display: flex;
@@ -2295,6 +2295,26 @@ textarea.block-text {
   border: none;
   color: #ffffff;
   font-size: 1.6rem;
+}
+
+/* Universal Character Importer Modal & Guide Styles */
+.import-guide-accordion {
+  transition: all 0.2s ease;
+}
+.import-guide-accordion[open] {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+.import-guide-accordion summary {
+  list-style: none;
+}
+.import-guide-accordion summary::-webkit-details-marker {
+  display: none;
+}
+kbd {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Party / DM Dashboard Modal */
