@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=42" />
+  <link rel="stylesheet" href="style.css?v=43" />
 </head>
 <body id="top">
 
@@ -115,7 +115,7 @@
               <div id="raceDropdown" class="dropdown-menu"></div>
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
@@ -987,7 +987,7 @@
         <div class="subtab-controls" style="margin-bottom: 0;">
           <button type="button" class="sub-tab active" data-sub="import-platform-parchment">PC on Parchment</button>
           <button type="button" class="sub-tab" data-sub="import-platform-dndbeyond">D&amp;D Beyond</button>
-          <button type="button" class="sub-tab" data-sub="import-platform-roll20" title="Roll20 Importer">Roll20 / Other</button>
+          <button type="button" class="sub-tab" data-sub="import-platform-roll20">Roll20</button>
         </div>
 
         <!-- TAB 1: PC on Parchment Panel -->
@@ -1082,17 +1082,60 @@
           </div>
         </div>
 
-        <!-- TAB 3: Roll20 / Other Placeholder -->
+        <!-- TAB 3: Roll20 Panel -->
         <div id="import-platform-roll20" class="subtab-page">
-          <div style="background: var(--bg-input); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 2.5rem 1.5rem; text-align: center; color: var(--text-muted);">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎲</div>
-            <h4 style="color: #ffffff; font-size: 1.05rem; margin-bottom: 0.4rem;">Roll20 &amp; Custom VTT Importers</h4>
-            <p style="font-size: 0.84rem; max-width: 440px; margin: 0 auto; line-height: 1.55;">
-              Support for Roll20 character JSON and other community character builders will be pluggable directly through this module.
-            </p>
-            <p class="import-help-note" style="margin-top: 1.25rem; font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
+          <!-- Step-by-Step Guide Card -->
+          <details class="import-guide-accordion" open style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 0.85rem 1.15rem; margin-bottom: 1rem;">
+            <summary style="font-weight: 800; font-size: 0.88rem; color: var(--accent-gold); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none;">
+              📖 In-Depth Guide: How to retrieve character JSON from Roll20
+            </summary>
+
+            <div style="margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <strong style="color: #ffffff; font-size: 0.85rem;">Option A (DevTools Network Inspection — Works on All Roll20 Sheets)</strong>
+                <ol style="margin-top: 0.35rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.35rem;">
+                  <li>Open your Roll20 character sheet link in your browser (e.g. <code>app.roll20.net/characters/sheet/...</code> or inside your active campaign).</li>
+                  <li>Press <kbd>F12</kbd> (or right-click anywhere on the webpage and select <strong>Inspect</strong>) to open Developer Tools.</li>
+                  <li>Switch to the <strong>Network</strong> tab in the top DevTools toolbar.</li>
+                  <li>Click the <strong>Fetch/XHR</strong> filter directly below the Network tab.</li>
+                  <li>Refresh the webpage (<kbd>F5</kbd> or <kbd>Ctrl+R</kbd> / <kbd>Cmd+R</kbd>) while keeping DevTools open.</li>
+                  <li>In the list of network requests on the left, click on the request corresponding to your sheet (matching your character ID, <code>sheet</code>, <code>character</code>, or <code>get_character</code>).</li>
+                  <li>Select the <strong>Response</strong> tab on the right side.</li>
+                  <li>Select all the text (<kbd>Ctrl+A</kbd> or <kbd>Cmd+A</kbd>) and copy it (<kbd>Ctrl+C</kbd> or <kbd>Cmd+C</kbd>).</li>
+                  <li>Paste the copied text into the box below (or save it as a <code>.json</code> file and upload it).</li>
+                </ol>
+              </div>
+
+              <div>
+                <strong style="color: #ffffff; font-size: 0.85rem;">Option B (Console One-Liner — When Inside a Roll20 Game Table)</strong>
+                <ol style="margin-top: 0.35rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.35rem;">
+                  <li>While inside your Roll20 virtual tabletop game, press <kbd>F12</kbd> and switch to the <strong>Console</strong> tab.</li>
+                  <li>Paste the following command and press <kbd>Enter</kbd>:<br />
+                    <code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.74rem; display: block; margin-top: 0.35rem; word-break: break-all;">copy(JSON.stringify({ name: window.characters?.models?.[0]?.get('name') || '', attributes: window.characters?.models?.[0]?.attribs?.models?.map(a => a.toJSON()) || [] }))</code>
+                  </li>
+                  <li>This automatically copies your sheet attributes to your clipboard! Paste directly into the box below.</li>
+                </ol>
+              </div>
+            </div>
+
+            <p class="import-help-note" style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-subtle); font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
               💬 Stuck or need help? contact me on Discord (lmp2620).
             </p>
+          </details>
+
+          <!-- Input Options -->
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+            <label class="btn btn-ghost file-label" style="flex: 1; text-align: center;">
+              Upload Saved JSON File (.json)
+              <input type="file" id="roll20FileInput" accept=".json" />
+            </label>
+          </div>
+
+          <textarea id="roll20JsonInput" class="block-text" rows="8" placeholder="Paste the Roll20 character JSON or attributes array here..." style="font-family: monospace; font-size: 0.8rem; margin-bottom: 1rem !important;"></textarea>
+          
+          <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-ghost" id="cancelRoll20Btn">Cancel</button>
+            <button type="button" class="btn red" id="parseRoll20Btn">Convert &amp; Import</button>
           </div>
         </div>
 
@@ -1284,6 +1327,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=42"></script>
+  <script src="app.js?v=43"></script>
 </body>
 </html>
