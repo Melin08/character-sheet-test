@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=43" />
+  <link rel="stylesheet" href="style.css?v=44" />
 </head>
 <body id="top">
 
@@ -24,7 +24,6 @@
     <!-- TOP OBSIDIAN COMMAND BAR -->
     <header class="top-command-bar">
       <div class="command-brand">
-        <span class="brand-crest">⚔</span>
         <div class="brand-headings">
           <span class="brand-title">Adventurer Codex</span>
           <span class="brand-system">5th Edition Character Engine</span>
@@ -34,7 +33,7 @@
       <div class="command-actions">
         <!-- Live Party Button -->
         <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Live Party Sync &amp; DM Screen">
-          <span class="btn-icon">👥</span> Party
+          Party
         </button>
 
         <!-- Account Button -->
@@ -44,7 +43,7 @@
 
         <div class="action-btn-group">
           <button class="btn btn-ghost" id="saveBtn" type="button">Save</button>
-          <button class="btn btn-ghost" id="loadBtn" type="button">Load</button>
+          <button class="btn btn-ghost" id="loadBtn" type="button">Roster</button>
           <button class="btn btn-ghost" id="newBtn" type="button">+ New</button>
         </div>
 
@@ -59,9 +58,9 @@
           <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
         </div>
 
-        <!-- Themes Selector Control (Consolidated under single "Themes" group) -->
+        <!-- Themes Selector Control -->
         <div class="theme-selector-wrapper" title="Change Sheet Theme">
-          <span class="theme-icon">🎨</span>
+          <span class="theme-label-text">Theme:</span>
           <select id="themeSelect" class="theme-select" aria-label="Select Theme">
             <optgroup label="Themes">
               <option value="theme-obsidian" selected>Obsidian Dark</option>
@@ -70,11 +69,11 @@
               <option value="theme-celestial">Celestial Light</option>
               <option value="theme-emerald">Verdant Grove</option>
               <option value="theme-aethertech">Aethertech Clockwork</option>
-              <option value="theme-bloodmoon">Crimson Rite</option>
+              <option value="theme-bloodmoon">Crimson Rite / Blood Moon</option>
               <option value="theme-glacial">Glacial Frost</option>
               <option value="theme-underdark">Bioluminescent Underdark</option>
-              <option value="theme-solaris">Radiant Dawn</option>
-              <option value="theme-cartographer">Cartographers Sketchbook</option>
+              <option value="theme-solaris">Solaris / Radiant Dawn</option>
+              <option value="theme-cartographer">Cartographer's Sketchbook</option>
             </optgroup>
           </select>
         </div>
@@ -210,7 +209,6 @@
         </div>
 
         <div class="hero-insp-widget" data-blur-id="inspiration">
-          <span class="insp-spark">✨</span>
           <span class="insp-title">Inspiration:</span>
           <input type="text" id="charInspiration" class="save-field insp-input" placeholder="None" />
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
@@ -222,9 +220,9 @@
         </div>
 
         <div class="codex-external-links">
-          <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">Wikidot Reference</a>
+          <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">WIKIDOT WIKI</a>
           <span class="sep">/</span>
-          <a href="https://roll20.net/compendium/dnd5e/Weapons#content" target="_blank" rel="noopener noreferrer">Weapons Compendium</a>
+          <a href="https://roll20.net/compendium/dnd5e/BookIndex" target="_blank" rel="noopener noreferrer">ROLL20 COMPENDIUM</a>
         </div>
       </div>
     </section>
@@ -232,19 +230,19 @@
     <!-- 5 WORKSPACE TABS -->
     <nav class="codex-navigation-dock">
       <button class="main-tab active" data-target="tab-stats" type="button">
-        <span class="tab-icon">⚔</span> Combat &amp; Core
+        Combat &amp; Core
       </button>
       <button class="main-tab" data-target="tab-traits" type="button">
-        <span class="tab-icon">⚡</span> Features &amp; Traits
+        Features &amp; Traits
       </button>
       <button class="main-tab" data-target="tab-spells" type="button">
-        <span class="tab-icon">✨</span> Spells &amp; Cantrips
+        Spells &amp; Cantrips
       </button>
       <button class="main-tab" data-target="tab-inventory" type="button">
-        <span class="tab-icon">🎒</span> Inventory &amp; Vault
+        Inventory &amp; Vault
       </button>
       <button class="main-tab" data-target="tab-journal" type="button">
-        <span class="tab-icon">📜</span> Notes &amp; Lore
+        Notes &amp; Lore
       </button>
     </nav>
 
@@ -272,7 +270,7 @@
         <!-- Health Pool with Corner ± Button -->
         <div class="vitals-card hp-card">
           <span class="card-tag">Vitality</span>
-          <button type="button" class="hp-corner-btn" id="openHpModalBtn" title="Damage / Heal Calculator">±</button>
+          <button type="button" class="hp-corner-btn" id="openHpModalBtn" title="Damage / Heal Calculator">&plusmn;</button>
           <div class="card-main">
             <div class="hp-gauge-box">
               <input type="number" id="curHp" class="save-field hp-input cur" value="10" title="Current HP" />
@@ -328,7 +326,6 @@
       <!-- ULTRA-COMPACT SLIM RECOVERY STRIP -->
       <div class="compact-rest-bar">
         <div class="rest-hd-indicator" data-blur-id="hitdice">
-          <span class="rest-hd-glyph">🎲</span>
           <span class="rest-hd-text">Hit Dice:</span>
           <input type="text" id="hitDiceCur" class="save-field hitdice-input center" value="1" placeholder="Cur" />
           <span class="rest-hd-slash">/</span>
@@ -342,10 +339,10 @@
         </div>
         <div class="rest-actions-inline">
           <button class="btn btn-rest-mini btn-short-rest" id="shortRestBtn" type="button" title="Spend Hit Dice to recover HP">
-            <span>⏳</span> Short Rest
+            Short Rest
           </button>
           <button class="btn btn-rest-mini btn-long-rest" id="longRestBtn" type="button" title="Full recovery of HP, slots, and half Hit Dice">
-            <span>🌙</span> Long Rest
+            Long Rest
           </button>
         </div>
       </div>
@@ -529,7 +526,6 @@
           <div class="conditions-container">
             <div class="conditions-header-bar">
               <div class="conditions-title-wrap">
-                <span class="tactical-glyph">⚡</span>
                 <span class="tactical-title">Conditions Tracker</span>
               </div>
               <div class="exhaustion-meter">
@@ -1000,10 +996,9 @@
 
         <!-- TAB 1: PC on Parchment Panel -->
         <div id="import-platform-parchment" class="subtab-page active">
-          <!-- Step-by-Step Guide Card -->
           <details class="import-guide-accordion" open style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 0.85rem 1.15rem; margin-bottom: 1rem;">
             <summary style="font-weight: 800; font-size: 0.88rem; color: var(--accent-gold); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none;">
-              📖 In-Depth Guide: How to retrieve character JSON from PC on Parchment
+              In-Depth Guide: How to retrieve character JSON from PC on Parchment
             </summary>
             <ol style="margin-top: 0.85rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.45rem;">
               <li>Open your web browser and navigate to <a href="https://pconparchment.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary-red); font-weight: 700;">pconparchment.com</a>.</li>
@@ -1018,11 +1013,10 @@
               <li>Return here and paste that copied text into the box below (or save it as a <code>.json</code> file and click "Upload Saved JSON File").</li>
             </ol>
             <p class="import-help-note" style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-subtle); font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
-              💬 Stuck or need help? contact me on Discord (lmp2620).
+              Stuck or need help? contact me on Discord (lmp2620).
             </p>
           </details>
 
-          <!-- Input Options -->
           <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
             <label class="btn btn-ghost file-label" style="flex: 1; text-align: center;">
               Upload Saved JSON File (.json)
@@ -1040,10 +1034,9 @@
 
         <!-- TAB 2: D&D Beyond Panel -->
         <div id="import-platform-dndbeyond" class="subtab-page">
-          <!-- Step-by-Step Guide Card -->
           <details class="import-guide-accordion" open style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 0.85rem 1.15rem; margin-bottom: 1rem;">
             <summary style="font-weight: 800; font-size: 0.88rem; color: var(--accent-gold); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none;">
-              📖 In-Depth Guide: How to retrieve character JSON from D&amp;D Beyond
+              In-Depth Guide: How to retrieve character JSON from D&amp;D Beyond
             </summary>
             
             <div style="margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1052,7 +1045,7 @@
                 <ol style="margin-top: 0.35rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.35rem;">
                   <li>Open your character on D&amp;D Beyond and look at the web browser address bar (e.g. <code>https://www.dndbeyond.com/characters/<strong>12345678</strong></code>). The number at the end is your <strong>Character ID</strong>.</li>
                   <li>In your character sheet preferences on D&amp;D Beyond, ensure your character privacy is set to <strong>Public</strong>.</li>
-                  <li>In a new browser tab, go directly to: <br /><code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 0.2rem;">https://character-service.dndbeyond.com/character/v5/character/YOUR_ID_HERE</code></li>
+                  <li>In a new browser tab, go directly to: <br /><code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 0.2rem;">https://character-service.dndbeyond.com/character/v2/character/YOUR_ID_HERE</code></li>
                   <li>Select all the raw text (<kbd>Ctrl+A</kbd> or <kbd>Cmd+A</kbd>) and copy it (<kbd>Ctrl+C</kbd> or <kbd>Cmd+C</kbd>).</li>
                 </ol>
               </div>
@@ -1070,11 +1063,10 @@
             </div>
 
             <p class="import-help-note" style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-subtle); font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
-              💬 Stuck or need help? contact me on Discord (lmp2620).
+              Stuck or need help? contact me on Discord (lmp2620).
             </p>
           </details>
 
-          <!-- Input Options -->
           <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
             <label class="btn btn-ghost file-label" style="flex: 1; text-align: center;">
               Upload Saved JSON File (.json)
@@ -1093,13 +1085,12 @@
         <!-- TAB 3: Roll20 / Other Placeholder -->
         <div id="import-platform-roll20" class="subtab-page">
           <div style="background: var(--bg-input); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 2.5rem 1.5rem; text-align: center; color: var(--text-muted);">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎲</div>
             <h4 style="color: #ffffff; font-size: 1.05rem; margin-bottom: 0.4rem;">Roll20 &amp; Custom VTT Importers</h4>
             <p style="font-size: 0.84rem; max-width: 440px; margin: 0 auto; line-height: 1.55;">
-              Support for Roll20 character sheet importing and other character sheet sites to be added later.
+              Support for Roll20 character JSON and other community character builders will be pluggable directly through this module.
             </p>
             <p class="import-help-note" style="margin-top: 1.25rem; font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
-              💬 Stuck or need help? contact me on Discord (lmp2620).
+              Stuck or need help? contact me on Discord (lmp2620).
             </p>
           </div>
         </div>
@@ -1124,7 +1115,7 @@
 
         <!-- VIEW 1: Player Join Room -->
         <div id="party-join-view" class="subtab-page active">
-          <p class="party-modal-desc">Link your active character to your Dungeon Master's campaign room to broadcast HP, AC, Spell Slots, and Conditions in real-time.</p>
+          <p class="party-modal-desc">Link your active character to your campaign room to broadcast your stats and view party members' current HP and active conditions in real-time.</p>
           <div class="party-action-row">
             <input type="text" id="campaignRoomInput" class="party-room-input center" placeholder="ROOM CODE (e.g. TAVERN-42)" maxlength="15" autocomplete="off" />
             <button type="button" class="btn btn-primary" id="joinCampaignBtn">Connect</button>
@@ -1133,6 +1124,17 @@
           <div class="party-status-indicator" id="partyStatusBox">
             <span class="status-dot disconnected"></span>
             <span id="partyStatusText">Not connected to any campaign room.</span>
+          </div>
+
+          <!-- Live Party Overview for Players (HP & Conditions only) -->
+          <div class="player-party-section" id="playerPartySection" style="margin-top: 1.25rem; display: none;">
+            <div class="dm-party-header-bar">
+              <span class="dm-party-heading">Party Vitals</span>
+              <span class="dm-member-counter" id="playerMemberCount">0 Active</span>
+            </div>
+            <div class="player-party-cards-grid" id="playerPartyGrid">
+              <p class="dm-empty-msg">Waiting for party members...</p>
+            </div>
           </div>
         </div>
 
@@ -1194,9 +1196,9 @@
           <input type="number" id="hpModalAmount" class="hp-modal-amount-input center" min="1" placeholder="Enter amount..." autocomplete="off" />
         </div>
         <div class="hp-modal-actions-grid">
-          <button type="button" class="btn hp-act-btn hp-act-damage" id="hpApplyDamageBtn">💥 Take Damage</button>
-          <button type="button" class="btn hp-act-btn hp-act-heal" id="hpApplyHealBtn">💚 Heal HP</button>
-          <button type="button" class="btn hp-act-btn hp-act-temp" id="hpApplyTempBtn">🛡 Add Temp HP</button>
+          <button type="button" class="btn hp-act-btn hp-act-damage" id="hpApplyDamageBtn">Take Damage</button>
+          <button type="button" class="btn hp-act-btn hp-act-heal" id="hpApplyHealBtn">Heal HP</button>
+          <button type="button" class="btn hp-act-btn hp-act-temp" id="hpApplyTempBtn">Add Temp HP</button>
         </div>
       </div>
     </div>
@@ -1292,6 +1294,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=43"></script>
+  <script src="app.js?v=44"></script>
 </body>
 </html>
