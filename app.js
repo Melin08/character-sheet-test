@@ -242,7 +242,6 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
-// 11 Themes supported without falling back
 function applyTheme(themeName) {
   const themes = [
     "theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald",
@@ -965,6 +964,33 @@ if (auth) {
   });
 }
 
+/* ==========================================================================
+   DIRECT MODAL OPEN HANDLERS
+   ========================================================================== */
+
+function openPartyModal() {
+  updatePartyStatusUI();
+  document.getElementById("partyModal")?.classList.add("open");
+}
+
+function openSpellModal() {
+  const input = document.getElementById("spellSearchInput");
+  if (input) input.value = "";
+  loadAllSpells();
+  renderModalSpells(allSpellsCache);
+  document.getElementById("spellModal")?.classList.add("open");
+  setTimeout(() => input?.focus(), 60);
+}
+
+function openTraitModal() {
+  const input = document.getElementById("traitSearchInput");
+  if (input) input.value = "";
+  loadAllTraits();
+  renderModalTraits(allTraitsCache);
+  document.getElementById("traitModal")?.classList.add("open");
+  setTimeout(() => input?.focus(), 60);
+}
+
 // Master Click Event Delegation
 document.addEventListener("click", async (e) => {
   // 1. TOP MAIN WORKSPACE TABS ROUTING
@@ -1023,8 +1049,7 @@ document.addEventListener("click", async (e) => {
   // TOP BAR COMMAND BUTTONS
   // Party Button
   if (e.target.id === "partyModalBtn" || e.target.closest("#partyModalBtn")) {
-    updatePartyStatusUI();
-    document.getElementById("partyModal")?.classList.add("open");
+    openPartyModal();
     return;
   }
 
@@ -1150,23 +1175,13 @@ document.addEventListener("click", async (e) => {
 
   // + ADD SPELL BUTTON
   if (e.target.id === "addSpellBtn" || e.target.closest("#addSpellBtn") || e.target.closest(".btn-add-spell")) {
-    const input = document.getElementById("spellSearchInput");
-    if (input) input.value = "";
-    const list = await loadAllSpells();
-    renderModalSpells(list);
-    document.getElementById("spellModal")?.classList.add("open");
-    setTimeout(() => input?.focus(), 50);
+    openSpellModal();
     return;
   }
 
   // + ADD ABILITY BUTTON
   if (e.target.id === "addTraitBtn" || e.target.closest("#addTraitBtn") || e.target.closest(".btn-add-trait")) {
-    const input = document.getElementById("traitSearchInput");
-    if (input) input.value = "";
-    const list = await loadAllTraits();
-    renderModalTraits(list);
-    document.getElementById("traitModal")?.classList.add("open");
-    setTimeout(() => input?.focus(), 50);
+    openTraitModal();
     return;
   }
 
@@ -1633,6 +1648,11 @@ document.addEventListener("click", async (e) => {
   }
 });
 
+// Explicit Button Click Attachments
+document.getElementById("partyModalBtn")?.addEventListener("click", openPartyModal);
+document.getElementById("addSpellBtn")?.addEventListener("click", openSpellModal);
+document.getElementById("addTraitBtn")?.addEventListener("click", openTraitModal);
+
 // Top-Level Event Listeners for Nav Actions
 document.getElementById("themeSelect")?.addEventListener("change", (e) => {
   applyTheme(e.target.value);
@@ -1830,5 +1850,3 @@ loadSheet();
 loadAllSpells();
 loadAllTraits();
 updatePartyStatusUI();
-
-
