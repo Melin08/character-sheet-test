@@ -51,9 +51,10 @@ const apiCache = {};
 let allSpellsCache = [];
 let allTraitsCache = [];
 
-// DM Real-Time Listener & Inspection State
+// DM & Player Real-Time Listener State
 let dmListenerUnsubscribe = null;
 let playerDocUnsubscribe = null;
+let playerPartyListUnsubscribe = null;
 let activeDMRoomCode = "";
 let currentInspectedMemberId = null;
 let cachedRoomMembers = [];
@@ -241,7 +242,7 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
-// 11 Themes Supported
+// 11 Themes supported
 function applyTheme(themeName) {
   const themes = [
     "theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald",
@@ -836,6 +837,7 @@ function updatePartyStatusUI() {
   const box = document.getElementById("partyStatusBox");
   const leaveBtn = document.getElementById("leaveCampaignBtn");
   const joinInput = document.getElementById("campaignRoomInput");
+  const playerSection = document.getElementById("playerPartySection");
 
   if (!box) return;
 
@@ -843,10 +845,60 @@ function updatePartyStatusUI() {
     box.innerHTML = `<span class="status-dot connected"></span><span>Connected to Campaign: <strong>${escapeHtml(connectedCampaignRoom)}</strong></span>`;
     if (leaveBtn) leaveBtn.style.display = "inline-flex";
     if (joinInput) joinInput.value = connectedCampaignRoom;
+    if (playerSection) playerSection.style.display = "block";
   } else {
     box.innerHTML = `<span class="status-dot disconnected"></span><span>Not connected to any campaign room.</span>`;
     if (leaveBtn) leaveBtn.style.display = "none";
+    if (playerSection) playerSection.style.display = "none";
   }
+}
+
+// Renders the limited vitals view (HP and conditions only) for players
+function renderPlayerPartyGrid(members) {
+  const grid = document.getElementById("playerPartyGrid");
+  const counter = document.getElementById("playerMemberCount");
+  if (!grid) return;
+
+  // Filter out the room creator/host and the current user's own active character
+  const otherAdventurers = members.filter(m => !m.isHost && m.id !== activeCharId && m.hp);
+
+  if (counter) counter.textContent = `${otherAdventurers.length} Active`;
+
+  if (otherAdventurers.length === 0) {
+    grid.innerHTML = `<p class="dm-empty-msg">No other party members in this room yet.</p>`;
+    return;
+  }
+
+  grid.innerHTML = otherAdventurers.map((m) => {
+    const curHp = m.hp?.cur ?? 0;
+    const maxHp = m.hp?.max ?? 10;
+    const tempHp = m.hp?.temp ?? 0;
+    const hpPercent = Math.min(100, Math.max(0, (curHp / Math.max(1, maxHp)) * 100));
+    const isDown = curHp <= 0;
+    const conds = (m.conditions || []).map(c => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("");
+
+    return `
+      <div class="player-party-card ${isDown ? 'unconscious' : ''}">
+        <div class="dm-card-header">
+          ${m.avatar ? `<img src="${m.avatar}" class="dm-player-avatar" alt="Avatar" />` : `<div class="dm-avatar-placeholder">⚔</div>`}
+          <div class="dm-player-info">
+            <span class="dm-player-name">${escapeHtml(m.name || "Adventurer")}</span>
+            <span class="dm-player-sub">${escapeHtml(m.charClass || "Class")} (Lvl ${m.level || 1})</span>
+          </div>
+        </div>
+        <div class="dm-health-gauge">
+          <div class="dm-health-labels">
+            <span class="dm-hp-val">HP: ${curHp} / ${maxHp}</span>
+            ${tempHp > 0 ? `<span class="dm-temp-val">+${tempHp} Temp</span>` : ""}
+          </div>
+          <div class="dm-health-track">
+            <div class="dm-health-fill" style="width: ${hpPercent}%;"></div>
+          </div>
+        </div>
+        ${conds ? `<div class="dm-conditions-list">${conds}</div>` : ""}
+      </div>
+    `;
+  }).join("");
 }
 
 async function joinCampaignRoom(roomCode) {
@@ -863,10 +915,14 @@ async function joinCampaignRoom(roomCode) {
     await syncToLiveCampaign(roster[activeCharId]);
   }
 
-  // Monitor membership
   if (playerDocUnsubscribe) {
     playerDocUnsubscribe();
     playerDocUnsubscribe = null;
+  }
+
+  if (playerPartyListUnsubscribe) {
+    playerPartyListUnsubscribe();
+    playerPartyListUnsubscribe = null;
   }
 
   if (db) {
@@ -884,6 +940,16 @@ async function joinCampaignRoom(roomCode) {
           showStatus("Removed from Campaign Room");
         }
       });
+
+    // Real-time listener for other party members (HP and Conditions only)
+    playerPartyListUnsubscribe = db.collection("campaigns").doc(cleanCode).collection("members")
+      .onSnapshot((snapshot) => {
+        const partyMembers = [];
+        snapshot.forEach(doc => partyMembers.push(doc.data()));
+        renderPlayerPartyGrid(partyMembers);
+      }, (err) => {
+        console.warn("Player party sync error:", err);
+      });
   }
 
   showStatus(`Joined ${cleanCode}!`);
@@ -894,6 +960,10 @@ async function leaveCampaignRoom() {
   if (playerDocUnsubscribe) {
     playerDocUnsubscribe();
     playerDocUnsubscribe = null;
+  }
+  if (playerPartyListUnsubscribe) {
+    playerPartyListUnsubscribe();
+    playerPartyListUnsubscribe = null;
   }
   if (db && activeCharId) {
     try {
@@ -930,10 +1000,21 @@ async function startDMLiveListener(roomCode) {
   if (copyBtn) copyBtn.style.display = "inline-flex";
   if (closeBtn) closeBtn.style.display = "inline-flex";
 
+  // Mark this connection as the Host/DM so it won't appear in player lists
+  try {
+    await db.collection("campaigns").doc(roomCode).set({
+      created: true,
+      lastActive: Date.now()
+    }, { merge: true });
+  } catch (e) {}
+
   dmListenerUnsubscribe = db.collection("campaigns").doc(roomCode).collection("members")
     .onSnapshot((snapshot) => {
       cachedRoomMembers = [];
-      snapshot.forEach((doc) => cachedRoomMembers.push(doc.data()));
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!data.isHost) cachedRoomMembers.push(data);
+      });
 
       if (counter) counter.textContent = `${cachedRoomMembers.length} Active`;
 
@@ -1205,1068 +1286,6 @@ function renderInspectModalContent(m) {
       </div>
     ` : ""}
   `;
-}
-
-/* ==========================================================================
-   ROBUST 5E COMPENDIUM ENGINE (IMMEDIATE PRE-COMPILED SRD CATALOG)
-   ========================================================================== */
-
-function getSpellLevelTag(s) {
-  if (s.levelTag) return s.levelTag;
-  let lvl = s.level;
-  if (lvl === undefined) {
-    const key = (s.index || s.name || "").toLowerCase().replace(/[^a-z0-9]/g, '-');
-    lvl = SRD_SPELL_LEVELS[key];
-  }
-  if (lvl === 0) return "Cantrip";
-  if (lvl !== undefined && lvl !== null) return `Level ${lvl}`;
-  return "Spell";
-}
-
-async function fetchAPI(url) {
-  if (apiCache[url]) return apiCache[url];
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) return null;
-    const data = await res.json();
-    apiCache[url] = data;
-    return data;
-  } catch (err) {
-    return null;
-  }
-}
-
-// Builds an instant local 300+ spell database from SRD_SPELL_LEVELS + BUILTIN_SPELLS
-async function loadAllSpells() {
-  if (allSpellsCache.length > 0) return allSpellsCache;
-
-  const combined = [...BUILTIN_SPELLS];
-  Object.keys(SRD_SPELL_LEVELS).forEach((key) => {
-    const spellName = key.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-    if (!combined.some(s => s.name.toLowerCase() === spellName.toLowerCase())) {
-      const lvl = SRD_SPELL_LEVELS[key];
-      combined.push({
-        name: spellName,
-        index: key,
-        url: `/api/spells/${key}`,
-        level: lvl,
-        levelTag: lvl === 0 ? "Cantrip" : `Level ${lvl}`,
-        casting_time: "1 Action",
-        range: "30 ft",
-        duration: "Instantaneous",
-        desc: ""
-      });
-    }
-  });
-
-  allSpellsCache = combined;
-
-  // Background fetch to enrich metadata without blocking UI
-  fetchAPI("https://www.dnd5eapi.co/api/spells").then((res) => {
-    if (res && res.results) {
-      res.results.forEach((s) => {
-        const existing = allSpellsCache.find(x => x.name.toLowerCase() === s.name.toLowerCase());
-        if (existing) {
-          existing.url = s.url;
-          existing.index = s.index;
-        } else {
-          allSpellsCache.push({
-            name: s.name,
-            url: s.url,
-            index: s.index,
-            level: s.level,
-            levelTag: getSpellLevelTag(s)
-          });
-        }
-      });
-      const modal = document.getElementById("spellModal");
-      if (modal && modal.classList.contains("open")) {
-        filterAndRenderSpells(document.getElementById("spellSearchInput")?.value || "");
-      }
-    }
-  }).catch(() => {});
-
-  return allSpellsCache;
-}
-
-async function loadAllTraits() {
-  if (allTraitsCache.length > 0) return allTraitsCache;
-  allTraitsCache = [...BUILTIN_TRAITS];
-
-  // Background fetch to discover additional traits without network spam
-  Promise.all([
-    fetchAPI("https://www.dnd5eapi.co/api/features"),
-    fetchAPI("https://www.dnd5eapi.co/api/traits")
-  ]).then(([f, t]) => {
-    let updated = false;
-    if (f && f.results) {
-      f.results.forEach((item) => {
-        if (!allTraitsCache.some((b) => b.name.toLowerCase() === item.name.toLowerCase())) {
-          allTraitsCache.push({ name: item.name, url: item.url, type: "Class Feature" });
-          updated = true;
-        }
-      });
-    }
-    if (t && t.results) {
-      t.results.forEach((item) => {
-        if (!allTraitsCache.some((b) => b.name.toLowerCase() === item.name.toLowerCase())) {
-          allTraitsCache.push({ name: item.name, url: item.url, type: "Racial Trait" });
-          updated = true;
-        }
-      });
-    }
-    if (updated) {
-      const modal = document.getElementById("traitModal");
-      if (modal && modal.classList.contains("open")) {
-        filterAndRenderTraits(document.getElementById("traitSearchInput")?.value || "");
-      }
-    }
-  }).catch(() => {});
-
-  return allTraitsCache;
-}
-
-function filterAndRenderSpells(query = "") {
-  const q = query.toLowerCase().trim();
-  const filtered = allSpellsCache.filter((s) => {
-    if (!q) return true;
-    const matchName = (s.name || "").toLowerCase().includes(q);
-    const matchClass = (s.classesTag || "").toLowerCase().includes(q);
-    const matchSchool = (s.schoolTag || "").toLowerCase().includes(q);
-    const matchLevel = (s.levelTag || "").toLowerCase().includes(q);
-    const matchDesc = (s.desc || "").toLowerCase().includes(q);
-    return matchName || matchClass || matchSchool || matchLevel || matchDesc;
-  });
-  renderModalSpells(filtered);
-}
-
-function filterAndRenderTraits(query = "") {
-  const q = query.toLowerCase().trim();
-  const filtered = allTraitsCache.filter((t) => {
-    if (!q) return true;
-    const matchName = (t.name || "").toLowerCase().includes(q);
-    const matchType = (t.type || "").toLowerCase().includes(q);
-    const matchClass = (t.classes || []).some((c) => c.toLowerCase().includes(q));
-    const matchRace = (t.races || []).some((r) => r.toLowerCase().includes(q));
-    const matchDesc = (t.desc || "").toLowerCase().includes(q);
-    return matchName || matchType || matchClass || matchRace || matchDesc;
-  });
-  renderModalTraits(filtered);
-}
-
-function renderModalSpells(list) {
-  const container = document.getElementById("spellApiList");
-  if (!container) return;
-
-  if (!list || list.length === 0) {
-    container.innerHTML = `<p class="loading-text">No matching spells found.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.slice(0, 50).map((s) => {
-    const levelStr = getSpellLevelTag(s);
-    const isCantrip = levelStr.toLowerCase().includes("cantrip");
-    const lvlClass = isCantrip ? "tag-cantrip" : "tag-level";
-
-    let tagsHtml = `<span class="tag-pill ${lvlClass}">${escapeHtml(levelStr)}</span>`;
-    if (s.schoolTag) {
-      tagsHtml += `<span class="tag-pill ${getSchoolCssClass(s.schoolTag)}">${escapeHtml(s.schoolTag)}</span>`;
-    }
-    if (s.classesTag) {
-      const cList = s.classesTag.split(",").map(c => c.trim()).filter(Boolean);
-      cList.slice(0, 3).forEach((cls) => {
-        tagsHtml += `<span class="tag-pill ${getClassCssClass(cls)}">${escapeHtml(cls)}</span>`;
-      });
-    }
-
-    return `
-      <div class="spell-option-item spell-pick-row" data-url="${s.url || ''}" data-name="${escapeHtml(s.name)}">
-        <div class="spell-option-details">
-          <div class="spell-option-title">${escapeHtml(s.name)}</div>
-          <div class="spell-meta-tags">${tagsHtml}</div>
-        </div>
-        <button type="button" class="spell-add-badge">+ Add</button>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderModalTraits(list) {
-  const container = document.getElementById("traitApiList");
-  if (!container) return;
-
-  if (!list || list.length === 0) {
-    container.innerHTML = `<p class="loading-text">No matching abilities found.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.slice(0, 50).map((t) => {
-    let tagsHtml = "";
-    const classes = Array.isArray(t.classes) ? t.classes : (t.class ? [t.class] : []);
-    const races = Array.isArray(t.races) ? t.races : (t.race ? [t.race] : []);
-
-    classes.slice(0, 3).forEach((c) => {
-      tagsHtml += `<span class="tag-pill ${getClassCssClass(c)}">${escapeHtml(c)}</span>`;
-    });
-    races.slice(0, 2).forEach((r) => {
-      tagsHtml += `<span class="tag-pill ${getRaceCssClass(r)}">${escapeHtml(r)}</span>`;
-    });
-
-    if (!tagsHtml) {
-      tagsHtml = `<span class="tag-pill race-generic">${escapeHtml(t.type || 'Feature')}</span>`;
-    }
-
-    return `
-      <div class="spell-option-item trait-pick-row" data-url="${t.url || ''}" data-name="${escapeHtml(t.name)}" data-type="${escapeHtml(t.type || 'Feature')}">
-        <div class="spell-option-details">
-          <div class="spell-option-title">${escapeHtml(t.name)}</div>
-          <div class="spell-meta-tags">${tagsHtml}</div>
-        </div>
-        <button type="button" class="spell-add-badge">+ Add</button>
-      </div>
-    `;
-  }).join("");
-}
-
-/* ==========================================================================
-   UNIVERSAL MULTI-PLATFORM IMPORTERS & ADAPTERS
-   ========================================================================== */
-
-function cleanKey(str) {
-  return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-// 5E Skill Definitions with Multi-Platform Aliases
-const SKILL_DEFINITIONS = [
-  { code: "athl", name: "Athletics", stat: "str", aliases: ["athletics", "athletic", "athl"] },
-  { code: "acro", name: "Acrobatics", stat: "dex", aliases: ["acrobatics", "acrobatic", "acro"] },
-  { code: "slt", name: "Sleight of Hand", stat: "dex", aliases: ["sleightofhand", "sleight_of_hand", "sleight-of-hand", "sleight", "soh", "slt"] },
-  { code: "ste", name: "Stealth", stat: "dex", aliases: ["stealth", "ste"] },
-  { code: "arca", name: "Arcana", stat: "int", aliases: ["arcana", "arca", "arc"] },
-  { code: "hist", name: "History", stat: "int", aliases: ["history", "hist"] },
-  { code: "inv", name: "Investigation", stat: "int", aliases: ["investigation", "investigate", "inv"] },
-  { code: "nat", name: "Nature", stat: "int", aliases: ["nature", "nat"] },
-  { code: "rel", name: "Religion", stat: "int", aliases: ["religion", "rel"] },
-  { code: "anim", name: "Animal Handling", stat: "wis", aliases: ["animalhandling", "animal_handling", "animal-handling", "handleanimal", "handle_animal", "animal", "anim"] },
-  { code: "ins", name: "Insight", stat: "wis", aliases: ["insight", "ins"] },
-  { code: "med", name: "Medicine", stat: "wis", aliases: ["medicine", "med"] },
-  { code: "perc", name: "Perception", stat: "wis", aliases: ["perception", "perceive", "perc"] },
-  { code: "surv", name: "Survival", stat: "wis", aliases: ["survival", "surv"] },
-  { code: "dec", name: "Deception", stat: "cha", aliases: ["deception", "deceive", "dec"] },
-  { code: "intm", name: "Intimidation", stat: "cha", aliases: ["intimidation", "intimidate", "intm", "intim"] },
-  { code: "perf", name: "Performance", stat: "cha", aliases: ["performance", "perform", "perf"] },
-  { code: "pers", name: "Persuasion", stat: "cha", aliases: ["persuasion", "persuade", "pers"] }
-];
-
-/* 1. PC on Parchment Adapter */
-function importFromPconParchment(rawJson) {
-  let source = rawJson;
-  if (Array.isArray(source)) {
-    source = source[0] || {};
-  }
-  const d = source.data || {};
-  const fields = {};
-
-  // Identity & Core Vitals
-  fields.charName = source.name || d.name || "Unnamed Adventurer";
-  fields.ac = d.ac !== undefined && d.ac !== "" ? d.ac : 10;
-  fields.charSpeed = d.speed !== undefined && d.speed !== "" ? d.speed : 30;
-  fields.charExp = d.xp !== undefined && d.xp !== "" ? `${d.xp} XP` : "0 XP";
-  fields.curHp = d.hpCurrent !== undefined && d.hpCurrent !== "" ? d.hpCurrent : (d.hpMax || 10);
-  fields.maxHp = d.hpMax !== undefined && d.hpMax !== "" ? d.hpMax : 10;
-  fields.tempHp = d.hpTemp || 0;
-
-  // Class & Level
-  if (Array.isArray(d.classes) && d.classes.length > 0) {
-    const primary = d.classes[0];
-    fields.charClass = primary.name || d.className || "";
-    fields.charLevel = primary.level || d.level || 1;
-  } else {
-    fields.charClass = d.className || "";
-    fields.charLevel = d.level || 1;
-  }
-
-  // Race, Background, Alignment
-  fields.charRace = d.species || d.race || "";
-  fields.charBackground = d.background || "";
-  fields.charAlignment = d.alignment || "";
-  fields.charInspiration = d.heroicInspiration ? "Yes" : "None";
-
-  // Ability Scores
-  const ab = d.abilities || {};
-  const stats = ["str", "dex", "con", "int", "wis", "cha"];
-  stats.forEach((s) => {
-    fields[`attr_${s}`] = ab[s] !== undefined && ab[s] !== "" ? ab[s] : 10;
-  });
-
-  // Saving Throw Proficiencies
-  const statNames = {
-    str: ["str", "strength"],
-    dex: ["dex", "dexterity"],
-    con: ["con", "constitution"],
-    int: ["int", "intelligence"],
-    wis: ["wis", "wisdom"],
-    cha: ["cha", "charisma"]
-  };
-
-  const rawSaves = [];
-  if (Array.isArray(d.saveProficiencies)) {
-    d.saveProficiencies.forEach((p) => {
-      if (typeof p === "string") rawSaves.push(cleanKey(p));
-      else if (p && typeof p === "object") rawSaves.push(cleanKey(p.name || p.stat || p.ability || p.key));
-    });
-  } else if (d.saveProficiencies && typeof d.saveProficiencies === "object") {
-    Object.keys(d.saveProficiencies).forEach((k) => {
-      if (d.saveProficiencies[k]) rawSaves.push(cleanKey(k));
-    });
-  }
-  if (d.saves && typeof d.saves === "object" && !Array.isArray(d.saves)) {
-    Object.keys(d.saves).forEach((k) => {
-      if (d.saves[k] === true || d.saves[k]?.proficient || d.saves[k]?.prof) rawSaves.push(cleanKey(k));
-    });
-  }
-
-  stats.forEach((s) => {
-    const matches = statNames[s];
-    const isSaveProf = rawSaves.some((rs) => matches.some((m) => rs === m || rs.startsWith(m)));
-    fields[`save_${s}`] = isSaveProf;
-  });
-
-  // Death Saves
-  fields.deathSucc = d.deathSaveSuccesses || 0;
-  fields.deathFail = d.deathSaveFailures || 0;
-
-  // Currency
-  const c = d.coins || {};
-  fields.coin_cp = c.cp || 0;
-  fields.coin_sp = c.sp || 0;
-  fields.coin_gp = c.gp || 0;
-  fields.coin_pp = c.pp || 0;
-
-  // Spellcasting Ability & DC
-  fields.spellAbility = d.spellAbility ? d.spellAbility.toUpperCase() : "";
-
-  // Spell Slots
-  if (Array.isArray(d.spellSlots)) {
-    d.spellSlots.forEach((slot, idx) => {
-      const lvl = idx + 1;
-      if (lvl <= 9) {
-        const total = slot.total || 0;
-        const expended = slot.expended || 0;
-        fields[`slot${lvl}_max`] = total;
-        fields[`slot${lvl}_cur`] = Math.max(0, total - expended);
-      }
-    });
-  }
-
-  // Hit Dice
-  if (d.hitDiceMax) fields.hitDiceMax = d.hitDiceMax;
-  if (d.hitDiceAvailable !== undefined && d.hitDiceAvailable !== "") {
-    fields.hitDiceCur = d.hitDiceAvailable;
-  }
-
-  // Notes & Lore Tab fields
-  fields.traits = d.personality || "";
-  fields.ideals = d.ideals || "";
-  fields.bonds = d.bonds || "";
-  fields.flaws = d.flaws || "";
-  fields.backstory = d.backstory || "";
-  fields.campaignNotes = d.notes || "";
-  fields.inventory = d.equipment || d.treasure || "";
-
-  // Proficiencies & Resistances Text Assembler
-  const profSections = [];
-  const stringifyList = (val) => {
-    if (!val) return "";
-    if (Array.isArray(val)) {
-      return val.map((item) => (typeof item === "string" ? item : (item.name || item.item || ""))).filter(Boolean).join(", ");
-    }
-    return String(val).trim();
-  };
-
-  const armors = [];
-  if (d.armorTraining && typeof d.armorTraining === "object") {
-    if (d.armorTraining.light) armors.push("Light Armor");
-    if (d.armorTraining.medium) armors.push("Medium Armor");
-    if (d.armorTraining.heavy) armors.push("Heavy Armor");
-    if (d.armorTraining.shields) armors.push("Shields");
-  }
-  const explicitArmor = stringifyList(d.armorProfs || d.armorProficiencies);
-  if (explicitArmor) armors.push(explicitArmor);
-  if (armors.length > 0) profSections.push("Armor: " + Array.from(new Set(armors)).join(", "));
-
-  const weapons = stringifyList(d.weaponProfs || d.weaponProficiencies);
-  if (weapons) profSections.push("Weapons: " + weapons);
-
-  const tools = stringifyList(d.toolProfs || d.toolProficiencies);
-  if (tools) profSections.push("Tools: " + tools);
-
-  const langs = stringifyList(d.languages || d.languageProficiencies);
-  if (langs) profSections.push("Languages: " + langs);
-
-  const resist = stringifyList(d.damageResistances || d.resistances);
-  if (resist) profSections.push("Resistances: " + resist);
-  const immun = stringifyList(d.damageImmunities || d.immunities);
-  if (immun) profSections.push("Immunities: " + immun);
-
-  fields.otherProfs = profSections.join("\n\n");
-
-  // Weapons / Attacks
-  const convertedWeapons = [];
-  if (Array.isArray(d.attacks)) {
-    d.attacks.forEach((atk) => {
-      if (atk.name) {
-        convertedWeapons.push({
-          name: atk.name || "",
-          atk: atk.bonus ? `${atk.bonus}` : "",
-          dmg: atk.damage || "",
-          notes: atk.notes || ""
-        });
-      }
-    });
-  }
-  while (convertedWeapons.length < 2) {
-    convertedWeapons.push({ name: "", atk: "", dmg: "", notes: "" });
-  }
-
-  // Spells
-  const convertedSpells = [];
-  if (Array.isArray(d.spells)) {
-    d.spells.forEach((sp) => {
-      if (sp.name) {
-        const lvlTag = sp.level === 0 || sp.level === "0" ? "Cantrip" : (sp.level ? `Level ${sp.level}` : "Spell");
-        convertedSpells.push({
-          name: sp.name,
-          type: lvlTag,
-          casting_time: sp.castingTime || "1 Action",
-          range: sp.range || "",
-          duration: sp.concentration ? "Concentration" : "Instantaneous",
-          desc: sp.description || sp.notes || ""
-        });
-      }
-    });
-  }
-
-  // Features & Traits
-  const convertedTraits = [];
-  if (d.classFeatures && typeof d.classFeatures === "string") {
-    convertedTraits.push({ name: "Class Features", type: "Class Feature", desc: d.classFeatures, isExpanded: false });
-  }
-  if (d.speciesTraits && typeof d.speciesTraits === "string") {
-    convertedTraits.push({ name: "Species Traits", type: "Racial Trait", desc: d.speciesTraits, isExpanded: false });
-  }
-  if (d.feats && typeof d.feats === "string") {
-    convertedTraits.push({ name: "Feats", type: "Feat", desc: d.feats, isExpanded: false });
-  }
-
-  // Skills & Expertise
-  SKILL_DEFINITIONS.forEach((def) => {
-    let isProf = false;
-    let isExpert = false;
-    const checkMatch = (candidate) => def.aliases.some((alias) => cleanKey(alias) === cleanKey(candidate));
-
-    if (Array.isArray(d.skillProficiencies)) {
-      d.skillProficiencies.forEach((item) => {
-        if (typeof item === "string" && checkMatch(item)) isProf = true;
-        else if (item && typeof item === "object" && checkMatch(item.name || item.key || item.id || item.skill)) {
-          isProf = true;
-          if (item.expertise || item.expert || item.level === 2 || item.rank === 2) isExpert = true;
-        }
-      });
-    } else if (d.skillProficiencies && typeof d.skillProficiencies === "object") {
-      Object.keys(d.skillProficiencies).forEach((k) => {
-        if (checkMatch(k)) {
-          const val = d.skillProficiencies[k];
-          if (val) isProf = true;
-          if (val === 2 || val === "expert" || val === "expertise") isExpert = true;
-        }
-      });
-    }
-
-    if (d.skillProfLevels && typeof d.skillProfLevels === "object") {
-      Object.keys(d.skillProfLevels).forEach((k) => {
-        if (checkMatch(k)) {
-          const lvl = d.skillProfLevels[k];
-          if (lvl === 1 || lvl === "proficient" || lvl === true) isProf = true;
-          if (lvl === 2 || lvl === "expert" || lvl === "expertise") {
-            isProf = true;
-            isExpert = true;
-          }
-        }
-      });
-    }
-
-    if (Array.isArray(d.skills)) {
-      d.skills.forEach((item) => {
-        if (item && typeof item === "object") {
-          const sName = item.name || item.key || item.skill || item.id;
-          if (checkMatch(sName)) {
-            if (item.proficient || item.isProf || item.prof || item.classSkill || item.ranks > 0) isProf = true;
-            if (item.expert || item.expertise || item.level === 2) isExpert = true;
-          }
-        } else if (typeof item === "string" && checkMatch(item)) {
-          isProf = true;
-        }
-      });
-    }
-
-    fields[`cb_${def.code}_p`] = isProf;
-    fields[`cb_${def.code}_e`] = isExpert;
-  });
-
-  commitImportedCharacter(fields, convertedSpells, convertedTraits, convertedWeapons, d.portraitUrl || "");
-}
-
-/* 2. D&D Beyond Adapter */
-function importFromDnDBeyond(rawJson) {
-  let source = rawJson;
-  if (Array.isArray(source)) source = source[0] || {};
-  const d = source.data || source;
-
-  if (!d || (!d.name && !d.stats && !d.classes)) {
-    throw new Error("Invalid D&D Beyond structure. Expected character object.");
-  }
-
-  const fields = {};
-
-  // Character Name
-  fields.charName = d.name || "Unnamed Adventurer";
-
-  // Classes & Level
-  let totalLevel = 0;
-  const classNames = [];
-  if (Array.isArray(d.classes)) {
-    d.classes.forEach((c) => {
-      const cName = c.definition?.name || c.name || "";
-      const cLvl = parseInt(c.level, 10) || 1;
-      totalLevel += cLvl;
-      if (cName) classNames.push(c.subclassDefinition?.name ? `${cName} (${c.subclassDefinition.name})` : cName);
-    });
-  }
-  fields.charLevel = totalLevel || d.level || 1;
-  fields.charClass = classNames.join(" / ") || d.className || "";
-
-  // Race
-  fields.charRace = d.race?.fullName || d.race?.baseRaceName || d.species || "";
-
-  // Background
-  fields.charBackground = d.background?.definition?.name || d.background?.customBackground?.name || "";
-
-  // Alignment
-  const ALIGNMENT_MAP = {
-    1: "Lawful Good", 2: "Neutral Good", 3: "Chaotic Good",
-    4: "Lawful Neutral", 5: "True Neutral", 6: "Chaotic Neutral",
-    7: "Lawful Evil", 8: "Neutral Evil", 9: "Chaotic Evil"
-  };
-  fields.charAlignment = ALIGNMENT_MAP[d.alignmentId] || d.alignment || "";
-  fields.charInspiration = d.inspiration ? "Yes" : "None";
-
-  // Ability Scores (D&D Beyond: 1: STR, 2: DEX, 3: CON, 4: INT, 5: WIS, 6: CHA)
-  const STAT_ID_MAP = { 1: "str", 2: "dex", 3: "con", 4: "int", 5: "wis", 6: "cha" };
-  const baseScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
-
-  if (Array.isArray(d.stats)) {
-    d.stats.forEach((s) => {
-      const code = STAT_ID_MAP[s.id];
-      if (code && s.value !== null && s.value !== undefined) baseScores[code] = parseInt(s.value, 10) || 10;
-    });
-  }
-
-  // Apply stat bonuses from bonusStats / modifiers
-  if (Array.isArray(d.bonusStats)) {
-    d.bonusStats.forEach((b) => {
-      const code = STAT_ID_MAP[b.id];
-      if (code && b.value) baseScores[code] += parseInt(b.value, 10) || 0;
-    });
-  }
-
-  // Check stat overrides
-  if (Array.isArray(d.overrideStats)) {
-    d.overrideStats.forEach((o) => {
-      const code = STAT_ID_MAP[o.id];
-      if (code && o.value !== null && o.value !== undefined) baseScores[code] = parseInt(o.value, 10);
-    });
-  }
-
-  // Scan modifiers bucket for ability bonuses
-  const allModifiers = [];
-  if (d.modifiers && typeof d.modifiers === "object") {
-    Object.keys(d.modifiers).forEach((cat) => {
-      if (Array.isArray(d.modifiers[cat])) allModifiers.push(...d.modifiers[cat]);
-    });
-  }
-
-  allModifiers.forEach((m) => {
-    if (m.type === "bonus") {
-      const sub = cleanKey(m.subType);
-      Object.keys(baseScores).forEach((st) => {
-        if (sub === `${st}score` || sub === `${st}`) {
-          baseScores[st] += parseInt(m.value, 10) || 0;
-        }
-      });
-    }
-  });
-
-  Object.keys(baseScores).forEach((s) => {
-    fields[`attr_${s}`] = baseScores[s];
-  });
-
-  // Saving Throw Proficiencies
-  allModifiers.forEach((m) => {
-    if (m.type === "proficiency") {
-      const sub = cleanKey(m.subType);
-      Object.keys(STAT_ID_MAP).forEach((id) => {
-        const st = STAT_ID_MAP[id];
-        if (sub === `${st}savingthrows` || sub === `${st}`) {
-          fields[`save_${st}`] = true;
-        }
-      });
-    }
-  });
-
-  // Hit Points & Vitals
-  const conMod = getModifier(baseScores.con);
-  const baseHp = parseInt(d.baseHitPoints, 10) || 10;
-  const bonusHp = parseInt(d.bonusHitPoints, 10) || 0;
-  const maxHp = d.overrideHitPoints !== null && d.overrideHitPoints !== undefined
-    ? parseInt(d.overrideHitPoints, 10)
-    : Math.max(1, baseHp + bonusHp + (conMod * fields.charLevel));
-  const removedHp = parseInt(d.removedHitPoints, 10) || 0;
-
-  fields.maxHp = maxHp;
-  fields.curHp = Math.max(0, maxHp - removedHp);
-  fields.tempHp = parseInt(d.temporaryHitPoints, 10) || 0;
-
-  // Speed
-  const walkSpeed = d.race?.weightSpeeds?.normal?.walk || 30;
-  fields.charSpeed = parseInt(walkSpeed, 10) || 30;
-
-  // Armor Class
-  const dexMod = getModifier(baseScores.dex);
-  fields.ac = 10 + dexMod;
-
-  // Death Saves
-  fields.deathSucc = d.deathSaves?.successCount || 0;
-  fields.deathFail = d.deathSaves?.failCount || 0;
-
-  // Currency
-  const curr = d.currencies || {};
-  fields.coin_cp = curr.cp || 0;
-  fields.coin_sp = curr.sp || 0;
-  fields.coin_gp = curr.gp || 0;
-  fields.coin_pp = curr.pp || 0;
-
-  // Experience
-  fields.charExp = d.currentXp ? `${d.currentXp} XP` : "0 XP";
-
-  // Skills & Expertise
-  SKILL_DEFINITIONS.forEach((def) => {
-    let isProf = false;
-    let isExpert = false;
-
-    allModifiers.forEach((m) => {
-      const sub = cleanKey(m.subType);
-      const matches = def.aliases.some((a) => sub === cleanKey(a) || sub === `${cleanKey(a)}proficiency`);
-      if (matches) {
-        if (m.type === "proficiency") isProf = true;
-        if (m.type === "expertise") {
-          isProf = true;
-          isExpert = true;
-        }
-      }
-    });
-
-    fields[`cb_${def.code}_p`] = isProf;
-    fields[`cb_${def.code}_e`] = isExpert;
-  });
-
-  // Spell Slots
-  if (Array.isArray(d.spellSlots)) {
-    d.spellSlots.forEach((slot) => {
-      const lvl = slot.level;
-      if (lvl >= 1 && lvl <= 9) {
-        const total = slot.available || slot.total || 0;
-        const used = slot.used || 0;
-        fields[`slot${lvl}_max`] = total;
-        fields[`slot${lvl}_cur`] = Math.max(0, total - used);
-      }
-    });
-  }
-
-  // Hit Dice
-  fields.hitDiceMax = `${fields.charLevel}`;
-  fields.hitDiceCur = `${fields.charLevel}`;
-
-  // Roleplay & Notes
-  const traits = d.traits || {};
-  fields.traits = traits.personalityTraits || "";
-  fields.ideals = traits.ideals || "";
-  fields.bonds = traits.bonds || "";
-  fields.flaws = traits.flaws || "";
-
-  const notes = d.notes || {};
-  fields.backstory = notes.backstory || "";
-  fields.campaignNotes = [notes.allies, notes.enemies, notes.otherNotes].filter(Boolean).join("\n\n");
-
-  // Proficiencies Text
-  const profsList = [];
-  allModifiers.forEach((m) => {
-    if (m.type === "language") profsList.push(`Language: ${m.friendlySubtypeName || m.subType}`);
-    if (m.type === "proficiency" && (m.subType.includes("armor") || m.subType.includes("shield") || m.subType.includes("weapon") || m.subType.includes("tool"))) {
-      profsList.push(`${m.friendlySubtypeName || m.subType}`);
-    }
-  });
-  fields.otherProfs = Array.from(new Set(profsList)).join("\n");
-
-  // Weapons
-  const convertedWeapons = [];
-  if (Array.isArray(d.inventory)) {
-    d.inventory.forEach((item) => {
-      const def = item.definition || {};
-      if (def.filterType === "Weapon" && item.equipped) {
-        convertedWeapons.push({
-          name: def.name || "Weapon",
-          atk: def.attackType === 2 ? "Ranged" : "Melee",
-          dmg: def.damage?.diceString || "1d8",
-          notes: (def.properties || []).map((p) => p.name).join(", ")
-        });
-      }
-    });
-  }
-  while (convertedWeapons.length < 2) {
-    convertedWeapons.push({ name: "", atk: "", dmg: "", notes: "" });
-  }
-
-  // Spells
-  const convertedSpells = [];
-  const rawSpellLists = [
-    ...(d.spells?.class || []),
-    ...(d.spells?.race || []),
-    ...(d.spells?.feat || []),
-    ...(d.spells?.item || [])
-  ];
-
-  rawSpellLists.forEach((sp) => {
-    const sDef = sp.definition || {};
-    if (sDef.name) {
-      const lvl = sDef.level === 0 ? "Cantrip" : `Level ${sDef.level}`;
-      convertedSpells.push({
-        name: sDef.name,
-        type: lvl,
-        casting_time: sDef.activation?.activationType ? `${sDef.activation.activationTime || 1} Action` : "1 Action",
-        range: sDef.range?.rangeValue ? `${sDef.range.rangeValue} ft` : "30 ft",
-        duration: sDef.duration?.durationInterval ? `${sDef.duration.durationInterval} Round` : "Instantaneous",
-        desc: sDef.description ? sDef.description.replace(/<[^>]*>?/gm, "") : ""
-      });
-    }
-  });
-
-  // Features & Traits
-  const convertedTraits = [];
-  const classFeatures = [];
-  if (Array.isArray(d.classes)) {
-    d.classes.forEach((c) => {
-      (c.classFeatures || []).forEach((cf) => {
-        const def = cf.definition || {};
-        if (def.name) {
-          classFeatures.push({
-            name: def.name,
-            type: "Class Feature",
-            desc: def.description ? def.description.replace(/<[^>]*>?/gm, "") : "",
-            isExpanded: false
-          });
-        }
-      });
-    });
-  }
-  convertedTraits.push(...classFeatures.slice(0, 15));
-
-  const portrait = d.avatarUrl || d.decorations?.avatarUrl || "";
-  commitImportedCharacter(fields, convertedSpells, convertedTraits, convertedWeapons, portrait);
-}
-
-// Shared helper to persist imported character records
-function commitImportedCharacter(fields, spells, traits, weapons, avatarUrl) {
-  const newId = "char_" + Date.now();
-  const characterRecord = {
-    id: newId,
-    name: fields.charName || "Unnamed Adventurer",
-    summary: fields.charClass ? `${fields.charClass} (Lvl ${fields.charLevel})` : `Level ${fields.charLevel}`,
-    updatedAt: Date.now(),
-    avatar: avatarUrl || "",
-    fields: fields,
-    spells: spells || [],
-    traits: traits || [],
-    weapons: weapons || [],
-    conditions: [],
-    blurredPills: []
-  };
-
-  const roster = getRoster();
-  roster[newId] = characterRecord;
-  activeCharId = newId;
-  saveRoster(roster);
-  localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
-  applyCharacterData(characterRecord);
-  saveSheet(true);
-  showStatus(`Imported ${fields.charName}!`);
-}
-
-const CharacterImporters = {
-  parchment: importFromPconParchment,
-  dndbeyond: importFromDnDBeyond
-};
-
-/* ==========================================================================
-   REST & HP CALC ENGINES
-   ========================================================================== */
-function applyLongRest() {
-  if (!confirm("Take a Long Rest? This will restore HP to max, refill all spell slots, recover class points, clear death saves, and regain up to half your total Hit Dice.")) return;
-
-  const maxHpEl = document.getElementById("maxHp");
-  const curHpEl = document.getElementById("curHp");
-  const tempHpEl = document.getElementById("tempHp");
-  if (maxHpEl && curHpEl) curHpEl.value = maxHpEl.value;
-  if (tempHpEl) tempHpEl.value = 0;
-
-  for (let lvl = 1; lvl <= 9; lvl++) {
-    const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
-    const curEl = document.getElementById(`slot${lvl}_cur`);
-    if (curEl) curEl.value = maxVal;
-  }
-
-  const hdCurEl = document.getElementById("hitDiceCur");
-  const hdMaxEl = document.getElementById("hitDiceMax");
-  const maxHd = parseInt(hdMaxEl?.value, 10) || 1;
-  const curHd = parseInt(hdCurEl?.value, 10) || 0;
-  const regained = Math.max(1, Math.floor(maxHd / 2));
-  if (hdCurEl) hdCurEl.value = Math.min(maxHd, curHd + regained);
-
-  const succEl = document.getElementById("deathSucc");
-  const failEl = document.getElementById("deathFail");
-  if (succEl) succEl.value = 0;
-  if (failEl) failEl.value = 0;
-
-  const classMaxEl = document.getElementById("classPtsMax");
-  const classCurEl = document.getElementById("classPtsCur");
-  if (classMaxEl && classCurEl) classCurEl.value = classMaxEl.value;
-
-  renderSpellSlotGrid();
-  saveSheet(false);
-  showStatus("Long Rest Complete!");
-}
-
-function applyShortRest() {
-  const hdCurEl = document.getElementById("hitDiceCur");
-  const curHd = parseInt(hdCurEl?.value, 10) || 0;
-  const maxHd = parseInt(document.getElementById("hitDiceMax")?.value, 10) || 1;
-
-  if (curHd <= 0) {
-    alert("You have no Hit Dice left to spend during a Short Rest!");
-    return;
-  }
-
-  const spend = confirm(`Take a Short Rest?\nYou have ${curHd} of ${maxHd} Hit Dice available.\nClick OK to spend 1 Hit Die and recover HP.`);
-  if (spend) {
-    const conMod = parseInt(document.getElementById("mod_con")?.textContent, 10) || 0;
-    const roll = Math.floor(Math.random() * 8) + 1;
-    const healTotal = Math.max(1, roll + conMod);
-
-    hdCurEl.value = Math.max(0, curHd - 1);
-
-    const curHpEl = document.getElementById("curHp");
-    const maxHp = parseInt(document.getElementById("maxHp")?.value, 10) || 10;
-    const curHp = parseInt(curHpEl?.value, 10) || 0;
-    const newHp = Math.min(maxHp, curHp + healTotal);
-    if (curHpEl) curHpEl.value = newHp;
-
-    addDiceHistory(`Short Rest Hit Die (1d8 + ${conMod})`, healTotal);
-    saveSheet(false);
-    showStatus(`Regained ${healTotal} HP!`);
-  }
-}
-
-function applyHpAdjustment(action) {
-  const amountInput = document.getElementById("hpModalAmount");
-  const amt = parseInt(amountInput?.value, 10);
-  if (isNaN(amt) || amt <= 0) {
-    alert("Please enter a valid number greater than 0.");
-    return;
-  }
-
-  const curHpEl = document.getElementById("curHp");
-  const maxHp = parseInt(document.getElementById("maxHp")?.value, 10) || 10;
-  const tempHpEl = document.getElementById("tempHp");
-
-  let curHp = parseInt(curHpEl?.value, 10) || 0;
-  let tempHp = parseInt(tempHpEl?.value, 10) || 0;
-
-  if (action === "damage") {
-    let damageLeft = amt;
-    if (tempHp > 0) {
-      if (tempHp >= damageLeft) {
-        tempHp -= damageLeft;
-        damageLeft = 0;
-      } else {
-        damageLeft -= tempHp;
-        tempHp = 0;
-      }
-    }
-    curHp = Math.max(0, curHp - damageLeft);
-    if (tempHpEl) tempHpEl.value = tempHp;
-    if (curHpEl) curHpEl.value = curHp;
-    showStatus(`Took ${amt} damage!`);
-  } else if (action === "heal") {
-    curHp = Math.min(maxHp, curHp + amt);
-    if (curHpEl) curHpEl.value = curHp;
-    showStatus(`Healed for ${amt} HP!`);
-  } else if (action === "temp") {
-    tempHp = Math.max(tempHp, amt);
-    if (tempHpEl) tempHpEl.value = tempHp;
-    showStatus(`Gained ${amt} Temp HP!`);
-  }
-
-  amountInput.value = "";
-  closeModal("hpModal");
-  saveSheet(false);
-}
-
-function renderCharList() {
-  const container = document.getElementById("charList");
-  if (!container) return;
-  const roster = getRoster();
-  const keys = Object.keys(roster);
-
-  if (keys.length === 0) {
-    container.innerHTML = `<p class="loading-text" style="color: #64748b; font-style: italic;">No saved characters found.</p>`;
-    return;
-  }
-
-  container.innerHTML = keys.map((id) => {
-    const char = roster[id];
-    const isActive = id === activeCharId;
-    return `
-      <div class="char-item-row" data-id="${id}">
-        <div class="char-item-info">
-          <span class="char-item-name">${escapeHtml(char.name || "Unnamed Character")}</span>
-          <span class="char-item-sub">${escapeHtml(char.summary || "")}</span>
-        </div>
-        <div class="char-actions">
-          <button type="button" class="char-select-btn ${isActive ? "active" : ""}">${isActive ? "Active" : "Select"}</button>
-          <button type="button" class="char-delete-btn" title="Delete character">&times;</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderClassDropdown(filter = "") {
-  const dropdown = document.getElementById("classDropdown");
-  if (!dropdown) return;
-  const q = filter.toLowerCase().trim();
-  const filtered = DND_CLASSES.filter((c) => c.toLowerCase().includes(q));
-
-  if (filtered.length === 0) {
-    dropdown.innerHTML = `<div class="dropdown-item" style="color:#64748b; cursor:default;">No classes match</div>`;
-    return;
-  }
-
-  dropdown.innerHTML = filtered.map((c) => `
-    <div class="dropdown-item select-class-item" data-name="${escapeHtml(c)}">${escapeHtml(c)}</div>
-  `).join("");
-}
-
-function renderRaceDropdown(filter = "") {
-  const dropdown = document.getElementById("raceDropdown");
-  if (!dropdown) return;
-  const q = filter.toLowerCase().trim();
-
-  let html = "";
-  DND_RACES_CATALOG.forEach((group) => {
-    const subMatches = group.subraces.filter((s) => s.toLowerCase().includes(q));
-    const raceMatches = group.race.toLowerCase().includes(q);
-
-    if (raceMatches || subMatches.length > 0) {
-      html += `<div class="dropdown-header-item">${escapeHtml(group.race)}</div>`;
-      if (!q || raceMatches) {
-        html += `<div class="dropdown-item select-race-item" data-name="${escapeHtml(group.race)}">${escapeHtml(group.race)} (Base)</div>`;
-      }
-      const listToDisplay = q && !raceMatches ? subMatches : group.subraces;
-      listToDisplay.forEach((sub) => {
-        if (sub !== group.race) {
-          html += `<div class="dropdown-item subrace-item select-race-item" data-name="${escapeHtml(sub)}">${escapeHtml(sub)}</div>`;
-        }
-      });
-    }
-  });
-
-  dropdown.innerHTML = html || `<div class="dropdown-item" style="color:#64748b; cursor:default;">No races match</div>`;
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId)?.classList.remove("open");
-}
-
-function closeAllModals() {
-  document.querySelectorAll(".modal-backdrop.open").forEach((m) => m.classList.remove("open"));
-}
-
-function switchMainTab(targetId) {
-  document.querySelectorAll(".main-tab").forEach((b) => b.classList.remove("active"));
-  document.querySelectorAll(".tab-page").forEach((p) => p.classList.remove("active"));
-  document.querySelector(`.main-tab[data-target="${targetId}"]`)?.classList.add("active");
-  document.getElementById(targetId)?.classList.add("active");
-}
-
-function setAuthError(message) {
-  const el = document.getElementById("authErrorMsg");
-  if (el) el.textContent = message || "";
-}
-
-function updateAuthUI(user) {
-  const authBtn = document.getElementById("authModalBtn");
-  const loggedOutView = document.getElementById("authLoggedOutView");
-  const loggedInView = document.getElementById("authLoggedInView");
-  const userText = document.getElementById("currentUserText");
-
-  if (user && !user.isAnonymous) {
-    if (authBtn) authBtn.textContent = user.displayName || user.email.split("@")[0];
-    if (loggedOutView) loggedOutView.style.display = "none";
-    if (loggedInView) loggedInView.style.display = "block";
-    if (userText) userText.textContent = user.email;
-  } else {
-    if (authBtn) authBtn.textContent = "Account";
-    if (loggedOutView) loggedOutView.style.display = "block";
-    if (loggedInView) loggedInView.style.display = "none";
-    if (userText) userText.textContent = "";
-  }
-}
-
-if (auth) {
-  auth.onAuthStateChanged(async (user) => {
-    currentUser = user;
-    updateAuthUI(user);
-
-    if (user && !user.isAnonymous && db) {
-      try {
-        const doc = await db.collection("users").doc(user.uid).get();
-        if (doc.exists && doc.data()?.roster) {
-          const merged = { ...getRoster(), ...doc.data().roster };
-          localStorage.setItem(ROSTER_STORAGE_KEY, JSON.stringify(merged));
-          loadSheet();
-          showStatus("Cloud Synced");
-        } else {
-          const localRoster = getRoster();
-          if (Object.keys(localRoster).length > 0) syncRosterToCloud(localRoster);
-        }
-      } catch (err) {
-        console.error("Cloud sync load error:", err);
-      }
-    }
-  });
 }
 
 // Master Click Event Delegation
@@ -2738,13 +1757,15 @@ document.addEventListener("click", async (e) => {
     if (confirm(`Permanently delete "${roster[activeCharId]?.name || "this character"}"?`)) {
       delete roster[activeCharId];
       saveRoster(roster);
-      const remaining = Object.keys(roster);
-      if (remaining.length > 0) {
-        activeCharId = remaining[0];
-        localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
-        loadSheet();
-      } else {
-        resetSheet();
+      if (activeCharId === row.dataset.id) {
+        const remaining = Object.keys(roster);
+        if (remaining.length > 0) {
+          activeCharId = remaining[0];
+          localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
+          loadSheet();
+        } else {
+          resetSheet();
+        }
       }
       renderCharList();
     }
@@ -2971,7 +1992,7 @@ document.getElementById("charRace")?.addEventListener("input", (e) => {
   document.getElementById("raceDropdown")?.classList.add("open");
 });
 
-// Search inputs for Spells and Abilities
+// Compendium Search Inputs with Immediate Results
 document.getElementById("spellSearchInput")?.addEventListener("input", (e) => {
   filterAndRenderSpells(e.target.value);
 });
