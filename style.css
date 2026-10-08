@@ -1,14 +1,15 @@
 /* ==========================================================================
-   1. THEME DEFINITIONS & COLOR PALETTES
+   1. THEME DEFINITIONS & COLOR PALETTES (11 TOTAL THEMES)
    ========================================================================== */
 
-/* Theme 1: Obsidian Dark (Default) */
+/* Theme 1: Obsidian Dark (Default) - Volcanic Crystalline Glass */
 :root, body.theme-obsidian {
   --bg-deep: #050811;
   --bg-surface: #0b1120;
   --bg-card: #111a2e;
   --bg-input: #070c18;
   --bg-hover: #192640;
+  --card-gradient: linear-gradient(145deg, #131d33 0%, #0c1322 100%);
 
   --border-subtle: #1e293b;
   --border-medium: #2a3d5e;
@@ -25,47 +26,51 @@
   --text-muted: #94a3b8;
   --text-dim: #64748b;
 
-  --glow-1: rgba(239, 68, 68, 0.08);
-  --glow-2: rgba(56, 189, 248, 0.08);
+  --glow-1: rgba(239, 68, 68, 0.12);
+  --glow-2: rgba(56, 189, 248, 0.12);
+  --theme-rim: rgba(56, 189, 248, 0.15);
 }
 
-/* Theme 2: Ancient Parchment */
+/* Theme 2: Ancient Parchment - Worn Sepia Fibrous Manuscript */
 body.theme-parchment {
-  --bg-deep: #201a14;
-  --bg-surface: #2c241c;
-  --bg-card: #382e23;
-  --bg-input: #17130e;
-  --bg-hover: #463a2c;
+  --bg-deep: #1c150e;
+  --bg-surface: #261d15;
+  --bg-card: #33271d;
+  --bg-input: #150f09;
+  --bg-hover: #423226;
+  --card-gradient: linear-gradient(145deg, #3a2d21 0%, #281e15 100%);
 
-  --border-subtle: #4c3f30;
-  --border-medium: #675542;
+  --border-subtle: #4a3828;
+  --border-medium: #69503a;
   --border-active: #d97706;
 
   --primary-red: #b45309;
   --primary-red-hover: #92400e;
   --accent-gold: #d97706;
-  --accent-blue: #78716c;
-  --accent-purple: #a8715a;
-  --accent-emerald: #65a30d;
+  --accent-blue: #8c7e6c;
+  --accent-purple: #ab7355;
+  --accent-emerald: #719e1c;
 
-  --text-main: #f5eedb;
-  --text-muted: #d6c7af;
-  --text-dim: #9e8e76;
+  --text-main: #fcf4e4;
+  --text-muted: #dcc8ae;
+  --text-dim: #a69177;
 
-  --glow-1: rgba(217, 119, 6, 0.12);
-  --glow-2: rgba(180, 83, 9, 0.1);
+  --glow-1: rgba(217, 119, 6, 0.15);
+  --glow-2: rgba(180, 83, 9, 0.14);
+  --theme-rim: rgba(217, 119, 6, 0.2);
 }
 
-/* Theme 3: Eldritch Void */
+/* Theme 3: Eldritch Void - Abyssal Cosmic Nebula */
 body.theme-eldritch {
-  --bg-deep: #06020c;
-  --bg-surface: #0e051a;
-  --bg-card: #17092c;
-  --bg-input: #080210;
-  --bg-hover: #260e48;
+  --bg-deep: #05010b;
+  --bg-surface: #0d041c;
+  --bg-card: #16072e;
+  --bg-input: #070110;
+  --bg-hover: #260a4f;
+  --card-gradient: linear-gradient(145deg, #1a0837 0%, #0d031c 100%);
 
-  --border-subtle: #2d1254;
-  --border-medium: #4c1d95;
+  --border-subtle: #2b0e57;
+  --border-medium: #4e1996;
   --border-active: #a855f7;
 
   --primary-red: #a855f7;
@@ -75,24 +80,26 @@ body.theme-eldritch {
   --accent-purple: #c084fc;
   --accent-emerald: #06b6d4;
 
-  --text-main: #f5f3ff;
-  --text-muted: #c4b5fd;
-  --text-dim: #7c3aed;
+  --text-main: #faf5ff;
+  --text-muted: #d8b4fe;
+  --text-dim: #8b5cf6;
 
-  --glow-1: rgba(168, 85, 247, 0.15);
-  --glow-2: rgba(6, 182, 212, 0.12);
+  --glow-1: rgba(168, 85, 247, 0.2);
+  --glow-2: rgba(6, 182, 212, 0.16);
+  --theme-rim: rgba(168, 85, 247, 0.3);
 }
 
-/* Theme 4: Celestial Light */
+/* Theme 4: Celestial Light - Gilded Divine Starlight */
 body.theme-celestial {
-  --bg-deep: #030d18;
-  --bg-surface: #081726;
-  --bg-card: #0f243a;
-  --bg-input: #040d16;
-  --bg-hover: #183756;
+  --bg-deep: #020b16;
+  --bg-surface: #061528;
+  --bg-card: #0b213f;
+  --bg-input: #030d1c;
+  --bg-hover: #13335e;
+  --card-gradient: linear-gradient(145deg, #0e2b52 0%, #081930 100%);
 
-  --border-subtle: #1e3a5f;
-  --border-medium: #2b5484;
+  --border-subtle: #193f72;
+  --border-medium: #25589c;
   --border-active: #fbbf24;
 
   --primary-red: #f59e0b;
@@ -106,20 +113,22 @@ body.theme-celestial {
   --text-muted: #bae6fd;
   --text-dim: #7dd3fc;
 
-  --glow-1: rgba(251, 191, 36, 0.12);
-  --glow-2: rgba(96, 165, 250, 0.14);
+  --glow-1: rgba(251, 191, 36, 0.18);
+  --glow-2: rgba(96, 165, 250, 0.18);
+  --theme-rim: rgba(251, 191, 36, 0.25);
 }
 
-/* Theme 5: Verdant Grove */
+/* Theme 5: Verdant Grove - Bioluminescent Deep Canopy */
 body.theme-emerald {
-  --bg-deep: #030f0a;
-  --bg-surface: #071a12;
-  --bg-card: #0c271c;
-  --bg-input: #030d09;
-  --bg-hover: #133a2a;
+  --bg-deep: #020c07;
+  --bg-surface: #05190f;
+  --bg-card: #092819;
+  --bg-input: #020d08;
+  --bg-hover: #103d27;
+  --card-gradient: linear-gradient(145deg, #0d3522 0%, #061d12 100%);
 
-  --border-subtle: #1b4d37;
-  --border-medium: #276749;
+  --border-subtle: #154e32;
+  --border-medium: #21734b;
   --border-active: #10b981;
 
   --primary-red: #10b981;
@@ -133,8 +142,183 @@ body.theme-emerald {
   --text-muted: #a7f3d0;
   --text-dim: #6ee7b7;
 
-  --glow-1: rgba(16, 185, 129, 0.14);
-  --glow-2: rgba(45, 212, 191, 0.1);
+  --glow-1: rgba(16, 185, 129, 0.18);
+  --glow-2: rgba(45, 212, 191, 0.15);
+  --theme-rim: rgba(16, 185, 129, 0.25);
+}
+
+/* Theme 6: Aethertech Clockwork - Polished Brass & Cyan Conduit */
+body.theme-aethertech {
+  --bg-deep: #060a12;
+  --bg-surface: #0c1424;
+  --bg-card: #131f36;
+  --bg-input: #080d17;
+  --bg-hover: #1d2e4f;
+  --card-gradient: linear-gradient(145deg, #182845 0%, #0f1a2c 100%);
+
+  --border-subtle: #2b3952;
+  --border-medium: #875c36;
+  --border-active: #00f0ff;
+
+  --primary-red: #d97706;
+  --primary-red-hover: #b45309;
+  --accent-gold: #eab308;
+  --accent-blue: #00f0ff;
+  --accent-purple: #38bdf8;
+  --accent-emerald: #10b981;
+
+  --text-main: #f0f7ff;
+  --text-muted: #9bb0ce;
+  --text-dim: #667c9c;
+
+  --glow-1: rgba(0, 240, 255, 0.18);
+  --glow-2: rgba(217, 119, 6, 0.18);
+  --theme-rim: rgba(0, 240, 255, 0.35);
+}
+
+/* Theme 7: Crimson Rite / Blood Moon - Gothic Ash & Arterial Crimson */
+body.theme-bloodmoon {
+  --bg-deep: #090204;
+  --bg-surface: #140409;
+  --bg-card: #200810;
+  --bg-input: #0a0104;
+  --bg-hover: #320d19;
+  --card-gradient: linear-gradient(145deg, #270a14 0%, #150409 100%);
+
+  --border-subtle: #3d1020;
+  --border-medium: #611730;
+  --border-active: #e11d48;
+
+  --primary-red: #e11d48;
+  --primary-red-hover: #be123c;
+  --accent-gold: #fb7185;
+  --accent-blue: #fda4af;
+  --accent-purple: #a21caf;
+  --accent-emerald: #f43f5e;
+
+  --text-main: #fff1f2;
+  --text-muted: #fecdd3;
+  --text-dim: #fb7185;
+
+  --glow-1: rgba(225, 29, 72, 0.25);
+  --glow-2: rgba(162, 28, 175, 0.16);
+  --theme-rim: rgba(225, 29, 72, 0.35);
+}
+
+/* Theme 8: Glacial Frost - Frosted Arctic Glass & Aurora */
+body.theme-glacial {
+  --bg-deep: #020812;
+  --bg-surface: #061324;
+  --bg-card: #0a213d;
+  --bg-input: #030c18;
+  --bg-hover: #10345e;
+  --card-gradient: linear-gradient(145deg, #0f2d52 0%, #07192f 100%);
+
+  --border-subtle: #193d6b;
+  --border-medium: #2f6ea8;
+  --border-active: #38bdf8;
+
+  --primary-red: #38bdf8;
+  --primary-red-hover: #0284c7;
+  --accent-gold: #7dd3fc;
+  --accent-blue: #00f0ff;
+  --accent-purple: #818cf8;
+  --accent-emerald: #2dd4bf;
+
+  --text-main: #f0faff;
+  --text-muted: #bae6fd;
+  --text-dim: #7dd3fc;
+
+  --glow-1: rgba(56, 189, 248, 0.22);
+  --glow-2: rgba(0, 240, 255, 0.18);
+  --theme-rim: rgba(125, 211, 252, 0.35);
+}
+
+/* Theme 9: Bioluminescent Underdark - Cavern Abyss & Toxic Spore */
+body.theme-underdark {
+  --bg-deep: #020409;
+  --bg-surface: #060a14;
+  --bg-card: #0d1424;
+  --bg-input: #03060c;
+  --bg-hover: #16223b;
+  --card-gradient: linear-gradient(145deg, #101a30 0%, #080d19 100%);
+
+  --border-subtle: #1a2742;
+  --border-medium: #2e436e;
+  --border-active: #00ff88;
+
+  --primary-red: #00ff88;
+  --primary-red-hover: #00cc6a;
+  --accent-gold: #f43f5e;
+  --accent-blue: #00f0ff;
+  --accent-purple: #d946ef;
+  --accent-emerald: #00ff88;
+
+  --text-main: #f0fdf4;
+  --text-muted: #bbf7d0;
+  --text-dim: #86efac;
+
+  --glow-1: rgba(0, 255, 136, 0.2);
+  --glow-2: rgba(217, 70, 239, 0.2);
+  --theme-rim: rgba(0, 255, 136, 0.35);
+}
+
+/* Theme 10: Solaris / Radiant Dawn - Alabaster Ivory & Sunburst Gold */
+body.theme-solaris {
+  --bg-deep: #140f07;
+  --bg-surface: #21190c;
+  --bg-card: #2e2311;
+  --bg-input: #110c05;
+  --bg-hover: #403219;
+  --card-gradient: linear-gradient(145deg, #382b15 0%, #241b0b 100%);
+
+  --border-subtle: #4d3a1b;
+  --border-medium: #7a5d2c;
+  --border-active: #f59e0b;
+
+  --primary-red: #f59e0b;
+  --primary-red-hover: #d97706;
+  --accent-gold: #fbbf24;
+  --accent-blue: #fde68a;
+  --accent-purple: #f59e0b;
+  --accent-emerald: #eab308;
+
+  --text-main: #fffbeb;
+  --text-muted: #fef3c7;
+  --text-dim: #fde68a;
+
+  --glow-1: rgba(245, 158, 11, 0.25);
+  --glow-2: rgba(251, 191, 36, 0.22);
+  --theme-rim: rgba(245, 158, 11, 0.35);
+}
+
+/* Theme 11: Cartographer’s Sketchbook - Sepia Draft & Umber Ink */
+body.theme-cartographer {
+  --bg-deep: #17120c;
+  --bg-surface: #241b12;
+  --bg-card: #302419;
+  --bg-input: #120d09;
+  --bg-hover: #403022;
+  --card-gradient: linear-gradient(145deg, #382b1d 0%, #261c13 100%);
+
+  --border-subtle: #473625;
+  --border-medium: #6b5239;
+  --border-active: #c2410c;
+
+  --primary-red: #c2410c;
+  --primary-red-hover: #9a3412;
+  --accent-gold: #ea580c;
+  --accent-blue: #8f7f6f;
+  --accent-purple: #a86b51;
+  --accent-emerald: #65a30d;
+
+  --text-main: #fbf6ec;
+  --text-muted: #ded1c1;
+  --text-dim: #a89885;
+
+  --glow-1: rgba(194, 65, 12, 0.2);
+  --glow-2: rgba(234, 88, 12, 0.15);
+  --theme-rim: rgba(194, 65, 12, 0.3);
 }
 
 /* Common sizing & shadow constants */
@@ -172,7 +356,7 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 .ambient-glow {
@@ -183,6 +367,7 @@ body {
   filter: blur(140px);
   pointer-events: none;
   z-index: 0;
+  transition: background 0.35s ease;
 }
 .glow-crimson { top: -100px; left: -100px; background: var(--glow-1); }
 .glow-sapphire { bottom: -100px; right: -100px; background: var(--glow-2); }
@@ -335,6 +520,7 @@ textarea::-webkit-scrollbar-thumb,
   backdrop-filter: blur(14px);
   position: relative;
   z-index: 1;
+  transition: background-color 0.35s ease, border-color 0.35s ease;
 }
 
 /* ==========================================================================
@@ -499,7 +685,7 @@ textarea::-webkit-scrollbar-thumb,
    4. HERO CODEX BANNER
    ========================================================================== */
 .hero-codex-card {
-  background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-surface) 100%);
+  background: var(--card-gradient, linear-gradient(145deg, var(--bg-card) 0%, var(--bg-surface) 100%));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 1.35rem 1.6rem;
@@ -507,6 +693,7 @@ textarea::-webkit-scrollbar-thumb,
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 .hero-codex-card::before {
   content: "";
@@ -541,7 +728,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .avatar-portal:hover {
   border-color: var(--primary-red);
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 16px var(--theme-rim, rgba(239, 68, 68, 0.45));
 }
 .avatar-pulse-ring {
   position: absolute;
@@ -892,7 +1079,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 .vitals-card {
-  background: var(--bg-card);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 1.15rem 1.25rem;
@@ -2315,6 +2502,11 @@ kbd {
   font-family: 'Courier New', Courier, monospace;
   font-weight: 700;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  background: var(--bg-card);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  border: 1px solid var(--border-subtle);
+  color: #fff;
 }
 
 /* Party / DM Dashboard Modal */
