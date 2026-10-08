@@ -461,7 +461,7 @@ function attachSpellDragEvents() {
       const targetIndex = parseInt(card.dataset.index, 10);
       if (draggedSpellIndex === targetIndex) return;
 
-      const moved = myCharacterSpells.splice(draggedSpellIndex, 1)[0];
+      const moved = myCharacterSpells.splice(draggedSpellIndex, 1) 0 ;
       myCharacterSpells.splice(targetIndex, 0, moved);
       saveSheet(false);
       renderMySpells();
@@ -761,7 +761,7 @@ function loadSheet() {
   } else {
     const keys = Object.keys(roster);
     if (keys.length > 0) {
-      activeCharId = keys[0];
+      activeCharId = keys 0 ;
       localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
       applyCharacterData(roster[activeCharId]);
     } else {
@@ -1013,8 +1013,8 @@ async function startDMLiveListener(roomCode) {
   if (closeBtn) closeBtn.style.display = "inline-flex";
 
   try {
-    await db.collection("campaigns").doc(roomCode).set({
-      created: true,
+    await db.collection("campaigns").doc(roomCode).collection("members").doc("host_dm").set({
+      isHost: true,
       lastActive: Date.now()
     }, { merge: true });
   } catch (e) {}
@@ -1548,7 +1548,7 @@ const SKILL_DEFINITIONS = [
 function importFromPconParchment(rawJson) {
   let source = rawJson;
   if (Array.isArray(source)) {
-    source = source[0] || {};
+    source = source 0  || {};
   }
   const d = source.data || {};
   const fields = {};
@@ -1562,7 +1562,7 @@ function importFromPconParchment(rawJson) {
   fields.tempHp = d.hpTemp || 0;
 
   if (Array.isArray(d.classes) && d.classes.length > 0) {
-    const primary = d.classes[0];
+    const primary = d.classes 0 ;
     fields.charClass = primary.name || d.className || "";
     fields.charLevel = primary.level || d.level || 1;
   } else {
@@ -1789,7 +1789,7 @@ function importFromPconParchment(rawJson) {
 
 function importFromDnDBeyond(rawJson) {
   let source = rawJson;
-  if (Array.isArray(source)) source = source[0] || {};
+  if (Array.isArray(source)) source = source 0  || {};
   const d = source.data || source;
 
   if (!d || (!d.name && !d.stats && !d.classes)) {
@@ -2175,14 +2175,23 @@ function applyHpAdjustment(action) {
 
 function openPartyModal() {
   updatePartyStatusUI();
-  document.getElementById("partyModal")?.classList.add("open");
+  const modal = document.getElementById("partyModal");
+  if (modal) {
+    modal.classList.add("open");
+    // Ensure the default subtab (Player view) is active
+    modal.querySelectorAll(".party-mode-tabs .sub-tab").forEach((b, i) => {
+      b.classList.toggle("active", i === 0);
+    });
+    document.getElementById("party-join-view")?.classList.add("active");
+    document.getElementById("party-dm-view")?.classList.remove("active");
+  }
 }
 
 function openSpellModal() {
   const input = document.getElementById("spellSearchInput");
   if (input) input.value = "";
   loadAllSpells();
-  renderModalSpells(allSpellsCache);
+  filterAndRenderSpells("");
   document.getElementById("spellModal")?.classList.add("open");
   setTimeout(() => input?.focus(), 60);
 }
@@ -2191,7 +2200,7 @@ function openTraitModal() {
   const input = document.getElementById("traitSearchInput");
   if (input) input.value = "";
   loadAllTraits();
-  renderModalTraits(allTraitsCache);
+  filterAndRenderTraits("");
   document.getElementById("traitModal")?.classList.add("open");
   setTimeout(() => input?.focus(), 60);
 }
@@ -2241,11 +2250,13 @@ document.addEventListener("click", async (e) => {
 
   // Modal Close Buttons
   if (e.target.classList.contains("modal-close-btn") || e.target.closest(".modal-close-btn")) {
+    e.preventDefault();
     e.target.closest(".modal-backdrop")?.classList.remove("open");
     if (e.target.closest("#dmInspectModal")) currentInspectedMemberId = null;
     return;
   }
   if (e.target.classList.contains("modal-backdrop")) {
+    e.preventDefault();
     e.target.classList.remove("open");
     if (e.target.id === "dmInspectModal") currentInspectedMemberId = null;
     return;
@@ -2254,6 +2265,7 @@ document.addEventListener("click", async (e) => {
   // TOP BAR COMMAND BUTTONS
   // Party Button
   if (e.target.id === "partyModalBtn" || e.target.closest("#partyModalBtn")) {
+    e.preventDefault();
     openPartyModal();
     return;
   }
@@ -2327,7 +2339,7 @@ document.addEventListener("click", async (e) => {
       saveRoster(roster);
       const remaining = Object.keys(roster);
       if (remaining.length > 0) {
-        activeCharId = remaining[0];
+        activeCharId = remaining 0 ;
         localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
         loadSheet();
       } else {
@@ -2380,12 +2392,14 @@ document.addEventListener("click", async (e) => {
 
   // + ADD SPELL BUTTON
   if (e.target.id === "addSpellBtn" || e.target.closest("#addSpellBtn") || e.target.closest(".btn-add-spell")) {
+    e.preventDefault();
     openSpellModal();
     return;
   }
 
   // + ADD ABILITY BUTTON
   if (e.target.id === "addTraitBtn" || e.target.closest("#addTraitBtn") || e.target.closest(".btn-add-trait")) {
+    e.preventDefault();
     openTraitModal();
     return;
   }
@@ -2420,26 +2434,12 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Pick Spell from compendium
+  // Pick Spell from compendium (Instantly adds without blocking on remote network)
   const spellRow = e.target.closest(".spell-pick-row");
   if (spellRow) {
     const name = spellRow.dataset.name;
     const url = spellRow.dataset.url;
     let detail = allSpellsCache.find((s) => s.name.toLowerCase() === name.toLowerCase());
-
-    if (url && (!detail || !detail.desc)) {
-      const fetched = await fetchAPI("https://www.dnd5eapi.co" + url);
-      if (fetched) {
-        detail = {
-          name: fetched.name,
-          type: fetched.level === 0 ? "Cantrip" : `Level ${fetched.level}`,
-          casting_time: fetched.casting_time || "1 Action",
-          range: fetched.range || "30 ft",
-          duration: fetched.duration || "Instantaneous",
-          desc: Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "")
-        };
-      }
-    }
 
     myCharacterSpells.push({
       name: detail?.name || name,
@@ -2454,26 +2454,29 @@ document.addEventListener("click", async (e) => {
     renderMySpells();
     closeModal("spellModal");
     showStatus(`Added ${name}!`);
+
+    // Asynchronously update spell description if missing
+    if (url && (!detail || !detail.desc)) {
+      fetchAPI("https://www.dnd5eapi.co" + url).then((fetched) => {
+        if (fetched && fetched.desc) {
+          const addedSpell = myCharacterSpells[myCharacterSpells.length - 1];
+          if (addedSpell && addedSpell.name.toLowerCase() === name.toLowerCase() && !addedSpell.desc) {
+            addedSpell.desc = Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "");
+            saveSheet(true);
+            renderMySpells();
+          }
+        }
+      }).catch(() => {});
+    }
     return;
   }
 
-  // Pick Trait from compendium
+  // Pick Trait from compendium (Instantly adds without blocking on remote network)
   const traitRow = e.target.closest(".trait-pick-row");
   if (traitRow) {
     const name = traitRow.dataset.name;
     const url = traitRow.dataset.url;
     let detail = allTraitsCache.find((t) => t.name.toLowerCase() === name.toLowerCase());
-
-    if (url && (!detail || !detail.desc)) {
-      const fetched = await fetchAPI("https://www.dnd5eapi.co" + url);
-      if (fetched) {
-        detail = {
-          name: fetched.name,
-          type: traitRow.dataset.type || "Feature",
-          desc: Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "")
-        };
-      }
-    }
 
     myCharacterTraits.push({
       name: detail?.name || name,
@@ -2486,6 +2489,20 @@ document.addEventListener("click", async (e) => {
     renderMyTraits();
     closeModal("traitModal");
     showStatus(`Added ${name}!`);
+
+    // Asynchronously update trait description if missing
+    if (url && (!detail || !detail.desc)) {
+      fetchAPI("https://www.dnd5eapi.co" + url).then((fetched) => {
+        if (fetched && fetched.desc) {
+          const addedTrait = myCharacterTraits[myCharacterTraits.length - 1];
+          if (addedTrait && addedTrait.name.toLowerCase() === name.toLowerCase() && !addedTrait.desc) {
+            addedTrait.desc = Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "");
+            saveSheet(true);
+            renderMyTraits();
+          }
+        }
+      }).catch(() => {});
+    }
     return;
   }
 
@@ -2823,7 +2840,7 @@ document.addEventListener("click", async (e) => {
       if (activeCharId === row.dataset.id) {
         const remaining = Object.keys(roster);
         if (remaining.length > 0) {
-          activeCharId = remaining[0];
+          activeCharId = remaining 0 ;
           localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
           loadSheet();
         } else {
@@ -2856,14 +2873,17 @@ document.addEventListener("click", async (e) => {
 // Explicit Button Click Attachments
 document.getElementById("partyModalBtn")?.addEventListener("click", (e) => {
   e.preventDefault();
+  e.stopPropagation();
   openPartyModal();
 });
 document.getElementById("addSpellBtn")?.addEventListener("click", (e) => {
   e.preventDefault();
+  e.stopPropagation();
   openSpellModal();
 });
 document.getElementById("addTraitBtn")?.addEventListener("click", (e) => {
   e.preventDefault();
+  e.stopPropagation();
   openTraitModal();
 });
 
@@ -2873,7 +2893,7 @@ document.getElementById("themeSelect")?.addEventListener("change", (e) => {
 });
 
 document.getElementById("avatarFileInput")?.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
+  const file = e.target.files?. 0 ;
   if (!file) return;
 
   const reader = new FileReader();
@@ -2993,7 +3013,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.getElementById("restoreFile")?.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
+  const file = e.target.files?. 0 ;
   if (!file) return;
 
   const reader = new FileReader();
@@ -3005,7 +3025,7 @@ document.getElementById("restoreFile")?.addEventListener("change", (e) => {
         Object.assign(roster, parsed.allRoster);
         const keys = Object.keys(parsed.allRoster);
         if (keys.length > 0) {
-          activeCharId = keys[0];
+          activeCharId = keys 0 ;
           localStorage.setItem(ACTIVE_CHAR_ID_KEY, activeCharId);
         }
       } else if (parsed.character) {
@@ -3025,7 +3045,7 @@ document.getElementById("restoreFile")?.addEventListener("change", (e) => {
 });
 
 document.getElementById("parchmentFileInput")?.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
+  const file = e.target.files?. 0 ;
   if (!file) return;
 
   const reader = new FileReader();
@@ -3042,7 +3062,7 @@ document.getElementById("parchmentFileInput")?.addEventListener("change", (e) =>
 });
 
 document.getElementById("dndbeyondFileInput")?.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
+  const file = e.target.files?. 0 ;
   if (!file) return;
 
   const reader = new FileReader();
