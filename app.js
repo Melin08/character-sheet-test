@@ -228,8 +228,12 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
+// Updated applyTheme function supporting all 11 themes
 function applyTheme(themeName) {
-  const themes = ["theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald"];
+  const themes = [
+    "theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald",
+    "theme-aethertech", "theme-bloodmoon", "theme-glacial", "theme-underdark", "theme-solaris", "theme-cartographer"
+  ];
   themes.forEach((t) => document.body.classList.remove(t));
   const validTheme = themes.includes(themeName) ? themeName : "theme-obsidian";
   document.body.classList.add(validTheme);
@@ -846,6 +850,7 @@ async function joinCampaignRoom(roomCode) {
     await syncToLiveCampaign(roster[activeCharId]);
   }
 
+  // Monitor membership
   if (playerDocUnsubscribe) {
     playerDocUnsubscribe();
     playerDocUnsubscribe = null;
@@ -1228,6 +1233,7 @@ function importFromPconParchment(rawJson) {
   const d = source.data || {};
   const fields = {};
 
+  // Identity & Core Vitals
   fields.charName = source.name || d.name || "Unnamed Adventurer";
   fields.ac = d.ac !== undefined && d.ac !== "" ? d.ac : 10;
   fields.charSpeed = d.speed !== undefined && d.speed !== "" ? d.speed : 30;
@@ -1236,6 +1242,7 @@ function importFromPconParchment(rawJson) {
   fields.maxHp = d.hpMax !== undefined && d.hpMax !== "" ? d.hpMax : 10;
   fields.tempHp = d.hpTemp || 0;
 
+  // Class & Level
   if (Array.isArray(d.classes) && d.classes.length > 0) {
     const primary = d.classes[0];
     fields.charClass = primary.name || d.className || "";
@@ -1245,17 +1252,20 @@ function importFromPconParchment(rawJson) {
     fields.charLevel = d.level || 1;
   }
 
+  // Race, Background, Alignment
   fields.charRace = d.species || d.race || "";
   fields.charBackground = d.background || "";
   fields.charAlignment = d.alignment || "";
   fields.charInspiration = d.heroicInspiration ? "Yes" : "None";
 
+  // Ability Scores
   const ab = d.abilities || {};
   const stats = ["str", "dex", "con", "int", "wis", "cha"];
   stats.forEach((s) => {
     fields[`attr_${s}`] = ab[s] !== undefined && ab[s] !== "" ? ab[s] : 10;
   });
 
+  // Saving Throw Proficiencies
   const statNames = {
     str: ["str", "strength"],
     dex: ["dex", "dexterity"],
@@ -1288,17 +1298,21 @@ function importFromPconParchment(rawJson) {
     fields[`save_${s}`] = isSaveProf;
   });
 
+  // Death Saves
   fields.deathSucc = d.deathSaveSuccesses || 0;
   fields.deathFail = d.deathSaveFailures || 0;
 
+  // Currency
   const c = d.coins || {};
   fields.coin_cp = c.cp || 0;
   fields.coin_sp = c.sp || 0;
   fields.coin_gp = c.gp || 0;
   fields.coin_pp = c.pp || 0;
 
+  // Spellcasting Ability & DC
   fields.spellAbility = d.spellAbility ? d.spellAbility.toUpperCase() : "";
 
+  // Spell Slots
   if (Array.isArray(d.spellSlots)) {
     d.spellSlots.forEach((slot, idx) => {
       const lvl = idx + 1;
@@ -1311,11 +1325,13 @@ function importFromPconParchment(rawJson) {
     });
   }
 
+  // Hit Dice
   if (d.hitDiceMax) fields.hitDiceMax = d.hitDiceMax;
   if (d.hitDiceAvailable !== undefined && d.hitDiceAvailable !== "") {
     fields.hitDiceCur = d.hitDiceAvailable;
   }
 
+  // Notes & Lore Tab fields
   fields.traits = d.personality || "";
   fields.ideals = d.ideals || "";
   fields.bonds = d.bonds || "";
@@ -1324,6 +1340,7 @@ function importFromPconParchment(rawJson) {
   fields.campaignNotes = d.notes || "";
   fields.inventory = d.equipment || d.treasure || "";
 
+  // Proficiencies & Resistances Text Assembler
   const profSections = [];
   const stringifyList = (val) => {
     if (!val) return "";
@@ -1360,6 +1377,7 @@ function importFromPconParchment(rawJson) {
 
   fields.otherProfs = profSections.join("\n\n");
 
+  // Weapons / Attacks
   const convertedWeapons = [];
   if (Array.isArray(d.attacks)) {
     d.attacks.forEach((atk) => {
@@ -1377,6 +1395,7 @@ function importFromPconParchment(rawJson) {
     convertedWeapons.push({ name: "", atk: "", dmg: "", notes: "" });
   }
 
+  // Spells
   const convertedSpells = [];
   if (Array.isArray(d.spells)) {
     d.spells.forEach((sp) => {
@@ -1394,6 +1413,7 @@ function importFromPconParchment(rawJson) {
     });
   }
 
+  // Features & Traits
   const convertedTraits = [];
   if (d.classFeatures && typeof d.classFeatures === "string") {
     convertedTraits.push({ name: "Class Features", type: "Class Feature", desc: d.classFeatures, isExpanded: false });
@@ -1405,6 +1425,7 @@ function importFromPconParchment(rawJson) {
     convertedTraits.push({ name: "Feats", type: "Feat", desc: d.feats, isExpanded: false });
   }
 
+  // Skills & Expertise
   SKILL_DEFINITIONS.forEach((def) => {
     let isProf = false;
     let isExpert = false;
@@ -1474,8 +1495,10 @@ function importFromDnDBeyond(rawJson) {
 
   const fields = {};
 
+  // Character Name
   fields.charName = d.name || "Unnamed Adventurer";
 
+  // Classes & Level
   let totalLevel = 0;
   const classNames = [];
   if (Array.isArray(d.classes)) {
@@ -1489,9 +1512,13 @@ function importFromDnDBeyond(rawJson) {
   fields.charLevel = totalLevel || d.level || 1;
   fields.charClass = classNames.join(" / ") || d.className || "";
 
+  // Race
   fields.charRace = d.race?.fullName || d.race?.baseRaceName || d.species || "";
+
+  // Background
   fields.charBackground = d.background?.definition?.name || d.background?.customBackground?.name || "";
 
+  // Alignment
   const ALIGNMENT_MAP = {
     1: "Lawful Good", 2: "Neutral Good", 3: "Chaotic Good",
     4: "Lawful Neutral", 5: "True Neutral", 6: "Chaotic Neutral",
@@ -1500,6 +1527,7 @@ function importFromDnDBeyond(rawJson) {
   fields.charAlignment = ALIGNMENT_MAP[d.alignmentId] || d.alignment || "";
   fields.charInspiration = d.inspiration ? "Yes" : "None";
 
+  // Ability Scores (D&D Beyond: 1: STR, 2: DEX, 3: CON, 4: INT, 5: WIS, 6: CHA)
   const STAT_ID_MAP = { 1: "str", 2: "dex", 3: "con", 4: "int", 5: "wis", 6: "cha" };
   const baseScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
 
@@ -1510,6 +1538,7 @@ function importFromDnDBeyond(rawJson) {
     });
   }
 
+  // Apply stat bonuses from bonusStats / modifiers
   if (Array.isArray(d.bonusStats)) {
     d.bonusStats.forEach((b) => {
       const code = STAT_ID_MAP[b.id];
@@ -1517,6 +1546,7 @@ function importFromDnDBeyond(rawJson) {
     });
   }
 
+  // Check stat overrides
   if (Array.isArray(d.overrideStats)) {
     d.overrideStats.forEach((o) => {
       const code = STAT_ID_MAP[o.id];
@@ -1524,6 +1554,7 @@ function importFromDnDBeyond(rawJson) {
     });
   }
 
+  // Scan modifiers bucket for ability bonuses
   const allModifiers = [];
   if (d.modifiers && typeof d.modifiers === "object") {
     Object.keys(d.modifiers).forEach((cat) => {
@@ -1546,6 +1577,7 @@ function importFromDnDBeyond(rawJson) {
     fields[`attr_${s}`] = baseScores[s];
   });
 
+  // Saving Throw Proficiencies
   allModifiers.forEach((m) => {
     if (m.type === "proficiency") {
       const sub = cleanKey(m.subType);
@@ -1558,6 +1590,7 @@ function importFromDnDBeyond(rawJson) {
     }
   });
 
+  // Hit Points & Vitals
   const conMod = getModifier(baseScores.con);
   const baseHp = parseInt(d.baseHitPoints, 10) || 10;
   const bonusHp = parseInt(d.bonusHitPoints, 10) || 0;
@@ -1570,23 +1603,29 @@ function importFromDnDBeyond(rawJson) {
   fields.curHp = Math.max(0, maxHp - removedHp);
   fields.tempHp = parseInt(d.temporaryHitPoints, 10) || 0;
 
+  // Speed
   const walkSpeed = d.race?.weightSpeeds?.normal?.walk || 30;
   fields.charSpeed = parseInt(walkSpeed, 10) || 30;
 
+  // Armor Class
   const dexMod = getModifier(baseScores.dex);
   fields.ac = 10 + dexMod;
 
+  // Death Saves
   fields.deathSucc = d.deathSaves?.successCount || 0;
   fields.deathFail = d.deathSaves?.failCount || 0;
 
+  // Currency
   const curr = d.currencies || {};
   fields.coin_cp = curr.cp || 0;
   fields.coin_sp = curr.sp || 0;
   fields.coin_gp = curr.gp || 0;
   fields.coin_pp = curr.pp || 0;
 
+  // Experience
   fields.charExp = d.currentXp ? `${d.currentXp} XP` : "0 XP";
 
+  // Skills & Expertise
   SKILL_DEFINITIONS.forEach((def) => {
     let isProf = false;
     let isExpert = false;
@@ -1607,6 +1646,7 @@ function importFromDnDBeyond(rawJson) {
     fields[`cb_${def.code}_e`] = isExpert;
   });
 
+  // Spell Slots
   if (Array.isArray(d.spellSlots)) {
     d.spellSlots.forEach((slot) => {
       const lvl = slot.level;
@@ -1619,9 +1659,11 @@ function importFromDnDBeyond(rawJson) {
     });
   }
 
+  // Hit Dice
   fields.hitDiceMax = `${fields.charLevel}`;
   fields.hitDiceCur = `${fields.charLevel}`;
 
+  // Roleplay & Notes
   const traits = d.traits || {};
   fields.traits = traits.personalityTraits || "";
   fields.ideals = traits.ideals || "";
@@ -1632,6 +1674,7 @@ function importFromDnDBeyond(rawJson) {
   fields.backstory = notes.backstory || "";
   fields.campaignNotes = [notes.allies, notes.enemies, notes.otherNotes].filter(Boolean).join("\n\n");
 
+  // Proficiencies Text
   const profsList = [];
   allModifiers.forEach((m) => {
     if (m.type === "language") profsList.push(`Language: ${m.friendlySubtypeName || m.subType}`);
@@ -1641,6 +1684,7 @@ function importFromDnDBeyond(rawJson) {
   });
   fields.otherProfs = Array.from(new Set(profsList)).join("\n");
 
+  // Weapons
   const convertedWeapons = [];
   if (Array.isArray(d.inventory)) {
     d.inventory.forEach((item) => {
@@ -1659,6 +1703,7 @@ function importFromDnDBeyond(rawJson) {
     convertedWeapons.push({ name: "", atk: "", dmg: "", notes: "" });
   }
 
+  // Spells
   const convertedSpells = [];
   const rawSpellLists = [
     ...(d.spells?.class || []),
@@ -1682,6 +1727,7 @@ function importFromDnDBeyond(rawJson) {
     }
   });
 
+  // Features & Traits
   const convertedTraits = [];
   const classFeatures = [];
   if (Array.isArray(d.classes)) {
@@ -2239,10 +2285,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  if (
-    e.target.id === "cancelImportHubBtn" || e.target.closest("#cancelImportHubBtn") ||
-    e.target.id === "cancelDnDBeyondBtn"
-  ) {
+  if (e.target.id === "cancelImportHubBtn" || e.target.closest("#cancelImportHubBtn") || e.target.id === "cancelDnDBeyondBtn") {
     closeModal("importHubModal");
     return;
   }
@@ -2417,7 +2460,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Blur Toggle
+  // Blur Toggle - Stops propagation and dismisses open dropdowns
   const blurBtn = e.target.closest(".blur-toggle-btn");
   if (blurBtn) {
     e.preventDefault();
