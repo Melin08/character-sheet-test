@@ -419,7 +419,8 @@ textarea::-webkit-scrollbar,
 .dice-history-list::-webkit-scrollbar,
 .attacks-table-wrapper::-webkit-scrollbar,
 .inspect-modal-content::-webkit-scrollbar,
-.dm-party-cards-grid::-webkit-scrollbar {
+.dm-party-cards-grid::-webkit-scrollbar,
+.player-party-cards-grid::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
@@ -428,7 +429,8 @@ textarea::-webkit-scrollbar-thumb,
 .dice-history-list::-webkit-scrollbar-thumb,
 .attacks-table-wrapper::-webkit-scrollbar-thumb,
 .inspect-modal-content::-webkit-scrollbar-thumb,
-.dm-party-cards-grid::-webkit-scrollbar-thumb {
+.dm-party-cards-grid::-webkit-scrollbar-thumb,
+.player-party-cards-grid::-webkit-scrollbar-thumb {
   background: var(--border-medium);
   border-radius: 999px;
 }
@@ -542,10 +544,6 @@ textarea::-webkit-scrollbar-thumb,
   align-items: center;
   gap: 0.85rem;
 }
-.brand-crest {
-  font-size: 1.5rem;
-  color: var(--primary-red);
-}
 .brand-headings {
   display: flex;
   flex-direction: column;
@@ -584,13 +582,19 @@ textarea::-webkit-scrollbar-thumb,
 .theme-selector-wrapper {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   background: var(--bg-input);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 0.25rem 0.65rem;
 }
-.theme-icon { font-size: 0.95rem; }
+.theme-label-text {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 .theme-select {
   background: transparent !important;
   color: var(--text-main) !important;
@@ -785,7 +789,6 @@ textarea::-webkit-scrollbar-thumb,
   align-items: flex-start;
 }
 
-/* Freely Expandable Character Info Pills */
 .codex-field-pill {
   position: relative;
   display: inline-flex;
@@ -804,7 +807,6 @@ textarea::-webkit-scrollbar-thumb,
   box-sizing: border-box;
 }
 
-/* Ensure dropdown menu floats out unclipped when opened */
 .codex-field-pill:has(.dropdown-menu.open) {
   overflow: visible !important;
 }
@@ -938,7 +940,6 @@ textarea::-webkit-scrollbar-thumb,
   border-radius: var(--radius-sm);
   padding: 0.3rem 0.65rem;
 }
-.insp-spark { font-size: 0.9rem; }
 .insp-title { font-size: 0.7rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
 .insp-input {
   width: 65px;
@@ -953,13 +954,14 @@ textarea::-webkit-scrollbar-thumb,
   font-size: 0.78rem;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.55rem;
   margin-left: auto;
 }
 .codex-external-links a {
   color: var(--primary-red);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 .codex-external-links a:hover { text-decoration: underline; }
 .codex-external-links .sep { color: var(--text-dim); }
@@ -1029,7 +1031,6 @@ textarea::-webkit-scrollbar-thumb,
   color: #ffffff;
   border-color: var(--primary-red);
 }
-.tab-icon { font-size: 0.95rem; }
 
 .tab-page { display: none; }
 .tab-page.active {
@@ -1246,7 +1247,6 @@ textarea::-webkit-scrollbar-thumb,
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-.rest-hd-glyph { font-size: 0.95rem; }
 .rest-hd-text { font-weight: 700; color: var(--text-dim); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.04em; }
 .rest-hd-indicator .hitdice-input {
   width: 28px !important;
@@ -1293,7 +1293,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   7. COMBAT ARENA: ATTRIBUTES & WEAPONS
+   7. COMBAT ARENA: PERMANENT FIXED-COLOR ATTRIBUTES & WEAPONS
    ========================================================================== */
 .two-col-layout {
   display: grid;
@@ -1417,35 +1417,36 @@ textarea::-webkit-scrollbar-thumb,
   cursor: pointer;
 }
 
-.attr-str { border-left: 4px solid var(--primary-red); }
-.attr-str .attr-abbr { color: #f87171; }
-.attr-str .attr-mod-box { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
-.attr-str .hex-die { background-color: var(--primary-red); }
+/* --- PERMANENT ABILITY COLOR IDENTITIES (IMMUNE TO THEME OVERRIDES) --- */
+.attr-str { border-left: 4px solid #ef4444 !important; }
+.attr-str .attr-abbr { color: #f87171 !important; }
+.attr-str .attr-mod-box { background: rgba(239, 68, 68, 0.14) !important; border-color: rgba(239, 68, 68, 0.45) !important; color: #f87171 !important; }
+.attr-str .hex-die { background-color: #ef4444 !important; }
 
-.attr-dex { border-left: 4px solid var(--accent-emerald); }
-.attr-dex .attr-abbr { color: #34d399; }
-.attr-dex .attr-mod-box { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
-.attr-dex .hex-die { background-color: var(--accent-emerald); }
+.attr-dex { border-left: 4px solid #10b981 !important; }
+.attr-dex .attr-abbr { color: #34d399 !important; }
+.attr-dex .attr-mod-box { background: rgba(16, 185, 129, 0.14) !important; border-color: rgba(16, 185, 129, 0.45) !important; color: #34d399 !important; }
+.attr-dex .hex-die { background-color: #10b981 !important; }
 
-.attr-con { border-left: 4px solid #f97316; }
-.attr-con .attr-abbr { color: #fb923c; }
-.attr-con .attr-mod-box { background: rgba(249, 115, 22, 0.12); border-color: rgba(249, 115, 22, 0.4); color: #fb923c; }
-.attr-con .hex-die { background-color: #f97316; }
+.attr-con { border-left: 4px solid #f97316 !important; }
+.attr-con .attr-abbr { color: #fb923c !important; }
+.attr-con .attr-mod-box { background: rgba(249, 115, 22, 0.14) !important; border-color: rgba(249, 115, 22, 0.45) !important; color: #fb923c !important; }
+.attr-con .hex-die { background-color: #f97316 !important; }
 
-.attr-int { border-left: 4px solid #3b82f6; }
-.attr-int .attr-abbr { color: #60a5fa; }
-.attr-int .attr-mod-box { background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
-.attr-int .hex-die { background-color: #3b82f6; }
+.attr-int { border-left: 4px solid #3b82f6 !important; }
+.attr-int .attr-abbr { color: #60a5fa !important; }
+.attr-int .attr-mod-box { background: rgba(59, 130, 246, 0.14) !important; border-color: rgba(59, 130, 246, 0.45) !important; color: #60a5fa !important; }
+.attr-int .hex-die { background-color: #3b82f6 !important; }
 
-.attr-wis { border-left: 4px solid var(--accent-purple); }
-.attr-wis .attr-abbr { color: var(--accent-purple); }
-.attr-wis .attr-mod-box { background: rgba(192, 132, 252, 0.12); border-color: rgba(192, 132, 252, 0.4); color: var(--accent-purple); }
-.attr-wis .hex-die { background-color: var(--accent-purple); }
+.attr-wis { border-left: 4px solid #c084fc !important; }
+.attr-wis .attr-abbr { color: #c084fc !important; }
+.attr-wis .attr-mod-box { background: rgba(192, 132, 252, 0.14) !important; border-color: rgba(192, 132, 252, 0.45) !important; color: #c084fc !important; }
+.attr-wis .hex-die { background-color: #c084fc !important; }
 
-.attr-cha { border-left: 4px solid #eab308; }
-.attr-cha .attr-abbr { color: #facc15; }
-.attr-cha .attr-mod-box { background: rgba(234, 179, 8, 0.12); border-color: rgba(234, 179, 8, 0.4); color: #facc15; }
-.attr-cha .hex-die { background-color: #eab308; }
+.attr-cha { border-left: 4px solid #eab308 !important; }
+.attr-cha .attr-abbr { color: #facc15 !important; }
+.attr-cha .attr-mod-box { background: rgba(234, 179, 8, 0.14) !important; border-color: rgba(234, 179, 8, 0.45) !important; color: #facc15 !important; }
+.attr-cha .hex-die { background-color: #eab308 !important; }
 
 .passive-senses-bar {
   display: grid;
@@ -1623,7 +1624,6 @@ textarea::-webkit-scrollbar-thumb,
   align-items: center;
   gap: 0.4rem;
 }
-.tactical-glyph { color: var(--accent-gold); font-size: 1rem; }
 .tactical-title {
   font-size: 0.85rem;
   font-weight: 800;
@@ -1670,7 +1670,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   8. HORIZONTAL SKILLS ATTRIBUTE MATRIX
+   8. HORIZONTAL SKILLS ATTRIBUTE MATRIX (PERMANENT FIXED-COLOR COLUMNS)
    ========================================================================== */
 .horizontal-skills-section {
   margin-top: 2.5rem;
@@ -1691,11 +1691,27 @@ textarea::-webkit-scrollbar-thumb,
   flex-direction: column;
   gap: 0.5rem;
 }
-.col-str { border-top: 3px solid var(--primary-red); }
-.col-dex { border-top: 3px solid var(--accent-emerald); }
-.col-int { border-top: 3px solid var(--accent-blue); }
-.col-wis { border-top: 3px solid var(--accent-purple); }
-.col-cha { border-top: 3px solid var(--accent-gold); }
+
+/* Locked Skill Column Colors */
+.col-str { border-top: 3px solid #ef4444 !important; }
+.col-str .attr-header-abbr { color: #f87171 !important; }
+.col-str .hex-die { background-color: #ef4444 !important; }
+
+.col-dex { border-top: 3px solid #10b981 !important; }
+.col-dex .attr-header-abbr { color: #34d399 !important; }
+.col-dex .hex-die { background-color: #10b981 !important; }
+
+.col-int { border-top: 3px solid #3b82f6 !important; }
+.col-int .attr-header-abbr { color: #60a5fa !important; }
+.col-int .hex-die { background-color: #3b82f6 !important; }
+
+.col-wis { border-top: 3px solid #c084fc !important; }
+.col-wis .attr-header-abbr { color: #c084fc !important; }
+.col-wis .hex-die { background-color: #c084fc !important; }
+
+.col-cha { border-top: 3px solid #eab308 !important; }
+.col-cha .attr-header-abbr { color: #facc15 !important; }
+.col-cha .hex-die { background-color: #eab308 !important; }
 
 .attr-column-header {
   display: flex;
@@ -1708,14 +1724,7 @@ textarea::-webkit-scrollbar-thumb,
 .attr-header-abbr {
   font-size: 0.95rem;
   font-weight: 900;
-  color: #ffffff;
 }
-.col-str .attr-header-abbr { color: #f87171; }
-.col-dex .attr-header-abbr { color: #34d399; }
-.col-int .attr-header-abbr { color: #60a5fa; }
-.col-wis .attr-header-abbr { color: var(--accent-purple); }
-.col-cha .attr-header-abbr { color: #facc15; }
-
 .attr-header-title {
   font-size: 0.65rem;
   font-weight: 700;
@@ -1762,15 +1771,17 @@ textarea::-webkit-scrollbar-thumb,
   border-radius: 50%;
   transition: all var(--transition-fast);
 }
+
+/* Locked Proficiency and Expertise Bubble Colors */
 .prof-cb:checked + .bubble {
-  background-color: var(--primary-red);
-  border-color: var(--primary-red);
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6) !important;
 }
 .exp-cb:checked + .bubble {
-  background-color: var(--accent-purple);
-  border-color: var(--accent-purple);
-  box-shadow: 0 0 6px rgba(192, 132, 252, 0.6);
+  background-color: #c084fc !important;
+  border-color: #c084fc !important;
+  box-shadow: 0 0 6px rgba(192, 132, 252, 0.6) !important;
 }
 
 .skill-label {
@@ -1792,13 +1803,7 @@ textarea::-webkit-scrollbar-thumb,
   width: 14px;
   height: 16px;
   margin-left: 0.25rem;
-  background-color: #475569;
 }
-.col-str .hex-die { background-color: var(--primary-red); }
-.col-dex .hex-die { background-color: var(--accent-emerald); }
-.col-int .hex-die { background-color: var(--accent-blue); }
-.col-wis .hex-die { background-color: var(--accent-purple); }
-.col-cha .hex-die { background-color: var(--accent-gold); }
 
 /* ==========================================================================
    9. DEDICATED FEATURES & TRAITS TAB
@@ -2716,6 +2721,31 @@ kbd {
 .status-dot.disconnected { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
 .status-dot.connected { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
+/* Player Live Party View Grid (HP & Conditions only) */
+.player-party-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+.player-party-card {
+  background: linear-gradient(145deg, #131a26 0%, #0d121c 100%);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+.player-party-card.unconscious {
+  border-color: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+}
+
 /* DM View */
 .dm-command-strip {
   display: flex;
@@ -2750,7 +2780,8 @@ kbd {
   gap: 0.45rem;
 }
 
-.dm-party-section {
+.dm-party-section,
+.player-party-section {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
@@ -2936,7 +2967,6 @@ kbd {
   gap: 1.25rem;
 }
 
-/* Character Summary Banner inside Inspection */
 .inspect-char-banner {
   display: flex;
   align-items: center;
@@ -3071,35 +3101,6 @@ kbd {
   font-weight: 800;
   color: var(--accent-blue);
   margin-top: 0.2rem;
-}
-
-/* Skills Flow in Inspection */
-.inspect-skills-flow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.inspect-skill-chip {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 0.25rem 0.55rem;
-  font-size: 0.78rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-.inspect-skill-chip.proficient {
-  border-color: rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.1);
-}
-.inspect-skill-chip.expert {
-  border-color: rgba(192, 132, 252, 0.4);
-  background: rgba(192, 132, 252, 0.12);
-}
-.inspect-skill-chip strong {
-  color: #ffffff;
 }
 
 /* Weapons List in Inspection */
