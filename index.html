@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=44" />
+  <link rel="stylesheet" href="style.css?v=42" />
 </head>
 <body id="top">
 
@@ -44,7 +44,7 @@
 
         <div class="action-btn-group">
           <button class="btn btn-ghost" id="saveBtn" type="button">Save</button>
-          <button class="btn btn-ghost" id="loadBtn" type="button">Load</button>
+          <button class="btn btn-ghost" id="loadBtn" type="button">Roster</button>
           <button class="btn btn-ghost" id="newBtn" type="button">+ New</button>
         </div>
 
@@ -59,15 +59,25 @@
           <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
         </div>
 
-        <!-- Theme Selector Control -->
+        <!-- 11 Advanced Themes Selector Control -->
         <div class="theme-selector-wrapper" title="Change Sheet Theme">
           <span class="theme-icon">🎨</span>
           <select id="themeSelect" class="theme-select" aria-label="Select Theme">
-            <option value="theme-obsidian" selected>Obsidian Dark</option>
-            <option value="theme-parchment">Ancient Parchment</option>
-            <option value="theme-eldritch">Eldritch Void</option>
-            <option value="theme-celestial">Celestial Light</option>
-            <option value="theme-emerald">Verdant Grove</option>
+            <optgroup label="Core Themes">
+              <option value="theme-obsidian" selected>Obsidian Dark</option>
+              <option value="theme-parchment">Ancient Parchment</option>
+              <option value="theme-eldritch">Eldritch Void</option>
+              <option value="theme-celestial">Celestial Light</option>
+              <option value="theme-emerald">Verdant Grove</option>
+            </optgroup>
+            <optgroup label="Advanced Atmospheric Themes">
+              <option value="theme-aethertech">Aethertech Clockwork</option>
+              <option value="theme-bloodmoon">Crimson Rite / Blood Moon</option>
+              <option value="theme-glacial">Glacial Frost</option>
+              <option value="theme-underdark">Bioluminescent Underdark</option>
+              <option value="theme-solaris">Solaris / Radiant Dawn</option>
+              <option value="theme-cartographer">Cartographer's Sketchbook</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -127,7 +137,7 @@
               <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Soldier" />
               <button type="button" class="blur-toggle-btn" title="Toggle blur">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8-4 8-11 8-11-8z"></path>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
@@ -154,7 +164,7 @@
             <input type="number" id="charLevel" class="save-field orb-number center" value="1" min="1" max="20" />
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
               <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
@@ -165,7 +175,7 @@
             <span id="profBonusDisplay" class="orb-val">+2</span>
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
               <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
@@ -179,7 +189,7 @@
             </div>
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
               <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
@@ -195,7 +205,7 @@
           <div class="xp-progress-bar"><div class="xp-fill-line" id="xpBarFill" style="width: 20%;"></div></div>
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
             <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
@@ -207,16 +217,16 @@
           <input type="text" id="charInspiration" class="save-field insp-input" placeholder="None" />
           <button type="button" class="blur-toggle-btn" title="Toggle blur">
             <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
         </div>
 
         <div class="codex-external-links">
-          <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">WIKIDOT WIKI</a>
+          <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">Wikidot Reference</a>
           <span class="sep">/</span>
-          <a href="https://app.roll20.net/compendium/dnd5e/BookIndex" target="_blank" rel="noopener noreferrer">ROLL20 WIKI</a>
+          <a href="https://roll20.net/compendium/dnd5e/Weapons#content" target="_blank" rel="noopener noreferrer">Weapons Compendium</a>
         </div>
       </div>
     </section>
@@ -987,6 +997,7 @@
         <div class="subtab-controls" style="margin-bottom: 0;">
           <button type="button" class="sub-tab active" data-sub="import-platform-parchment">PC on Parchment</button>
           <button type="button" class="sub-tab" data-sub="import-platform-dndbeyond">D&amp;D Beyond</button>
+          <button type="button" class="sub-tab" data-sub="import-platform-roll20" title="Roll20 Importer">Roll20 / Other</button>
         </div>
 
         <!-- TAB 1: PC on Parchment Panel -->
@@ -1041,9 +1052,9 @@
               <div>
                 <strong style="color: #ffffff; font-size: 0.85rem;">Option A (Fastest: Direct API URL)</strong>
                 <ol style="margin-top: 0.35rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.35rem;">
-                  <li>Open your character on D&amp;D Beyond and look at the web browser address bar (e.g. <code>https://www.dndbeyond.com/characters/<strong>172055522</strong></code>). The number at the end is your <strong>Character ID</strong>.</li>
-                  <li>In your character sheet preferences on D&amp;D Beyond (or character builder &gt; Home tab), make sure <strong>Character Privacy</strong> is set to <strong>Public</strong> (otherwise D&amp;D Beyond's server will deny access).</li>
-                  <li>In a new browser tab, go directly to: <br /><code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 0.2rem;">https://character-service.dndbeyond.com/character/v5/character/YOUR_ID_HERE</code></li>
+                  <li>Open your character on D&amp;D Beyond and look at the web browser address bar (e.g. <code>https://www.dndbeyond.com/characters/<strong>12345678</strong></code>). The number at the end is your <strong>Character ID</strong>.</li>
+                  <li>In your character sheet preferences on D&amp;D Beyond, ensure your character privacy is set to <strong>Public</strong>.</li>
+                  <li>In a new browser tab, go directly to: <br /><code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 0.2rem;">https://character-service.dndbeyond.com/character/v2/character/YOUR_ID_HERE</code></li>
                   <li>Select all the raw text (<kbd>Ctrl+A</kbd> or <kbd>Cmd+A</kbd>) and copy it (<kbd>Ctrl+C</kbd> or <kbd>Cmd+C</kbd>).</li>
                 </ol>
               </div>
@@ -1078,6 +1089,20 @@
           <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
             <button type="button" class="btn btn-ghost" id="cancelDnDBeyondBtn">Cancel</button>
             <button type="button" class="btn red" id="parseDnDBeyondBtn">Convert &amp; Import</button>
+          </div>
+        </div>
+
+        <!-- TAB 3: Roll20 / Other Placeholder -->
+        <div id="import-platform-roll20" class="subtab-page">
+          <div style="background: var(--bg-input); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 2.5rem 1.5rem; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎲</div>
+            <h4 style="color: #ffffff; font-size: 1.05rem; margin-bottom: 0.4rem;">Roll20 &amp; Custom VTT Importers</h4>
+            <p style="font-size: 0.84rem; max-width: 440px; margin: 0 auto; line-height: 1.55;">
+              Support for Roll20 character JSON and other community character builders will be pluggable directly through this module.
+            </p>
+            <p class="import-help-note" style="margin-top: 1.25rem; font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
+              💬 Stuck or need help? contact me on Discord (lmp2620).
+            </p>
           </div>
         </div>
 
@@ -1269,6 +1294,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=44"></script>
+  <script src="app.js?v=42"></script>
 </body>
 </html>
