@@ -157,9 +157,22 @@ const BUILTIN_SPELLS = [
 ];
 
 const BUILTIN_TRAITS = [
-  { name: "Action Surge", classes: ["Fighter"], desc: "Take one additional action on your turn once per short or long rest." },
-  { name: "Sneak Attack", classes: ["Rogue"], desc: "Deal extra damage once per turn with advantage or adjacent ally." },
-  { name: "Rage", classes: ["Barbarian"], desc: "Enter a rage for advantage on Strength checks, weapon damage bonus, and physical resistance." }
+  { name: "Action Surge", classes: ["Fighter"], type: "Class Feature", desc: "Take one additional action on your turn once per short or long rest." },
+  { name: "Second Wind", classes: ["Fighter"], type: "Class Feature", desc: "Regain 1d10 + fighter level hit points as a bonus action once per short or long rest." },
+  { name: "Sneak Attack", classes: ["Rogue"], type: "Class Feature", desc: "Deal extra damage once per turn with advantage or adjacent ally." },
+  { name: "Cunning Action", classes: ["Rogue"], type: "Class Feature", desc: "Take a bonus action on each turn to Dash, Disengage, or Hide." },
+  { name: "Rage", classes: ["Barbarian"], type: "Class Feature", desc: "Enter a rage for advantage on Strength checks, weapon damage bonus, and physical resistance." },
+  { name: "Reckless Attack", classes: ["Barbarian"], type: "Class Feature", desc: "Gain advantage on melee weapon attack rolls using Strength during your turn." },
+  { name: "Divine Smite", classes: ["Paladin"], type: "Class Feature", desc: "Expending a spell slot deals radiant damage to a struck creature." },
+  { name: "Lay on Hands", classes: ["Paladin"], type: "Class Feature", desc: "Pool of healing power replenishing on long rest (5 × paladin level)." },
+  { name: "Wild Shape", classes: ["Druid"], type: "Class Feature", desc: "Magically assume the shape of a beast you have seen before." },
+  { name: "Bardic Inspiration", classes: ["Bard"], type: "Class Feature", desc: "Add an inspiration die to an ability check, attack roll, or saving throw." },
+  { name: "Ki / Flurry of Blows", classes: ["Monk"], type: "Class Feature", desc: "Harness martial energy to make extra unarmed strikes or dodge." },
+  { name: "Font of Magic", classes: ["Sorcerer"], type: "Class Feature", desc: "Metamagic and sorcery points to alter or create spell slots." },
+  { name: "Eldritch Invocations", classes: ["Warlock"], type: "Class Feature", desc: "Occult lore fragments that bestow permanent magical abilities." },
+  { name: "Darkvision", races: ["Elf", "Dwarf", "Tiefling", "Gnome", "Half-Orc"], type: "Racial Trait", desc: "See in dim light within 60 feet as if it were bright light, and in darkness as if dim light." },
+  { name: "Fey Ancestry", races: ["Elf", "Half-Elf"], type: "Racial Trait", desc: "Advantage on saving throws against being charmed, and magic cannot put you to sleep." },
+  { name: "Dwarven Resilience", races: ["Dwarf"], type: "Racial Trait", desc: "Advantage on saving throws against poison, and resistance against poison damage." }
 ];
 
 function escapeHtml(str) {
@@ -228,7 +241,7 @@ function getRaceCssClass(raceName) {
   return "race-generic";
 }
 
-// Updated applyTheme function supporting all 11 themes
+// 11 Themes Supported
 function applyTheme(themeName) {
   const themes = [
     "theme-obsidian", "theme-parchment", "theme-eldritch", "theme-celestial", "theme-emerald",
@@ -1195,6 +1208,230 @@ function renderInspectModalContent(m) {
 }
 
 /* ==========================================================================
+   ROBUST 5E COMPENDIUM ENGINE (IMMEDIATE PRE-COMPILED SRD CATALOG)
+   ========================================================================== */
+
+function getSpellLevelTag(s) {
+  if (s.levelTag) return s.levelTag;
+  let lvl = s.level;
+  if (lvl === undefined) {
+    const key = (s.index || s.name || "").toLowerCase().replace(/[^a-z0-9]/g, '-');
+    lvl = SRD_SPELL_LEVELS[key];
+  }
+  if (lvl === 0) return "Cantrip";
+  if (lvl !== undefined && lvl !== null) return `Level ${lvl}`;
+  return "Spell";
+}
+
+async function fetchAPI(url) {
+  if (apiCache[url]) return apiCache[url];
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const data = await res.json();
+    apiCache[url] = data;
+    return data;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Builds an instant local 300+ spell database from SRD_SPELL_LEVELS + BUILTIN_SPELLS
+async function loadAllSpells() {
+  if (allSpellsCache.length > 0) return allSpellsCache;
+
+  const combined = [...BUILTIN_SPELLS];
+  Object.keys(SRD_SPELL_LEVELS).forEach((key) => {
+    const spellName = key.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    if (!combined.some(s => s.name.toLowerCase() === spellName.toLowerCase())) {
+      const lvl = SRD_SPELL_LEVELS[key];
+      combined.push({
+        name: spellName,
+        index: key,
+        url: `/api/spells/${key}`,
+        level: lvl,
+        levelTag: lvl === 0 ? "Cantrip" : `Level ${lvl}`,
+        casting_time: "1 Action",
+        range: "30 ft",
+        duration: "Instantaneous",
+        desc: ""
+      });
+    }
+  });
+
+  allSpellsCache = combined;
+
+  // Background fetch to enrich metadata without blocking UI
+  fetchAPI("https://www.dnd5eapi.co/api/spells").then((res) => {
+    if (res && res.results) {
+      res.results.forEach((s) => {
+        const existing = allSpellsCache.find(x => x.name.toLowerCase() === s.name.toLowerCase());
+        if (existing) {
+          existing.url = s.url;
+          existing.index = s.index;
+        } else {
+          allSpellsCache.push({
+            name: s.name,
+            url: s.url,
+            index: s.index,
+            level: s.level,
+            levelTag: getSpellLevelTag(s)
+          });
+        }
+      });
+      const modal = document.getElementById("spellModal");
+      if (modal && modal.classList.contains("open")) {
+        filterAndRenderSpells(document.getElementById("spellSearchInput")?.value || "");
+      }
+    }
+  }).catch(() => {});
+
+  return allSpellsCache;
+}
+
+async function loadAllTraits() {
+  if (allTraitsCache.length > 0) return allTraitsCache;
+  allTraitsCache = [...BUILTIN_TRAITS];
+
+  // Background fetch to discover additional traits without network spam
+  Promise.all([
+    fetchAPI("https://www.dnd5eapi.co/api/features"),
+    fetchAPI("https://www.dnd5eapi.co/api/traits")
+  ]).then(([f, t]) => {
+    let updated = false;
+    if (f && f.results) {
+      f.results.forEach((item) => {
+        if (!allTraitsCache.some((b) => b.name.toLowerCase() === item.name.toLowerCase())) {
+          allTraitsCache.push({ name: item.name, url: item.url, type: "Class Feature" });
+          updated = true;
+        }
+      });
+    }
+    if (t && t.results) {
+      t.results.forEach((item) => {
+        if (!allTraitsCache.some((b) => b.name.toLowerCase() === item.name.toLowerCase())) {
+          allTraitsCache.push({ name: item.name, url: item.url, type: "Racial Trait" });
+          updated = true;
+        }
+      });
+    }
+    if (updated) {
+      const modal = document.getElementById("traitModal");
+      if (modal && modal.classList.contains("open")) {
+        filterAndRenderTraits(document.getElementById("traitSearchInput")?.value || "");
+      }
+    }
+  }).catch(() => {});
+
+  return allTraitsCache;
+}
+
+function filterAndRenderSpells(query = "") {
+  const q = query.toLowerCase().trim();
+  const filtered = allSpellsCache.filter((s) => {
+    if (!q) return true;
+    const matchName = (s.name || "").toLowerCase().includes(q);
+    const matchClass = (s.classesTag || "").toLowerCase().includes(q);
+    const matchSchool = (s.schoolTag || "").toLowerCase().includes(q);
+    const matchLevel = (s.levelTag || "").toLowerCase().includes(q);
+    const matchDesc = (s.desc || "").toLowerCase().includes(q);
+    return matchName || matchClass || matchSchool || matchLevel || matchDesc;
+  });
+  renderModalSpells(filtered);
+}
+
+function filterAndRenderTraits(query = "") {
+  const q = query.toLowerCase().trim();
+  const filtered = allTraitsCache.filter((t) => {
+    if (!q) return true;
+    const matchName = (t.name || "").toLowerCase().includes(q);
+    const matchType = (t.type || "").toLowerCase().includes(q);
+    const matchClass = (t.classes || []).some((c) => c.toLowerCase().includes(q));
+    const matchRace = (t.races || []).some((r) => r.toLowerCase().includes(q));
+    const matchDesc = (t.desc || "").toLowerCase().includes(q);
+    return matchName || matchType || matchClass || matchRace || matchDesc;
+  });
+  renderModalTraits(filtered);
+}
+
+function renderModalSpells(list) {
+  const container = document.getElementById("spellApiList");
+  if (!container) return;
+
+  if (!list || list.length === 0) {
+    container.innerHTML = `<p class="loading-text">No matching spells found.</p>`;
+    return;
+  }
+
+  container.innerHTML = list.slice(0, 50).map((s) => {
+    const levelStr = getSpellLevelTag(s);
+    const isCantrip = levelStr.toLowerCase().includes("cantrip");
+    const lvlClass = isCantrip ? "tag-cantrip" : "tag-level";
+
+    let tagsHtml = `<span class="tag-pill ${lvlClass}">${escapeHtml(levelStr)}</span>`;
+    if (s.schoolTag) {
+      tagsHtml += `<span class="tag-pill ${getSchoolCssClass(s.schoolTag)}">${escapeHtml(s.schoolTag)}</span>`;
+    }
+    if (s.classesTag) {
+      const cList = s.classesTag.split(",").map(c => c.trim()).filter(Boolean);
+      cList.slice(0, 3).forEach((cls) => {
+        tagsHtml += `<span class="tag-pill ${getClassCssClass(cls)}">${escapeHtml(cls)}</span>`;
+      });
+    }
+
+    return `
+      <div class="spell-option-item spell-pick-row" data-url="${s.url || ''}" data-name="${escapeHtml(s.name)}">
+        <div class="spell-option-details">
+          <div class="spell-option-title">${escapeHtml(s.name)}</div>
+          <div class="spell-meta-tags">${tagsHtml}</div>
+        </div>
+        <button type="button" class="spell-add-badge">+ Add</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderModalTraits(list) {
+  const container = document.getElementById("traitApiList");
+  if (!container) return;
+
+  if (!list || list.length === 0) {
+    container.innerHTML = `<p class="loading-text">No matching abilities found.</p>`;
+    return;
+  }
+
+  container.innerHTML = list.slice(0, 50).map((t) => {
+    let tagsHtml = "";
+    const classes = Array.isArray(t.classes) ? t.classes : (t.class ? [t.class] : []);
+    const races = Array.isArray(t.races) ? t.races : (t.race ? [t.race] : []);
+
+    classes.slice(0, 3).forEach((c) => {
+      tagsHtml += `<span class="tag-pill ${getClassCssClass(c)}">${escapeHtml(c)}</span>`;
+    });
+    races.slice(0, 2).forEach((r) => {
+      tagsHtml += `<span class="tag-pill ${getRaceCssClass(r)}">${escapeHtml(r)}</span>`;
+    });
+
+    if (!tagsHtml) {
+      tagsHtml = `<span class="tag-pill race-generic">${escapeHtml(t.type || 'Feature')}</span>`;
+    }
+
+    return `
+      <div class="spell-option-item trait-pick-row" data-url="${t.url || ''}" data-name="${escapeHtml(t.name)}" data-type="${escapeHtml(t.type || 'Feature')}">
+        <div class="spell-option-details">
+          <div class="spell-option-title">${escapeHtml(t.name)}</div>
+          <div class="spell-meta-tags">${tagsHtml}</div>
+        </div>
+        <button type="button" class="spell-add-badge">+ Add</button>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ==========================================================================
    UNIVERSAL MULTI-PLATFORM IMPORTERS & ADAPTERS
    ========================================================================== */
 
@@ -1969,235 +2206,6 @@ function renderRaceDropdown(filter = "") {
   dropdown.innerHTML = html || `<div class="dropdown-item" style="color:#64748b; cursor:default;">No races match</div>`;
 }
 
-async function fetchAPI(url) {
-  if (apiCache[url]) return apiCache[url];
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) return null;
-    const data = await res.json();
-    apiCache[url] = data;
-    return data;
-  } catch (err) {
-    return null;
-  }
-}
-
-function getSpellLevelTag(s) {
-  if (s.levelTag) return s.levelTag;
-  let lvl = s.level;
-  if (lvl === undefined) {
-    const key = (s.index || s.name || "").toLowerCase().replace(/[^a-z0-9]/g, '-');
-    lvl = SRD_SPELL_LEVELS[key];
-  }
-  if (lvl === 0) return "Cantrip";
-  if (lvl !== undefined && lvl !== null) return `Level ${lvl}`;
-  return "Spell";
-}
-
-async function loadAllSpells() {
-  if (allSpellsCache.length > 0) return allSpellsCache;
-  const res = await fetchAPI("https://www.dnd5eapi.co/api/spells");
-  if (res && res.results && res.results.length > 0) {
-    const combined = [...BUILTIN_SPELLS];
-    res.results.forEach((s) => {
-      if (!combined.some((b) => b.name.toLowerCase() === s.name.toLowerCase())) {
-        combined.push({
-          name: s.name,
-          url: s.url,
-          index: s.index,
-          level: s.level,
-          levelTag: getSpellLevelTag(s)
-        });
-      }
-    });
-    allSpellsCache = combined;
-  } else {
-    allSpellsCache = [...BUILTIN_SPELLS];
-  }
-  return allSpellsCache;
-}
-
-async function enrichSpellList(items) {
-  const topSlice = items.slice(0, 25);
-  let updated = false;
-  await Promise.all(topSlice.map(async (s) => {
-    if (!s.schoolTag && s.url) {
-      const data = await fetchAPI("https://www.dnd5eapi.co" + s.url);
-      if (data) {
-        s.levelTag = data.level === 0 ? "Cantrip" : `Level ${data.level}`;
-        s.schoolTag = data.school?.name || "";
-        s.classesTag = (data.classes || []).map((c) => c.name).join(", ");
-        s.casting_time = data.casting_time || "1 Action";
-        s.range = data.range || "30 ft";
-        s.duration = data.duration || "Instantaneous";
-        s.desc = Array.isArray(data.desc) ? data.desc.join("\n\n") : (data.desc || "");
-        updated = true;
-      }
-    }
-  }));
-  return updated;
-}
-
-async function loadAllTraits() {
-  if (allTraitsCache.length > 0) return allTraitsCache;
-  const combined = [...BUILTIN_TRAITS];
-  const [f, t] = await Promise.all([
-    fetchAPI("https://www.dnd5eapi.co/api/features"),
-    fetchAPI("https://www.dnd5eapi.co/api/traits")
-  ]);
-
-  if (f && f.results) {
-    f.results.forEach((item) => {
-      if (!combined.some((b) => b.name.toLowerCase() === item.name.toLowerCase())) {
-        combined.push({ name: item.name, url: item.url, type: "Class Feature" });
-      }
-    });
-  }
-  if (t && t.results) {
-    t.results.forEach((item) => {
-      if (!combined.some((b) => b.name.toLowerCase() === item.name.toLowerCase())) {
-        combined.push({ name: item.name, url: item.url, type: "Racial Trait" });
-      }
-    });
-  }
-  allTraitsCache = combined;
-  syncClassAndRaceFeatureTags();
-  return allTraitsCache;
-}
-
-async function syncClassAndRaceFeatureTags() {
-  const classes = ["barbarian", "bard", "cleric", "druid", "fighter", "monk", "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"];
-  const races = ["dragonborn", "dwarf", "elf", "gnome", "half-elf", "half-orc", "halfling", "human", "tiefling"];
-
-  const classFetches = classes.map((c) => fetchAPI(`https://www.dnd5eapi.co/api/classes/${c}/features`));
-  const raceFetches = races.map((r) => fetchAPI(`https://www.dnd5eapi.co/api/races/${r}/traits`));
-
-  const [classResults, raceResults] = await Promise.all([
-    Promise.all(classFetches),
-    Promise.all(raceFetches)
-  ]);
-
-  classResults.forEach((res, idx) => {
-    if (res && res.results) {
-      const className = classes[idx].charAt(0).toUpperCase() + classes[idx].slice(1);
-      res.results.forEach((feat) => {
-        const match = allTraitsCache.find((t) => t.name.toLowerCase() === feat.name.toLowerCase());
-        if (match) {
-          if (!match.classes) match.classes = [];
-          if (!match.classes.includes(className)) match.classes.push(className);
-        }
-      });
-    }
-  });
-
-  raceResults.forEach((res, idx) => {
-    if (res && res.results) {
-      const raceName = races[idx].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
-      res.results.forEach((trait) => {
-        const match = allTraitsCache.find((t) => t.name.toLowerCase() === trait.name.toLowerCase());
-        if (match) {
-          if (!match.races) match.races = [];
-          if (!match.races.includes(raceName)) match.races.push(raceName);
-        }
-      });
-    }
-  });
-
-  const traitModal = document.getElementById("traitModal");
-  if (traitModal && traitModal.classList.contains("open")) {
-    const query = document.getElementById("traitSearchInput")?.value.toLowerCase().trim() || "";
-    const filtered = allTraitsCache.filter((t) => {
-      const matchName = (t.name || "").toLowerCase().includes(query);
-      const matchType = (t.type || "").toLowerCase().includes(query);
-      const matchClass = (t.classes || []).some((c) => c.toLowerCase().includes(query));
-      const matchRace = (t.races || []).some((r) => r.toLowerCase().includes(query));
-      return matchName || matchType || matchClass || matchRace;
-    });
-    renderModalTraits(filtered);
-  }
-}
-
-function renderModalSpells(list) {
-  const container = document.getElementById("spellApiList");
-  if (!container) return;
-
-  if (!list || list.length === 0) {
-    container.innerHTML = `<p class="loading-text" style="color: #64748b; font-style: italic;">No matching spells found.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.slice(0, 40).map((s) => {
-    const levelStr = getSpellLevelTag(s);
-    const isCantrip = levelStr.toLowerCase().includes("cantrip");
-    const lvlClass = isCantrip ? "tag-cantrip" : "tag-level";
-
-    let tagsHtml = `<span class="tag-pill ${lvlClass}">${escapeHtml(levelStr)}</span>`;
-
-    if (s.schoolTag) {
-      tagsHtml += `<span class="tag-pill ${getSchoolCssClass(s.schoolTag)}">${escapeHtml(s.schoolTag)}</span>`;
-    }
-
-    if (s.classesTag) {
-      const cList = s.classesTag.split(",").map(c => c.trim()).filter(Boolean);
-      cList.forEach((cls) => {
-        const isRace = ["elf", "dwarf", "tiefling", "dragonborn", "halfling", "half-orc", "gnome", "half-elf", "human", "drow", "genasi", "aasimar", "triton"].some(r => cls.toLowerCase().includes(r));
-        const pillClass = isRace ? getRaceCssClass(cls) : getClassCssClass(cls);
-        tagsHtml += `<span class="tag-pill ${pillClass}">${escapeHtml(cls)}</span>`;
-      });
-    }
-
-    return `
-      <div class="spell-option-item spell-pick-row" data-url="${s.url || ''}" data-name="${escapeHtml(s.name)}">
-        <div class="spell-option-details">
-          <div class="spell-option-title">${escapeHtml(s.name)}</div>
-          <div class="spell-meta-tags">${tagsHtml}</div>
-        </div>
-        <button type="button" class="spell-add-badge">+ Add</button>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderModalTraits(list) {
-  const container = document.getElementById("traitApiList");
-  if (!container) return;
-
-  if (!list || list.length === 0) {
-    container.innerHTML = `<p class="loading-text" style="color: #64748b; font-style: italic;">No matching abilities found.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.slice(0, 40).map((t) => {
-    let tagsHtml = "";
-    const classes = Array.isArray(t.classes) ? t.classes : (t.class ? [t.class] : []);
-    const races = Array.isArray(t.races) ? t.races : (t.race ? [t.race] : []);
-
-    classes.forEach((c) => {
-      tagsHtml += `<span class="tag-pill ${getClassCssClass(c)}">${escapeHtml(c)}</span>`;
-    });
-    races.forEach((r) => {
-      tagsHtml += `<span class="tag-pill ${getRaceCssClass(r)}">${escapeHtml(r)}</span>`;
-    });
-
-    if (!tagsHtml) {
-      tagsHtml = `<span class="tag-pill race-generic">${escapeHtml(t.type || 'Feature')}</span>`;
-    }
-
-    return `
-      <div class="spell-option-item trait-pick-row" data-url="${t.url || ''}" data-name="${escapeHtml(t.name)}" data-type="${escapeHtml(t.type || 'Feature')}">
-        <div class="spell-option-details">
-          <div class="spell-option-title">${escapeHtml(t.name)}</div>
-          <div class="spell-meta-tags">${tagsHtml}</div>
-        </div>
-        <button type="button" class="spell-add-badge">+ Add</button>
-      </div>
-    `;
-  }).join("");
-}
-
 function closeModal(modalId) {
   document.getElementById(modalId)?.classList.remove("open");
 }
@@ -2321,6 +2329,127 @@ document.addEventListener("click", async (e) => {
     } catch (err) {
       alert("Invalid D&D Beyond JSON format. Please verify the copied text.");
     }
+    return;
+  }
+
+  // Open Spell Modal
+  if (e.target.id === "addSpellBtn" || e.target.closest("#addSpellBtn") || e.target.closest(".btn-add-spell")) {
+    const input = document.getElementById("spellSearchInput");
+    if (input) input.value = "";
+    const list = await loadAllSpells();
+    renderModalSpells(list);
+    document.getElementById("spellModal")?.classList.add("open");
+    setTimeout(() => input?.focus(), 50);
+    return;
+  }
+
+  // Custom Spell
+  if (e.target.id === "addCustomSpellBtn" || e.target.closest("#addCustomSpellBtn")) {
+    myCharacterSpells.push({
+      name: "New Spell",
+      type: "Cantrip",
+      casting_time: "1 Action",
+      range: "30 ft",
+      duration: "Instantaneous",
+      desc: ""
+    });
+    saveSheet(false);
+    renderMySpells();
+    closeModal("spellModal");
+    return;
+  }
+
+  // Open Trait / Ability Modal
+  if (e.target.id === "addTraitBtn" || e.target.closest("#addTraitBtn") || e.target.closest(".btn-add-trait")) {
+    const input = document.getElementById("traitSearchInput");
+    if (input) input.value = "";
+    const list = await loadAllTraits();
+    renderModalTraits(list);
+    document.getElementById("traitModal")?.classList.add("open");
+    setTimeout(() => input?.focus(), 50);
+    return;
+  }
+
+  // Custom Trait
+  if (e.target.id === "addCustomTraitBtn" || e.target.closest("#addCustomTraitBtn")) {
+    myCharacterTraits.push({
+      name: "New Ability",
+      type: "Feature",
+      desc: "",
+      isExpanded: true
+    });
+    saveSheet(false);
+    renderMyTraits();
+    closeModal("traitModal");
+    return;
+  }
+
+  // Pick Spell from compendium
+  const spellRow = e.target.closest(".spell-pick-row");
+  if (spellRow) {
+    const name = spellRow.dataset.name;
+    const url = spellRow.dataset.url;
+    let detail = allSpellsCache.find((s) => s.name.toLowerCase() === name.toLowerCase());
+
+    if (url && (!detail || !detail.desc)) {
+      const fetched = await fetchAPI("https://www.dnd5eapi.co" + url);
+      if (fetched) {
+        detail = {
+          name: fetched.name,
+          type: fetched.level === 0 ? "Cantrip" : `Level ${fetched.level}`,
+          casting_time: fetched.casting_time || "1 Action",
+          range: fetched.range || "30 ft",
+          duration: fetched.duration || "Instantaneous",
+          desc: Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "")
+        };
+      }
+    }
+
+    myCharacterSpells.push({
+      name: detail?.name || name,
+      type: detail?.type || detail?.levelTag || "Cantrip",
+      casting_time: detail?.casting_time || "1 Action",
+      range: detail?.range || "30 ft",
+      duration: detail?.duration || "Instantaneous",
+      desc: detail?.desc || ""
+    });
+
+    saveSheet(false);
+    renderMySpells();
+    closeModal("spellModal");
+    showStatus(`Added ${name}!`);
+    return;
+  }
+
+  // Pick Trait from compendium
+  const traitRow = e.target.closest(".trait-pick-row");
+  if (traitRow) {
+    const name = traitRow.dataset.name;
+    const url = traitRow.dataset.url;
+    let detail = allTraitsCache.find((t) => t.name.toLowerCase() === name.toLowerCase());
+
+    if (url && (!detail || !detail.desc)) {
+      const fetched = await fetchAPI("https://www.dnd5eapi.co" + url);
+      if (fetched) {
+        detail = {
+          name: fetched.name,
+          type: traitRow.dataset.type || "Feature",
+          desc: Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "")
+        };
+      }
+    }
+
+    myCharacterTraits.push({
+      name: detail?.name || name,
+      type: detail?.type || traitRow.dataset.type || "Feature",
+      desc: detail?.desc || "",
+      isExpanded: false
+    });
+
+    saveSheet(false);
+    renderMyTraits();
+    closeModal("traitModal");
+    showStatus(`Added ${name}!`);
     return;
   }
 
@@ -2726,129 +2855,6 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Open Spell Modal
-  if (e.target.id === "addSpellBtn" || e.target.closest("#addSpellBtn") || e.target.closest(".btn-add-spell")) {
-    document.getElementById("spellModal")?.classList.add("open");
-    const input = document.getElementById("spellSearchInput");
-    if (input) input.value = "";
-    const list = await loadAllSpells();
-    renderModalSpells(list);
-    enrichSpellList(list).then((changed) => {
-      if (changed && (!input || input.value === "")) {
-        renderModalSpells(allSpellsCache);
-      }
-    });
-    return;
-  }
-
-  // Custom Spell
-  if (e.target.id === "addCustomSpellBtn" || e.target.closest("#addCustomSpellBtn")) {
-    myCharacterSpells.push({
-      name: "New Spell",
-      type: "Cantrip",
-      casting_time: "1 Action",
-      range: "30 ft",
-      duration: "Instantaneous",
-      desc: ""
-    });
-    saveSheet(false);
-    renderMySpells();
-    closeModal("spellModal");
-    return;
-  }
-
-  // Open Trait Modal
-  if (e.target.id === "addTraitBtn" || e.target.closest("#addTraitBtn") || e.target.closest(".btn-add-trait")) {
-    document.getElementById("traitModal")?.classList.add("open");
-    const input = document.getElementById("traitSearchInput");
-    if (input) input.value = "";
-    loadAllTraits().then((list) => {
-      renderModalTraits(list);
-    });
-    return;
-  }
-
-  // Custom Trait
-  if (e.target.id === "addCustomTraitBtn" || e.target.closest("#addCustomTraitBtn")) {
-    myCharacterTraits.push({
-      name: "New Ability",
-      type: "Feature",
-      desc: "",
-      isExpanded: true
-    });
-    saveSheet(false);
-    renderMyTraits();
-    closeModal("traitModal");
-    return;
-  }
-
-  // Pick Spell from compendium
-  const spellRow = e.target.closest(".spell-pick-row");
-  if (spellRow) {
-    const name = spellRow.dataset.name;
-    const url = spellRow.dataset.url;
-    let detail = allSpellsCache.find((s) => s.name.toLowerCase() === name.toLowerCase());
-
-    if (url && (!detail || !detail.desc)) {
-      const fetched = await fetchAPI("https://www.dnd5eapi.co" + url);
-      if (fetched) {
-        detail = {
-          name: fetched.name,
-          type: fetched.level === 0 ? "Cantrip" : `Level ${fetched.level}`,
-          casting_time: fetched.casting_time || "1 Action",
-          range: fetched.range || "30 ft",
-          duration: fetched.duration || "Instantaneous",
-          desc: Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "")
-        };
-      }
-    }
-
-    myCharacterSpells.push({
-      name: detail?.name || name,
-      type: detail?.type || getSpellLevelTag({ name }),
-      casting_time: detail?.casting_time || "1 Action",
-      range: detail?.range || "30 ft",
-      duration: detail?.duration || "Instantaneous",
-      desc: detail?.desc || ""
-    });
-
-    saveSheet(false);
-    renderMySpells();
-    closeModal("spellModal");
-    return;
-  }
-
-  // Pick Trait from compendium
-  const traitRow = e.target.closest(".trait-pick-row");
-  if (traitRow) {
-    const name = traitRow.dataset.name;
-    const url = traitRow.dataset.url;
-    let detail = allTraitsCache.find((t) => t.name.toLowerCase() === name.toLowerCase());
-
-    if (url && (!detail || !detail.desc)) {
-      const fetched = await fetchAPI("https://www.dnd5eapi.co" + url);
-      if (fetched) {
-        detail = {
-          name: fetched.name,
-          type: traitRow.dataset.type || "Feature",
-          desc: Array.isArray(fetched.desc) ? fetched.desc.join("\n\n") : (fetched.desc || "")
-        };
-      }
-    }
-
-    myCharacterTraits.push({
-      name: detail?.name || name,
-      type: detail?.type || "Feature",
-      desc: detail?.desc || "",
-      isExpanded: false
-    });
-
-    saveSheet(false);
-    renderMyTraits();
-    closeModal("traitModal");
-    return;
-  }
-
   // Delete Weapon
   if (e.target.classList.contains("weapon-delete-btn")) {
     const idx = parseInt(e.target.dataset.index, 10);
@@ -2965,42 +2971,13 @@ document.getElementById("charRace")?.addEventListener("input", (e) => {
   document.getElementById("raceDropdown")?.classList.add("open");
 });
 
-// Search inputs
-let spellSearchTimeout = null;
+// Search inputs for Spells and Abilities
 document.getElementById("spellSearchInput")?.addEventListener("input", (e) => {
-  const query = e.target.value.toLowerCase().trim();
-  clearTimeout(spellSearchTimeout);
-  spellSearchTimeout = setTimeout(() => {
-    const filtered = allSpellsCache.filter((s) => {
-      const matchName = (s.name || "").toLowerCase().includes(query);
-      const matchClass = (s.classesTag || "").toLowerCase().includes(query);
-      const matchSchool = (s.schoolTag || "").toLowerCase().includes(query);
-      const matchLevel = (s.levelTag || "").toLowerCase().includes(query);
-      return matchName || matchClass || matchSchool || matchLevel;
-    });
-    renderModalSpells(filtered);
-    enrichSpellList(filtered).then((changed) => {
-      if (changed && document.getElementById("spellSearchInput")?.value.toLowerCase().trim() === query) {
-        renderModalSpells(filtered);
-      }
-    });
-  }, 120);
+  filterAndRenderSpells(e.target.value);
 });
 
-let traitSearchTimeout = null;
 document.getElementById("traitSearchInput")?.addEventListener("input", (e) => {
-  const query = e.target.value.toLowerCase().trim();
-  clearTimeout(traitSearchTimeout);
-  traitSearchTimeout = setTimeout(() => {
-    const filtered = allTraitsCache.filter((t) => {
-      const matchName = (t.name || "").toLowerCase().includes(query);
-      const matchType = (t.type || "").toLowerCase().includes(query);
-      const matchClass = (t.classes || []).some((c) => c.toLowerCase().includes(query));
-      const matchRace = (t.races || []).some((r) => r.toLowerCase().includes(query));
-      return matchName || matchType || matchClass || matchRace;
-    });
-    renderModalTraits(filtered);
-  }, 120);
+  filterAndRenderTraits(e.target.value);
 });
 
 // Filter spells in spellbook
