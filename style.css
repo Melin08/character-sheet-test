@@ -601,7 +601,8 @@ textarea::-webkit-scrollbar-thumb,
   cursor: pointer;
   padding-right: 0.35rem;
 }
-.theme-select option {
+.theme-select option,
+.theme-select optgroup {
   background: var(--bg-card);
   color: var(--text-main);
 }
@@ -2431,7 +2432,7 @@ textarea.block-text {
 }
 
 /* ==========================================================================
-   14. MODALS & PARTY/DM LIVE DASHBOARD
+   14. MODALS & GENERAL LIST STYLES
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
@@ -2482,9 +2483,157 @@ textarea.block-text {
   border: none;
   color: #ffffff;
   font-size: 1.6rem;
+  cursor: pointer;
+  line-height: 1;
 }
 
-/* Universal Character Importer Modal & Guide Styles */
+.modal-list {
+  padding: 1rem 1.35rem;
+  overflow-y: auto;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* ==========================================================================
+   15. 5E SPELL & ABILITY COMPENDIUM BROWSERS
+   ========================================================================== */
+.modal-search-bar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.35rem 0.5rem 1.35rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: center;
+}
+.modal-search-bar input[type="text"] {
+  flex: 1;
+  padding: 0.6rem 0.9rem !important;
+  font-size: 0.9rem !important;
+}
+.custom-spell-btn {
+  white-space: nowrap;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.78rem;
+}
+
+.spell-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+  cursor: pointer;
+}
+.spell-option-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-red);
+  background: var(--bg-hover);
+}
+
+.spell-option-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1;
+}
+.spell-option-title {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.spell-meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.tag-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+}
+
+/* Badge category colors */
+.tag-cantrip {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: var(--accent-blue);
+}
+.tag-level {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--accent-gold);
+}
+
+/* Schools of Magic */
+.school-abjuration { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); }
+.school-conjuration { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border-color: rgba(245, 158, 11, 0.35); }
+.school-divination { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border-color: rgba(251, 191, 36, 0.35); }
+.school-enchantment { background: rgba(236, 72, 153, 0.12); color: #ec4899; border-color: rgba(236, 72, 153, 0.35); }
+.school-evocation { background: rgba(239, 68, 68, 0.12); color: #ef4444; border-color: rgba(239, 68, 68, 0.35); }
+.school-illusion { background: rgba(168, 85, 247, 0.12); color: #a855f7; border-color: rgba(168, 85, 247, 0.35); }
+.school-necromancy { background: rgba(148, 163, 184, 0.12); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.35); }
+.school-transmutation { background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: rgba(16, 185, 129, 0.35); }
+
+/* Classes & Races Badges */
+.class-barbarian, .class-fighter, .class-bloodhunter { background: rgba(239, 68, 68, 0.12); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+.class-druid, .class-ranger { background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+.class-wizard, .class-artificer { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+.class-sorcerer, .class-warlock { background: rgba(192, 132, 252, 0.12); color: #c084fc; border-color: rgba(192, 132, 252, 0.3); }
+.class-cleric, .class-paladin { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+.class-bard, .class-rogue { background: rgba(244, 63, 94, 0.12); color: #fb7185; border-color: rgba(244, 63, 94, 0.3); }
+.class-monk { background: rgba(45, 212, 191, 0.12); color: #2dd4bf; border-color: rgba(45, 212, 191, 0.3); }
+
+.race-generic, .race-elf, .race-dwarf, .race-tiefling, .race-dragonborn {
+  background: rgba(100, 116, 139, 0.12);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.35);
+}
+
+.spell-add-badge {
+  background: var(--primary-red);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.spell-add-badge:hover {
+  background: var(--primary-red-hover);
+  transform: translateY(-1px);
+}
+
+.loading-text {
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   16. UNIVERSAL IMPORTER & GUIDE STYLES
+   ========================================================================== */
 .import-guide-accordion {
   transition: all 0.2s ease;
 }
@@ -2765,7 +2914,7 @@ kbd {
 }
 
 /* ==========================================================================
-   15. DM LIVE PLAYER INSPECTOR MODAL
+   17. DM LIVE PLAYER INSPECTOR MODAL
    ========================================================================== */
 .dm-inspect-box {
   max-width: 920px;
@@ -3179,7 +3328,7 @@ kbd {
 }
 
 /* ==========================================================================
-   16. RESPONSIVENESS
+   18. RESPONSIVENESS
    ========================================================================== */
 @media (max-width: 1024px) {
   .vitals-hud { grid-template-columns: repeat(2, 1fr); }
