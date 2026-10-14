@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=53" />
+  <link rel="stylesheet" href="style.css?v=54" />
 </head>
 <body id="top" class="theme-obsidian">
 
@@ -308,7 +308,7 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- ON-SCREEN LIVE PARTY DOCK (AUTO-SHOWS WHEN IN A PARTY ROOM)       -->
+    <!-- ON-SCREEN LIVE PARTY DOCK (SHOWS ONLY HP, AC, CONDS & CONC)       -->
     <!-- ================================================================= -->
     <section id="livePartyDock" class="live-party-dock" style="display: none;">
       <div class="live-party-dock-header">
@@ -316,6 +316,7 @@
           <span class="status-dot connected"></span>
           <span class="dock-room-label">Party Room:</span>
           <strong id="dockRoomCodeText" class="dock-room-code">NONE</strong>
+          <span id="dockRoleBadge" class="dock-role-badge">Player</span>
           <button type="button" class="btn btn-ghost btn-xs" id="dockCopyCodeBtn" title="Copy Room Code">Copy Code</button>
           <button type="button" class="btn btn-ghost btn-xs" id="dockCopyLinkBtn" title="Copy 1-Click Invite Link">Copy Invite Link</button>
         </div>
@@ -334,7 +335,7 @@
       </div>
 
       <div id="livePartyDockBody" class="live-party-dock-strip">
-        <!-- Mini party member pills rendered live here -->
+        <!-- Mini party member pills rendered live here (HP, AC, Conditions, Concentration only) -->
       </div>
     </section>
 
@@ -1438,11 +1439,11 @@
         <!-- VIEW 1: Player Join & Party View -->
         <div id="party-join-view" class="subtab-page active">
           <p class="party-modal-desc">
-            Enter a Room Code to instantly sync your character with your group. Share the <strong>Invite Link</strong> so friends can join in 1 click!
+            Enter your DM's Room Code to join the party. Players can view party members' live <strong>HP, AC, Conditions, and Concentration</strong> while keeping private character sheet details hidden.
           </p>
 
           <div class="party-action-row">
-            <input type="text" id="campaignRoomInput" class="party-room-input center" placeholder="ROOM CODE (e.g. TAVERN-42)" maxlength="15" autocomplete="off" />
+            <input type="text" id="campaignRoomInput" class="party-room-input center" placeholder="ROOM CODE (e.g. REALM-4200)" maxlength="15" autocomplete="off" />
             <button type="button" class="btn btn-primary" id="joinCampaignBtn">Connect</button>
             <button type="button" class="btn btn-ghost" id="copyPlayerRoomCodeBtn" style="display: none;">Copy Code</button>
             <button type="button" class="btn btn-ghost" id="copyInviteLinkBtn" style="display: none;">Invite Link</button>
@@ -1456,7 +1457,7 @@
 
           <div class="player-party-section" id="playerPartySection" style="margin-top: 1.25rem; display: none;">
             <div class="dm-party-header-bar">
-              <span class="dm-party-heading">Live Party Vitals</span>
+              <span class="dm-party-heading">Party Vitals (HP, AC, Conditions &amp; Concentration)</span>
               <span class="dm-member-counter" id="playerMemberCount">0 Active</span>
             </div>
             <div class="player-party-cards-grid" id="playerPartyGrid">
@@ -1465,16 +1466,19 @@
           </div>
         </div>
 
-        <!-- VIEW 2: DM Live Party HUD -->
+        <!-- VIEW 2: DM Live Party HUD (Restricted to Room Creator) -->
         <div id="party-dm-view" class="subtab-page">
+          <p class="party-modal-desc">
+            Click <strong>+ New Room</strong> to create a room as the DM. Only the creator of a room has permission to inspect full player character sheets and use DM HP/Inspiration controls.
+          </p>
           <div class="dm-command-strip">
             <div class="dm-room-display">
               <span class="dm-code-label">Active DM Room:</span>
               <strong id="dmActiveRoomCode" class="dm-code-text">NONE</strong>
             </div>
             <div class="dm-action-btns">
-              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="ROOM CODE" maxlength="15" autocomplete="off" style="width: 140px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
-              <button type="button" class="btn btn-primary" id="openDMRoomBtn">Monitor Room</button>
+              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="YOUR ROOM CODE" maxlength="15" autocomplete="off" style="width: 155px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
+              <button type="button" class="btn btn-primary" id="openDMRoomBtn">Reopen My Room</button>
               <button type="button" class="btn btn-ghost" id="createCampaignBtn">+ New Room</button>
               <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy Code</button>
               <button type="button" class="btn btn-ghost" id="copyDMInviteLinkBtn" style="display: none;">Invite Link</button>
@@ -1484,11 +1488,11 @@
 
           <div class="dm-party-section">
             <div class="dm-party-header-bar">
-              <span class="dm-party-heading">Active Adventurers (Quick-Adjust HP or Click to Inspect)</span>
+              <span class="dm-party-heading">Active Adventurers (Room Creator Only: Click to Inspect Full Sheet)</span>
               <span class="dm-member-counter" id="dmMemberCount">0 Active</span>
             </div>
             <div class="dm-party-cards-grid" id="dmPartyGrid">
-              <p class="dm-empty-msg">No party active. Create or enter a room code to monitor and manage your players live.</p>
+              <p class="dm-empty-msg">No DM session active. Click "+ New Room" or reopen a room you created to inspect your players live.</p>
             </div>
           </div>
         </div>
@@ -1496,11 +1500,11 @@
     </div>
   </div>
 
-  <!-- DM FULL CHARACTER INSPECTION MODAL -->
+  <!-- DM FULL CHARACTER INSPECTION MODAL (ROOM CREATOR ONLY) -->
   <div id="dmInspectModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box dm-inspect-box">
       <div class="modal-header">
-        <h3 id="inspectCharTitle">Adventurer Codex: Inspection</h3>
+        <h3 id="inspectCharTitle">DM Inspection</h3>
         <div class="inspect-header-actions">
           <button type="button" class="btn btn-danger-ghost" id="inspectKickBtn">Kick Player</button>
           <button id="closeInspectModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
@@ -1637,6 +1641,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=53"></script>
+  <script src="app.js?v=54"></script>
 </body>
 </html>
