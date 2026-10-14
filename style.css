@@ -4,6 +4,7 @@
 
 /* Theme 1: Obsidian Dark (Default) - Volcanic Crystalline Glass */
 :root, body.theme-obsidian {
+  color-scheme: dark;
   --bg-deep: #050811;
   --bg-surface: #0b1120;
   --bg-card: #111a2e;
@@ -33,6 +34,7 @@
 
 /* Theme 2: Ancient Parchment - Worn Sepia Fibrous Manuscript */
 body.theme-parchment {
+  color-scheme: dark;
   --bg-deep: #1c150e;
   --bg-surface: #261d15;
   --bg-card: #33271d;
@@ -62,6 +64,7 @@ body.theme-parchment {
 
 /* Theme 3: Eldritch Void - Abyssal Cosmic Nebula */
 body.theme-eldritch {
+  color-scheme: dark;
   --bg-deep: #05010b;
   --bg-surface: #0d041c;
   --bg-card: #16072e;
@@ -91,6 +94,7 @@ body.theme-eldritch {
 
 /* Theme 4: Celestial Light - Gilded Divine Starlight */
 body.theme-celestial {
+  color-scheme: dark;
   --bg-deep: #020b16;
   --bg-surface: #061528;
   --bg-card: #0b213f;
@@ -120,6 +124,7 @@ body.theme-celestial {
 
 /* Theme 5: Verdant Grove - Bioluminescent Deep Canopy */
 body.theme-emerald {
+  color-scheme: dark;
   --bg-deep: #020c07;
   --bg-surface: #05190f;
   --bg-card: #092819;
@@ -149,6 +154,7 @@ body.theme-emerald {
 
 /* Theme 6: Aethertech Clockwork - Polished Brass & Cyan Conduit */
 body.theme-aethertech {
+  color-scheme: dark;
   --bg-deep: #060a12;
   --bg-surface: #0c1424;
   --bg-card: #131f36;
@@ -178,6 +184,7 @@ body.theme-aethertech {
 
 /* Theme 7: Crimson Rite / Blood Moon - Gothic Ash & Arterial Crimson */
 body.theme-bloodmoon {
+  color-scheme: dark;
   --bg-deep: #090204;
   --bg-surface: #140409;
   --bg-card: #200810;
@@ -207,6 +214,7 @@ body.theme-bloodmoon {
 
 /* Theme 8: Glacial Frost - Frosted Arctic Glass & Aurora */
 body.theme-glacial {
+  color-scheme: dark;
   --bg-deep: #020812;
   --bg-surface: #061324;
   --bg-card: #0a213d;
@@ -236,6 +244,7 @@ body.theme-glacial {
 
 /* Theme 9: Bioluminescent Underdark - Cavern Abyss & Toxic Spore */
 body.theme-underdark {
+  color-scheme: dark;
   --bg-deep: #020409;
   --bg-surface: #060a14;
   --bg-card: #0d1424;
@@ -265,6 +274,7 @@ body.theme-underdark {
 
 /* Theme 10: Solaris / Radiant Dawn - Alabaster Ivory & Sunburst Gold */
 body.theme-solaris {
+  color-scheme: dark;
   --bg-deep: #140f07;
   --bg-surface: #21190c;
   --bg-card: #2e2311;
@@ -294,6 +304,7 @@ body.theme-solaris {
 
 /* Theme 11: Cartographer’s Sketchbook - Sepia Draft & Umber Ink */
 body.theme-cartographer {
+  color-scheme: dark;
   --bg-deep: #17120c;
   --bg-surface: #241b12;
   --bg-card: #302419;
@@ -390,13 +401,27 @@ input[type="email"],
 input[type="password"],
 textarea,
 select.hd-size-select {
-  background: linear-gradient(180deg, var(--bg-input) 0%, rgba(0, 0, 0, 0.55) 100%) !important;
+  color-scheme: dark;
+  background-color: var(--bg-input) !important;
+  background-image: linear-gradient(180deg, var(--bg-input) 0%, rgba(0, 0, 0, 0.55) 100%) !important;
   border: 1px solid var(--border-medium) !important;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
   border-radius: var(--radius-sm) !important;
   color: var(--text-main) !important;
   outline: none !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, filter 0.28s ease, opacity 0.28s ease !important;
+}
+
+/* Fix all native dropdown option menus so they are never white-on-white */
+select,
+select option,
+select optgroup,
+.hd-size-select option,
+.theme-select option,
+.theme-select optgroup {
+  color-scheme: dark;
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
 }
 
 input:focus,
@@ -423,7 +448,8 @@ textarea::-webkit-scrollbar,
 .inspect-modal-content::-webkit-scrollbar,
 .dm-party-cards-grid::-webkit-scrollbar,
 .player-party-cards-grid::-webkit-scrollbar,
-.structured-inv-list::-webkit-scrollbar {
+.structured-inv-list::-webkit-scrollbar,
+.live-party-dock-strip::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
@@ -434,7 +460,8 @@ textarea::-webkit-scrollbar-thumb,
 .inspect-modal-content::-webkit-scrollbar-thumb,
 .dm-party-cards-grid::-webkit-scrollbar-thumb,
 .player-party-cards-grid::-webkit-scrollbar-thumb,
-.structured-inv-list::-webkit-scrollbar-thumb {
+.structured-inv-list::-webkit-scrollbar-thumb,
+.live-party-dock-strip::-webkit-scrollbar-thumb {
   background: var(--border-medium);
   border-radius: 999px;
 }
@@ -458,7 +485,9 @@ textarea::-webkit-scrollbar-thumb,
 .dm-player-card,
 .player-party-card,
 .econ-chip,
-.econ-reset-btn {
+.econ-reset-btn,
+.recent-room-chip,
+.dock-member-pill {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -478,7 +507,9 @@ textarea::-webkit-scrollbar-thumb,
 .btn-outline:hover,
 .file-label:hover,
 .avatar-portal:hover,
-.btn-rest-mini:hover {
+.btn-rest-mini:hover,
+.recent-room-chip:hover,
+.dock-member-pill:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
@@ -526,7 +557,7 @@ textarea::-webkit-scrollbar-thumb,
   max-width: 1280px;
   margin: 0 auto;
   background-color: var(--bg-surface);
-  padding: 2rem 2.25rem;
+  padding: 1.85rem 2.25rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-medium);
@@ -537,16 +568,23 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   3. TOP COMMAND BAR & GLOBAL STATUS PILLS
+   3. TOP COMMAND BAR (LEFT THEME SELECTOR UNDER PARTY & TOP-RIGHT QUICK ACTION)
    ========================================================================== */
 .top-command-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.command-top-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.15rem;
-  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
   flex-wrap: wrap;
 }
 
@@ -573,7 +611,7 @@ textarea::-webkit-scrollbar-thumb,
   flex-direction: column;
 }
 .brand-title {
-  font-size: 1.22rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 0.04em;
@@ -585,6 +623,13 @@ textarea::-webkit-scrollbar-thumb,
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+.command-top-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-left: auto;
 }
 
 /* Global Concentration Pill */
@@ -631,33 +676,46 @@ textarea::-webkit-scrollbar-thumb,
 }
 .conc-clear-btn:hover { color: #ffffff; }
 
+/* Middle Row: Toolbar Actions */
 .command-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.6rem;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Bottom Row: Left-aligned directly under Party button */
+.command-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .cmd-palette-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   background: var(--bg-input) !important;
   border: 1px solid var(--border-medium) !important;
-  color: var(--text-muted) !important;
-  padding: 0.45rem 0.8rem !important;
+  color: var(--text-main) !important;
+  padding: 0.48rem 0.9rem !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm);
 }
 .cmd-palette-trigger:hover {
   color: #ffffff !important;
-  border-color: var(--accent-blue) !important;
+  border-color: var(--primary-red) !important;
 }
 .cmd-kbd {
-  font-size: 0.65rem;
-  padding: 0.08rem 0.35rem;
+  font-size: 0.68rem;
+  padding: 0.1rem 0.4rem;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  color: var(--accent-blue);
+  color: var(--accent-gold);
 }
 
 .dm-hub-trigger {
@@ -706,11 +764,6 @@ textarea::-webkit-scrollbar-thumb,
   cursor: pointer;
   padding-right: 0.25rem;
 }
-.theme-select option,
-.theme-select optgroup {
-  background: var(--bg-card);
-  color: var(--text-main);
-}
 
 .action-btn-group {
   display: inline-flex;
@@ -736,8 +789,8 @@ textarea::-webkit-scrollbar-thumb,
   border: none;
 }
 .btn-xs {
-  padding: 0.3rem 0.65rem !important;
-  font-size: 0.72rem !important;
+  padding: 0.28rem 0.6rem !important;
+  font-size: 0.7rem !important;
 }
 .btn.red,
 .btn-primary {
@@ -792,14 +845,14 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   4. HERO CODEX BANNER
+   4. HERO CODEX BANNER & ON-SCREEN LIVE PARTY DOCK
    ========================================================================== */
 .hero-codex-card {
   background: var(--card-gradient, linear-gradient(145deg, var(--bg-card) 0%, var(--bg-surface) 100%));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 1.35rem 1.6rem;
-  margin-bottom: 1.65rem;
+  margin-bottom: 1.35rem;
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: visible;
@@ -1176,6 +1229,135 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
+   4B. ON-SCREEN LIVE PARTY DOCK (ALWAYS VISIBLE WHEN CONNECTED)
+   ========================================================================== */
+.live-party-dock {
+  background: var(--card-gradient, var(--bg-card));
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 1.1rem;
+  margin-bottom: 1.4rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.live-party-dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.live-party-dock-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.dock-room-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.dock-room-code {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: var(--accent-gold);
+  letter-spacing: 0.08em;
+}
+
+.live-party-roll-ticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+}
+.ticker-label {
+  color: var(--text-dim);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+}
+.ticker-val {
+  color: var(--accent-emerald);
+  font-weight: 800;
+}
+
+.live-party-dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.live-party-dock-strip {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.dock-member-pill {
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.7rem;
+  min-width: 185px;
+  max-width: 225px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+.dock-member-pill.unconscious {
+  border-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.35);
+}
+.dock-member-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+.dock-member-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dock-member-ac {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  background: rgba(56, 189, 248, 0.12);
+  padding: 0.08rem 0.35rem;
+  border-radius: 4px;
+}
+.dock-member-hp-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #f87171;
+}
+.dock-member-conds {
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
    5. NAVIGATION DOCK & FILTER PILLS
    ========================================================================== */
 .codex-navigation-dock {
@@ -1492,18 +1674,18 @@ textarea::-webkit-scrollbar-thumb,
 }
 .rest-hd-text { font-weight: 800; color: var(--text-dim); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.04em; }
 .rest-hd-indicator .hitdice-input {
-  width: 28px !important;
-  height: 24px !important;
+  width: 34px !important;
+  height: 26px !important;
   font-size: 0.82rem !important;
   font-weight: 800 !important;
   color: #ffffff !important;
   padding: 0 !important;
 }
 .hd-size-select {
-  height: 24px;
-  font-size: 0.74rem;
+  height: 26px;
+  font-size: 0.76rem;
   font-weight: 800;
-  padding: 0 0.3rem;
+  padding: 0 0.4rem;
   cursor: pointer;
 }
 
@@ -1848,7 +2030,7 @@ textarea::-webkit-scrollbar-thumb,
   grid-template-columns: minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 2.2fr) 30px;
   gap: 0.5rem;
   align-items: center;
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: 10px;
   padding: 0.5rem 0.65rem;
@@ -2253,7 +2435,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .trait-card,
 .companion-card {
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: 12px;
   padding: 1.05rem 1.2rem;
@@ -2412,7 +2594,7 @@ textarea::-webkit-scrollbar-thumb,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 0.75rem 0.85rem;
@@ -2470,7 +2652,7 @@ textarea::-webkit-scrollbar-thumb,
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 0.6rem 0.35rem;
@@ -2555,7 +2737,7 @@ textarea::-webkit-scrollbar-thumb,
   margin-bottom: 2rem;
 }
 .spell-card {
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: 12px;
   padding: 1.05rem 1.2rem;
@@ -2650,7 +2832,7 @@ textarea::-webkit-scrollbar-thumb,
    11. INVENTORY, ATTUNEMENT & ENCUMBRANCE VAULT
    ========================================================================== */
 .currency-vault-card {
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 1.05rem 1.35rem;
@@ -2814,7 +2996,7 @@ textarea.block-text {
    12. DOCKED ARCANE DICE STATION
    ========================================================================== */
 .dice-station-bar {
-  background: linear-gradient(145deg, #0e1626 0%, #080d17 100%);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 0.95rem 1.3rem;
@@ -3188,9 +3370,9 @@ textarea.block-text {
 }
 
 /* ==========================================================================
-   15. PARTY REALM, DM DASHBOARD & INSPECTOR MODALS
+   15. PARTY REALM, RECENT ROOMS, DM DASHBOARD & INSPECTOR MODALS
    ========================================================================== */
-.party-modal-box { max-width: 820px; width: 95%; }
+.party-modal-box { max-width: 860px; width: 95%; }
 .party-modal-content {
   padding: 1.35rem;
   display: flex;
@@ -3198,20 +3380,58 @@ textarea.block-text {
   gap: 1rem;
   overflow-y: auto;
 }
+
+.recent-rooms-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  flex-wrap: wrap;
+}
+.recent-rooms-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.recent-rooms-chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.recent-room-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+}
+.recent-room-chip:hover {
+  border-color: var(--accent-gold);
+  background: var(--bg-hover);
+}
+
 .party-modal-desc {
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   margin-bottom: 0.75rem;
 }
 .party-action-row {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 .party-room-input {
   flex: 1;
-  padding: 0.6rem 0.9rem;
-  font-size: 1.05rem;
+  min-width: 170px;
+  padding: 0.55rem 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3236,7 +3456,7 @@ textarea.block-text {
 .player-party-cards-grid,
 .dm-party-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
   gap: 0.85rem;
   max-height: 440px;
   overflow-y: auto;
@@ -3244,7 +3464,7 @@ textarea.block-text {
 }
 .player-party-card,
 .dm-player-card {
-  background: var(--card-gradient, #131a26);
+  background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
@@ -3259,6 +3479,29 @@ textarea.block-text {
   border-color: #ef4444;
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
 }
+
+/* DM Quick HP & Inspiration Controls on Player Cards */
+.dm-quick-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.dm-quick-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  color: var(--text-main);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.42rem;
+  cursor: pointer;
+}
+.dm-quick-btn.dmg:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+.dm-quick-btn.heal:hover { background: #10b981; border-color: #10b981; color: #fff; }
+.dm-quick-btn.insp:hover { background: var(--accent-gold); border-color: var(--accent-gold); color: #000; }
 
 .dm-command-strip {
   display: flex;
@@ -3542,7 +3785,7 @@ kbd {
 
 @media print {
   body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
-  .top-command-bar, .codex-navigation-dock, .dice-station-bar, .sheet-footer, .ambient-glow, .modal-backdrop, .blur-toggle-btn {
+  .top-command-bar, .codex-navigation-dock, .dice-station-bar, .sheet-footer, .ambient-glow, .modal-backdrop, .blur-toggle-btn, .live-party-dock {
     display: none !important;
   }
   .sheet-container { box-shadow: none !important; border: none !important; max-width: 100% !important; padding: 0 !important; }
