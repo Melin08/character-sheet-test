@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=50" />
+  <link rel="stylesheet" href="style.css?v=53" />
 </head>
 <body id="top" class="theme-obsidian">
 
@@ -26,43 +26,49 @@
     <!-- TOP COMMAND BAR                                                   -->
     <!-- ================================================================= -->
     <header class="top-command-bar">
-      <div class="command-brand">
-        <div class="brand-emblem" title="Adventurer Codex">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-            <polyline points="2 17 12 22 22 17"></polyline>
-            <polyline points="2 12 12 17 22 12"></polyline>
-          </svg>
-        </div>
-        <div class="brand-headings">
-          <span class="brand-title">Adventurer Codex</span>
-          <span class="brand-system">5e Tactical Character Engine</span>
+      <!-- Top Row: Brand on Left, Concentration & Quick Action in Top-Right Corner -->
+      <div class="command-top-row">
+        <div class="command-brand">
+          <div class="brand-emblem" title="Adventurer Codex">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div class="brand-headings">
+            <span class="brand-title">Adventurer Codex</span>
+            <span class="brand-system">5e Tactical Character Engine</span>
+          </div>
+
+          <!-- Global Active Concentration Pill (Auto-shows when concentrating on a spell) -->
+          <div id="globalConcentrationBanner" class="concentration-global-pill" style="display: none;" title="Click to end concentration">
+            <span class="conc-pulse-dot"></span>
+            <span class="conc-pill-label">Concentrating:</span>
+            <strong id="globalConcentrationName">None</strong>
+            <button type="button" id="clearConcentrationBtn" class="conc-clear-btn" aria-label="Drop Concentration">&times;</button>
+          </div>
         </div>
 
-        <!-- Global Active Concentration Pill (Auto-shows when concentrating on a spell) -->
-        <div id="globalConcentrationBanner" class="concentration-global-pill" style="display: none;" title="Click to end concentration">
-          <span class="conc-pulse-dot"></span>
-          <span class="conc-pill-label">Concentrating:</span>
-          <strong id="globalConcentrationName">None</strong>
-          <button type="button" id="clearConcentrationBtn" class="conc-clear-btn" aria-label="Drop Concentration">&times;</button>
+        <!-- Top-Right Corner: Quick Action Button (OS-aware shortcut) -->
+        <div class="command-top-right">
+          <button class="btn btn-ghost cmd-palette-trigger" id="commandPaletteBtn" type="button" title="Quick Roll &amp; Search">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Quick Action</span>
+            <kbd class="cmd-kbd" id="quickActionShortcutKbd">Ctrl+K</kbd>
+          </button>
         </div>
       </div>
 
+      <!-- Middle Row: Main Toolbar Controls -->
       <div class="command-actions">
-        <!-- Quick Command Palette Button (Ctrl+K) -->
-        <button class="btn btn-ghost cmd-palette-trigger" id="commandPaletteBtn" type="button" title="Quick Roll &amp; Search (Ctrl+K)">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Quick Action</span>
-          <kbd class="cmd-kbd">⌘K</kbd>
-        </button>
-
-        <!-- Live Party & DM Screen Button -->
-        <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Live Party Sync &amp; DM Screen">
+        <!-- Live Party & DM Dashboard Button -->
+        <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Party &amp; DM Dashboard">
           <span class="live-beacon-dot" id="headerPartyDot"></span>
-          <span>Party Realm</span>
+          <span id="headerPartyBtnText">Party</span>
         </button>
 
         <!-- Account / Cloud Sync Button -->
@@ -70,10 +76,10 @@
           <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
         </div>
 
-        <!-- Character Roster Management -->
+        <!-- Character Management -->
         <div class="action-btn-group">
           <button class="btn btn-ghost" id="saveBtn" type="button" title="Save Character (Ctrl+S)">Save</button>
-          <button class="btn btn-ghost" id="loadBtn" type="button" title="Switch or Manage Characters">Roster</button>
+          <button class="btn btn-ghost" id="loadBtn" type="button" title="Load or Manage Characters">Load</button>
           <button class="btn btn-ghost" id="newBtn" type="button" title="Create New Character">+ New</button>
         </div>
 
@@ -88,8 +94,10 @@
           <button class="btn btn-ghost" id="printSheetBtn" type="button" title="Print Sheet">Print</button>
           <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
         </div>
+      </div>
 
-        <!-- 11 Themes Selector -->
+      <!-- Bottom Row (Left-Aligned directly under Party Button): 11 Themes Selector -->
+      <div class="command-sub-row">
         <div class="theme-selector-wrapper" title="Change Sheet Theme">
           <span class="theme-label-text">Theme:</span>
           <select id="themeSelect" class="theme-select" aria-label="Select Theme">
@@ -150,7 +158,7 @@
               </button>
             </div>
 
-            <!-- Subclass Pill (NEW) -->
+            <!-- Subclass Pill -->
             <div class="codex-field-pill" data-blur-id="subclass">
               <span class="pill-title">Subclass</span>
               <input type="text" id="charSubclass" class="save-field pill-input" placeholder="e.g. Battle Master" />
@@ -292,10 +300,41 @@
         <div class="codex-external-links">
           <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">5E WIKIDOT</a>
           <span class="sep">/</span>
-          <a href="https://roll20.net/compendium/dnd5e/BookIndex" target="_blank" rel="noopener noreferrer">ROLL20 SRD</a>
+          <a href="https://roll20.net/compendium/dnd5e/BookIndex" target="_blank" rel="noopener noreferrer">ROLL20</a>
           <span class="sep">/</span>
           <a href="https://5e.tools/" target="_blank" rel="noopener noreferrer">5ETOOLS</a>
         </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- ON-SCREEN LIVE PARTY DOCK (AUTO-SHOWS WHEN IN A PARTY ROOM)       -->
+    <!-- ================================================================= -->
+    <section id="livePartyDock" class="live-party-dock" style="display: none;">
+      <div class="live-party-dock-header">
+        <div class="live-party-dock-title">
+          <span class="status-dot connected"></span>
+          <span class="dock-room-label">Party Room:</span>
+          <strong id="dockRoomCodeText" class="dock-room-code">NONE</strong>
+          <button type="button" class="btn btn-ghost btn-xs" id="dockCopyCodeBtn" title="Copy Room Code">Copy Code</button>
+          <button type="button" class="btn btn-ghost btn-xs" id="dockCopyLinkBtn" title="Copy 1-Click Invite Link">Copy Invite Link</button>
+        </div>
+
+        <!-- Live Shared Party Roll Ticker -->
+        <div class="live-party-roll-ticker" id="livePartyRollTicker">
+          <span class="ticker-label">Last Party Roll:</span>
+          <span id="livePartyLastRollText" class="ticker-val">Waiting for rolls...</span>
+        </div>
+
+        <div class="live-party-dock-actions">
+          <button type="button" class="btn btn-outline btn-xs" id="dockOpenFullPartyBtn">Party &amp; DM Dashboard</button>
+          <button type="button" class="btn btn-ghost btn-xs" id="dockToggleCollapseBtn" title="Collapse/Expand Party Bar">&#9650;</button>
+          <button type="button" class="btn btn-danger-ghost btn-xs" id="dockLeaveRoomBtn" title="Disconnect from Room">Leave</button>
+        </div>
+      </div>
+
+      <div id="livePartyDockBody" class="live-party-dock-strip">
+        <!-- Mini party member pills rendered live here -->
       </div>
     </section>
 
@@ -318,7 +357,7 @@
         <span>Inventory &amp; Vault</span>
       </button>
       <button class="main-tab" data-target="tab-companions" type="button">
-        <span>Companions &amp; Wild Shape</span>
+        <span>Companions &amp; Creatures</span>
       </button>
       <button class="main-tab" data-target="tab-journal" type="button">
         <span>Notes &amp; Quests</span>
@@ -372,7 +411,7 @@
           </div>
         </div>
 
-        <!-- Death Saves (With Interactive Pips + Numeric Fallback) -->
+        <!-- Death Saves -->
         <div class="vitals-card death-card">
           <div class="vitals-card-top">
             <span class="card-tag">Mortality</span>
@@ -438,7 +477,7 @@
           </button>
         </div>
 
-        <!-- Action Economy Tracker (NEW) -->
+        <!-- Action Economy Tracker -->
         <div class="action-economy-strip">
           <span class="economy-label">Turn Economy:</span>
           <label class="econ-chip"><input type="checkbox" id="econ_action" class="save-field" /><span>Action</span></label>
@@ -465,7 +504,7 @@
         <div class="left-pane">
           <div class="pane-header flex-header">
             <h2 class="section-title">Ability Scores</h2>
-            <span class="pane-hint">Click hex to roll</span>
+            <span class="pane-hint">Click mod or hex to roll</span>
           </div>
 
           <div class="attributes-group">
@@ -618,7 +657,7 @@
             </div>
           </div>
 
-          <!-- Senses, Vision & Defenses Summary Card (NEW) -->
+          <!-- Senses, Vision & Defenses Summary Card -->
           <div class="defenses-summary-card">
             <div class="defense-field-row">
               <label for="charSenses">Senses / Vision</label>
@@ -651,7 +690,7 @@
             </div>
           </div>
 
-          <!-- Dynamic Custom Resource Trackers (Ammo, Superiority Dice, Luck, Channel Divinity, etc.) -->
+          <!-- Dynamic Custom Resource Trackers -->
           <div class="custom-resources-panel">
             <div class="conditions-header-bar">
               <div class="conditions-title-wrap">
@@ -659,9 +698,7 @@
               </div>
               <button type="button" class="btn btn-outline btn-xs" id="addCustomResourceBtn">+ Add Counter</button>
             </div>
-            <div id="customResourcesList" class="custom-resources-grid">
-              <!-- Populated dynamically by JS -->
-            </div>
+            <div id="customResourcesList" class="custom-resources-grid"></div>
           </div>
 
           <!-- Tactical Conditions Tracker -->
@@ -946,7 +983,7 @@
       <div class="pane-header flex-header traits-page-header">
         <div>
           <h2 class="section-title">Features, Abilities &amp; Feats</h2>
-          <span class="section-subtitle">Manage class powers, racial traits, feats, and supernatural gifts</span>
+          <span class="section-subtitle">Manage class powers, racial traits, and feats</span>
         </div>
         <div class="traits-toolbar-actions">
           <input type="text" id="filterTraitsInput" class="spell-filter-input" placeholder="Search your abilities..." />
@@ -1037,9 +1074,9 @@
       <div id="spellsList" class="spells-grid-container"></div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 4: INVENTORY & VAULT                   -->
-    <!-- ========================================== -->
+    <!-- ================================================================= -->
+    <!-- TAB 4: INVENTORY & VAULT                                          -->
+    <!-- ================================================================= -->
     <div id="tab-inventory" class="tab-page">
       <!-- Treasury & Wealth Card -->
       <div class="currency-vault-card">
@@ -1110,13 +1147,13 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- TAB 5: COMPANIONS, FAMILIARS & WILD SHAPE (NEW TAB)               -->
+    <!-- TAB 5: COMPANIONS & CREATURES                                     -->
     <!-- ================================================================= -->
     <div id="tab-companions" class="tab-page">
       <div class="pane-header flex-header">
         <div>
-          <h2 class="section-title">Companions, Mounts &amp; Wild Shapes</h2>
-          <span class="section-subtitle">Track Familiars, Beast Master Companions, Find Steed, Steel Defenders, and Druid Wild Shapes</span>
+          <h2 class="section-title">Companions &amp; Creatures</h2>
+          <span class="section-subtitle">Track Familiars, Beast Master Companions, Find Steed, Steel Defenders, Summons, and Wild Shapes</span>
         </div>
         <button type="button" class="btn btn-add-trait" id="addCompanionBtn">+ Add Creature</button>
       </div>
@@ -1183,7 +1220,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- DOCKED ARCANE DICE STATION (WITH ADV/DIS & CUSTOM FORMULA)        -->
+    <!-- DOCKED ARCANE DICE STATION (ORDERED HIGHEST TO LOWEST)            -->
     <!-- ================================================================= -->
     <section class="dice-station-bar">
       <div class="dice-station-left">
@@ -1194,13 +1231,13 @@
         </div>
 
         <div class="dice-button-rack">
+          <button class="btn dice-btn" data-sides="100" type="button">d100</button>
           <button class="btn dice-btn" data-sides="20" type="button">d20</button>
           <button class="btn dice-btn" data-sides="12" type="button">d12</button>
           <button class="btn dice-btn" data-sides="10" type="button">d10</button>
           <button class="btn dice-btn" data-sides="8" type="button">d8</button>
           <button class="btn dice-btn" data-sides="6" type="button">d6</button>
           <button class="btn dice-btn" data-sides="4" type="button">d4</button>
-          <button class="btn dice-btn" data-sides="100" type="button">d100</button>
         </div>
 
         <!-- Custom Formula Roller (e.g. 2d6+4 or 8d6) -->
@@ -1375,27 +1412,43 @@
     </div>
   </div>
 
-  <!-- Live Party & DM Dashboard Modal -->
+  <!-- =================================================================== -->
+  <!-- PARTY & DM DASHBOARD MODAL                                          -->
+  <!-- =================================================================== -->
   <div id="partyModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box party-modal-box">
       <div class="modal-header">
-        <h3 id="partyModalTitle">Party Realm &amp; DM Dashboard</h3>
+        <h3 id="partyModalTitle">Party &amp; DM Dashboard</h3>
         <button id="closePartyModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
       </div>
+
       <div class="party-modal-content">
-        <div class="subtab-controls party-mode-tabs">
-          <button type="button" class="sub-tab active" data-sub="party-join-view">Player: Join Party</button>
-          <button type="button" class="sub-tab" data-sub="party-dm-view">DM: Live Dashboard</button>
+        <!-- Quick Recent Rooms Strip (1-Click Rejoin) -->
+        <div id="recentRoomsBar" class="recent-rooms-bar" style="display: none;">
+          <span class="recent-rooms-label">Recent Rooms:</span>
+          <div id="recentRoomsList" class="recent-rooms-chips"></div>
         </div>
 
-        <!-- VIEW 1: Player Join Room -->
+        <!-- Sub-tabs: Player Join vs DM View -->
+        <div class="subtab-controls party-mode-tabs">
+          <button type="button" class="sub-tab active" data-sub="party-join-view">Player: Party View</button>
+          <button type="button" class="sub-tab" data-sub="party-dm-view">DM: Live Command Center</button>
+        </div>
+
+        <!-- VIEW 1: Player Join & Party View -->
         <div id="party-join-view" class="subtab-page active">
-          <p class="party-modal-desc">Link your active character to your campaign room to broadcast your stats and view party members' current HP and active conditions in real-time.</p>
+          <p class="party-modal-desc">
+            Enter a Room Code to instantly sync your character with your group. Share the <strong>Invite Link</strong> so friends can join in 1 click!
+          </p>
+
           <div class="party-action-row">
             <input type="text" id="campaignRoomInput" class="party-room-input center" placeholder="ROOM CODE (e.g. TAVERN-42)" maxlength="15" autocomplete="off" />
             <button type="button" class="btn btn-primary" id="joinCampaignBtn">Connect</button>
-            <button type="button" class="btn btn-danger-ghost" id="leaveCampaignBtn" style="display: none;">Leave Room</button>
+            <button type="button" class="btn btn-ghost" id="copyPlayerRoomCodeBtn" style="display: none;">Copy Code</button>
+            <button type="button" class="btn btn-ghost" id="copyInviteLinkBtn" style="display: none;">Invite Link</button>
+            <button type="button" class="btn btn-danger-ghost" id="leaveCampaignBtn" style="display: none;">Leave</button>
           </div>
+
           <div class="party-status-indicator" id="partyStatusBox">
             <span class="status-dot disconnected"></span>
             <span id="partyStatusText">Not connected to any campaign room.</span>
@@ -1403,7 +1456,7 @@
 
           <div class="player-party-section" id="playerPartySection" style="margin-top: 1.25rem; display: none;">
             <div class="dm-party-header-bar">
-              <span class="dm-party-heading">Party Vitals</span>
+              <span class="dm-party-heading">Live Party Vitals</span>
               <span class="dm-member-counter" id="playerMemberCount">0 Active</span>
             </div>
             <div class="player-party-cards-grid" id="playerPartyGrid">
@@ -1416,24 +1469,26 @@
         <div id="party-dm-view" class="subtab-page">
           <div class="dm-command-strip">
             <div class="dm-room-display">
-              <span class="dm-code-label">Room Code:</span>
+              <span class="dm-code-label">Active DM Room:</span>
               <strong id="dmActiveRoomCode" class="dm-code-text">NONE</strong>
             </div>
             <div class="dm-action-btns">
-              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="ENTER CODE" maxlength="15" autocomplete="off" style="width: 140px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
-              <button type="button" class="btn btn-primary" id="openDMRoomBtn">Open Room</button>
-              <button type="button" class="btn btn-ghost" id="createCampaignBtn">+ New</button>
-              <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy</button>
-              <button type="button" class="btn btn-danger-ghost" id="closeCampaignBtn" style="display: none;">Close Room</button>
+              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="ROOM CODE" maxlength="15" autocomplete="off" style="width: 140px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
+              <button type="button" class="btn btn-primary" id="openDMRoomBtn">Monitor Room</button>
+              <button type="button" class="btn btn-ghost" id="createCampaignBtn">+ New Room</button>
+              <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy Code</button>
+              <button type="button" class="btn btn-ghost" id="copyDMInviteLinkBtn" style="display: none;">Invite Link</button>
+              <button type="button" class="btn btn-danger-ghost" id="closeCampaignBtn" style="display: none;">Close</button>
             </div>
           </div>
+
           <div class="dm-party-section">
             <div class="dm-party-header-bar">
-              <span class="dm-party-heading">Active Adventurers (Click Card to Inspect Full Sheet)</span>
+              <span class="dm-party-heading">Active Adventurers (Quick-Adjust HP or Click to Inspect)</span>
               <span class="dm-member-counter" id="dmMemberCount">0 Active</span>
             </div>
             <div class="dm-party-cards-grid" id="dmPartyGrid">
-              <p class="dm-empty-msg">No party active. Create or enter a room code to inspect your players live.</p>
+              <p class="dm-empty-msg">No party active. Create or enter a room code to monitor and manage your players live.</p>
             </div>
           </div>
         </div>
@@ -1505,11 +1560,11 @@
     </div>
   </div>
 
-  <!-- Load Character Roster Modal -->
+  <!-- Load Character Modal -->
   <div id="loadModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box char-modal-box">
       <div class="modal-header">
-        <h3>Saved Adventurers Roster</h3>
+        <h3>Saved Adventurers</h3>
         <button id="closeLoadModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
       </div>
       <div id="charList" class="modal-list"></div>
@@ -1582,6 +1637,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=50"></script>
+  <script src="app.js?v=53"></script>
 </body>
 </html>
