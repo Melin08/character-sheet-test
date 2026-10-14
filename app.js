@@ -30,6 +30,7 @@ const ROSTER_STORAGE_KEY = "badman_char_roster_v1";
 const ACTIVE_CHAR_ID_KEY = "badman_active_char_id";
 const THEME_STORAGE_KEY = "badman_active_theme";
 const CAMPAIGN_ROOM_KEY = "badman_active_campaign_room";
+const RECENT_ROOMS_KEY = "badman_recent_rooms_v1";
 
 let activeCharId = localStorage.getItem(ACTIVE_CHAR_ID_KEY) || "default";
 let connectedCampaignRoom = localStorage.getItem(CAMPAIGN_ROOM_KEY) || "";
@@ -47,11 +48,13 @@ let myCompanions = [];
 let myActiveConditions = [];
 let myBlurredPills = [];
 let diceRollHistory = [];
+let lastBroadcastRoll = null;
 
 // UI Filter & Dice States
 let currentDiceMode = "norm"; // "norm" | "adv" | "dis"
 let activeTraitCategoryFilter = "all";
 let activeSpellLevelFilter = "all";
+let isPartyDockCollapsed = false;
 
 let draggedSpellIndex = null;
 const apiCache = {};
@@ -189,8 +192,27 @@ const BUILTIN_TRAITS = [
 ];
 
 /* ==========================================================================
-   UTILITIES & HELPERS
+   UTILITIES, OS DETECTION & HELPERS
    ========================================================================== */
+
+function detectOSAndSetShortcut() {
+  const kbdEl = document.getElementById("quickActionShortcutKbd");
+  const btnEl = document.getElementById("commandPaletteBtn");
+  if (!kbdEl) return;
+
+  const isTouchOnly = window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  if (isTouchOnly) {
+    kbdEl.style.display = "none";
+    return;
+  }
+
+  const platform = (navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || "").toLowerCase();
+  const isMac = platform.includes("mac") || platform.includes("iphone") || platform.includes("ipad");
+  const shortcutText = isMac ? "⌘K" : "Ctrl+K";
+
+  kbdEl.textContent = shortcutText;
+  if (btnEl) btnEl.title = `Quick Roll & Search (${shortcutText})`;
+}
 
 function escapeHtml(str) {
   if (typeof str !== "string") return "";
@@ -338,7 +360,6 @@ function updateConcentrationBanner() {
     }
   }
 
-  // Highlight active spell card button if matching
   document.querySelectorAll(".spell-conc-btn").forEach((btn) => {
     const cardSpellName = btn.dataset.spellName || "";
     if (spellVal && cardSpellName.toLowerCase() === spellVal.toLowerCase()) {
@@ -352,7 +373,6 @@ function updateConcentrationBanner() {
 }
 
 function updateWealthAndEncumbrance() {
-  // 1. Total Wealth in GP
   const cp = parseInt(document.getElementById("coin_cp")?.value, 10) || 0;
   const sp = parseInt(document.getElementById("coin_sp")?.value, 10) || 0;
   const ep = parseInt(document.getElementById("coin_ep")?.value, 10) || 0;
@@ -365,7 +385,6 @@ function updateWealthAndEncumbrance() {
     wealthEl.textContent = `Total Value: ${totalGp.toLocaleString(undefined, { maximumFractionDigits: 2 })} GP`;
   }
 
-  // 2. Carrying Capacity & Encumbrance
   const strScore = parseInt(document.getElementById("attr_str")?.value, 10) || 10;
   const maxCarry = strScore * 15;
 
@@ -564,7 +583,7 @@ function renderCompanions() {
   if (!Array.isArray(myCompanions)) myCompanions = [];
 
   if (myCompanions.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 2rem 0; text-align: center;">No companions, familiars, mounts, or Wild Shapes added yet. Click "+ Add Creature" above to create a statblock.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 0.88rem; color: #64748b; font-style: italic; padding: 2rem 0; text-align: center;">No companions, familiars, mounts, or creatures added yet. Click "+ Add Creature" above to create a statblock.</p>`;
     return;
   }
 
@@ -666,7 +685,6 @@ function renderMySpells() {
     const sName = spell.name || "";
     const isConcentrating = activeConc && sName.toLowerCase() === activeConc;
 
-    // Check level filter
     let matchesLvl = true;
     const lowerType = typeVal.toLowerCase();
     if (activeSpellLevelFilter === "cantrip") {
@@ -831,7 +849,7 @@ function renderAvatar() {
 }
 
 /* ==========================================================================
-   DICE ENGINE (ADVANTAGE / DISADVANTAGE, CRITS & FORMULA PARSER)
+   DICE ENGINE (ADVANTAGE / DISADVANTAGE, CRITS & LIVE PARTY BROADCAST)
    ========================================================================== */
 
 function performD20Roll(bonus = 0, label = "Roll") {
@@ -880,7 +898,6 @@ function rollCustomFormula(formulaStr) {
   const clean = (formulaStr || "").replace(/\s+/g, "").toLowerCase();
   if (!clean) return;
 
-  // Match expressions like 2d6+4, d20-1, 8d6, etc.
   const regex = /^(\d*)d(\d+)([+-]\d+)?$/;
   const match = clean.match(regex);
   if (!match) {
@@ -914,9 +931,27 @@ function rollCustomFormula(formulaStr) {
 
 function addDiceHistory(desc, total) {
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const charName = document.getElementById("charName")?.value?.trim() || "Adventurer";
+
   diceRollHistory.unshift({ desc, total, time });
   if (diceRollHistory.length > 25) diceRollHistory.pop();
   renderDiceHistory();
+
+  lastBroadcastRoll = {
+    charName,
+    desc,
+    total: String(total),
+    timestamp: Date.now()
+  };
+
+  if (db && connectedCampaignRoom && activeCharId) {
+    db.collection("campaigns")
+      .doc(connectedCampaignRoom)
+      .collection("members")
+      .doc(activeCharId)
+      .set({ lastRoll: lastBroadcastRoll, updatedAt: Date.now() }, { merge: true })
+      .catch(() => {});
+  }
 }
 
 function renderDiceHistory() {
@@ -988,7 +1023,7 @@ function extractFullCharacterPayload(charData) {
   const maxHp = parseInt(f.maxHp, 10) || 10;
   const tempHp = parseInt(f.tempHp, 10) || 0;
 
-  return {
+  const payload = {
     id: activeCharId,
     name: charData.name || "Unnamed Adventurer",
     charClass: f.charClass || "",
@@ -1027,8 +1062,15 @@ function extractFullCharacterPayload(charData) {
     passiveInsight: parseInt(document.getElementById("passiveInsight")?.textContent, 10) || 10,
     passiveInvestigation: parseInt(document.getElementById("passiveInvestigation")?.textContent, 10) || 10,
     inspiration: f.charInspiration || "",
+    heroicInspiration: !!f.heroicInspirationToggle,
     updatedAt: Date.now()
   };
+
+  if (lastBroadcastRoll) {
+    payload.lastRoll = lastBroadcastRoll;
+  }
+
+  return payload;
 }
 
 async function ensureAuthenticated() {
@@ -1118,7 +1160,6 @@ function applyCharacterData(charData) {
   if (!charData) return;
   const fields = charData.fields || {};
 
-  // Render spell slot grid first with saved slot values so inputs exist in DOM
   renderSpellSlotGrid(fields);
 
   Object.keys(fields).forEach((id) => {
@@ -1128,6 +1169,21 @@ function applyCharacterData(charData) {
       else el.value = fields[id];
     }
   });
+
+  // Migrate legacy Hit Dice strings (e.g. "d10" or "2d10" in hitDiceMax) cleanly into #hitDieSize
+  const hdMaxEl = document.getElementById("hitDiceMax");
+  const hdSizeEl = document.getElementById("hitDieSize");
+  if (hdMaxEl && typeof hdMaxEl.value === "string" && hdMaxEl.value.toLowerCase().includes("d")) {
+    const match = hdMaxEl.value.toLowerCase().match(/(\d*)d(\d+)/);
+    if (match) {
+      const countPart = parseInt(match[1], 10) || parseInt(fields.charLevel, 10) || 1;
+      const diePart = match[2];
+      hdMaxEl.value = countPart;
+      if (hdSizeEl && ["6", "8", "10", "12"].includes(diePart)) {
+        hdSizeEl.value = diePart;
+      }
+    }
+  }
 
   myCharacterAvatar = charData.avatar || "";
   myCharacterSpells = charData.spells || [];
@@ -1512,7 +1568,7 @@ function filterAndRenderTraits(query = "") {
 }
 
 /* ==========================================================================
-   QUICK COMMAND PALETTE (CTRL+K)
+   QUICK COMMAND PALETTE (CTRL+K / CMD+K)
    ========================================================================== */
 
 function openCommandPalette() {
@@ -1536,12 +1592,13 @@ function renderCommandPaletteResults(query = "") {
     { title: "Take a Short Rest", tag: "Recovery", action: "short-rest" },
     { title: "Take a Long Rest", tag: "Recovery", action: "long-rest" },
     { title: "Open HP Damage / Heal Calculator", tag: "Vitality", action: "open-hp" },
+    { title: "Open Party & DM Dashboard", tag: "Party", action: "open-party" },
     { title: "Reset Turn Economy (New Turn)", tag: "Combat", action: "reset-turn" },
     { title: "Go to Combat & Core Tab", tag: "Navigation", action: "tab", target: "tab-stats" },
     { title: "Go to Features & Traits Tab", tag: "Navigation", action: "tab", target: "tab-traits" },
     { title: "Go to Spells & Grimoire Tab", tag: "Navigation", action: "tab", target: "tab-spells" },
     { title: "Go to Inventory & Vault Tab", tag: "Navigation", action: "tab", target: "tab-inventory" },
-    { title: "Go to Companions & Wild Shape Tab", tag: "Navigation", action: "tab", target: "tab-companions" },
+    { title: "Go to Companions & Creatures Tab", tag: "Navigation", action: "tab", target: "tab-companions" },
     { title: "Go to Notes & Quests Tab", tag: "Navigation", action: "tab", target: "tab-journal" }
   ];
 
@@ -1603,53 +1660,186 @@ function renderCommandPaletteResults(query = "") {
 }
 
 /* ==========================================================================
-   PARTY REALM & DM DASHBOARD (REAL-TIME SYNC)
+   PARTY & DM DASHBOARD, RECENT ROOMS & ON-SCREEN DOCK
    ========================================================================== */
+
+function getRecentRooms() {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_ROOMS_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function addRecentRoom(code) {
+  if (!code) return;
+  const clean = code.trim().toUpperCase();
+  let list = getRecentRooms().filter((r) => r !== clean);
+  list.unshift(clean);
+  if (list.length > 6) list = list.slice(0, 6);
+  localStorage.setItem(RECENT_ROOMS_KEY, JSON.stringify(list));
+  renderRecentRoomsBar();
+}
+
+function renderRecentRoomsBar() {
+  const bar = document.getElementById("recentRoomsBar");
+  const listEl = document.getElementById("recentRoomsList");
+  if (!bar || !listEl) return;
+
+  const rooms = getRecentRooms();
+  if (rooms.length === 0) {
+    bar.style.display = "none";
+    return;
+  }
+
+  bar.style.display = "flex";
+  listEl.innerHTML = rooms.map((code) => `
+    <button type="button" class="recent-room-chip" data-room="${escapeHtml(code)}" title="Click to connect to ${escapeHtml(code)}">
+      ${escapeHtml(code)}
+    </button>
+  `).join("");
+}
+
+function copyRoomInviteLink(roomCode) {
+  const clean = (roomCode || connectedCampaignRoom || activeDMRoomCode || "").trim().toUpperCase();
+  if (!clean || clean === "NONE") return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("room", clean);
+  navigator.clipboard.writeText(url.toString()).then(() => {
+    showStatus(`Invite Link Copied for ${clean}!`);
+  });
+}
+
+function renderLivePartyDock(members) {
+  const dock = document.getElementById("livePartyDock");
+  const dockCode = document.getElementById("dockRoomCodeText");
+  const dockBody = document.getElementById("livePartyDockBody");
+  const lastRollEl = document.getElementById("livePartyLastRollText");
+
+  const activeRoom = connectedCampaignRoom || activeDMRoomCode;
+  if (!dock) return;
+
+  if (!activeRoom) {
+    dock.style.display = "none";
+    return;
+  }
+
+  dock.style.display = "flex";
+  if (dockCode) dockCode.textContent = activeRoom;
+  if (dockBody) dockBody.style.display = isPartyDockCollapsed ? "none" : "flex";
+
+  if (!Array.isArray(members) || members.length === 0) {
+    if (dockBody) {
+      dockBody.innerHTML = `<span style="font-size:0.78rem; color:var(--text-dim); font-style:italic;">Waiting for party members to join ${escapeHtml(activeRoom)}...</span>`;
+    }
+    return;
+  }
+
+  let latestRoll = null;
+  members.forEach((m) => {
+    if (m.lastRoll && m.lastRoll.timestamp) {
+      if (!latestRoll || m.lastRoll.timestamp > latestRoll.timestamp) {
+        latestRoll = { ...m.lastRoll, charName: m.name || m.lastRoll.charName || "Adventurer" };
+      }
+    }
+  });
+
+  if (lastRollEl) {
+    if (latestRoll) {
+      lastRollEl.textContent = `${latestRoll.charName}: ${latestRoll.desc} = ${latestRoll.total}`;
+    } else {
+      lastRollEl.textContent = "No party rolls yet";
+    }
+  }
+
+  if (dockBody) {
+    dockBody.innerHTML = members.map((m) => {
+      const hp = m.hp || { cur: 10, max: 10, temp: 0 };
+      const pct = Math.min(100, Math.max(0, Math.round((hp.cur / (hp.max || 1)) * 100)));
+      const conds = (m.conditions || []).join(", ");
+      const isDead = hp.cur <= 0;
+
+      return `
+        <div class="dock-member-pill ${isDead ? "unconscious" : ""}" data-member-id="${escapeHtml(m.id || "")}" title="Click to inspect or view in Party &amp; DM Dashboard">
+          <div class="dock-member-top">
+            <span class="dock-member-name">${escapeHtml(m.name || "Unnamed")}</span>
+            <span class="dock-member-ac">AC ${m.ac || 10}</span>
+          </div>
+          <div class="dock-member-hp-row">
+            <span>HP: ${hp.cur}/${hp.max}${hp.temp > 0 ? ` (+${hp.temp})` : ""}</span>
+            <span>${pct}%</span>
+          </div>
+          <div class="dm-health-track">
+            <div class="dm-health-fill" style="width: ${pct}%;"></div>
+          </div>
+          ${conds ? `<span class="dock-member-conds">Cond: ${escapeHtml(conds)}</span>` : ""}
+        </div>
+      `;
+    }).join("");
+  }
+}
 
 function updatePartyStatusUI() {
   const statusBox = document.getElementById("partyStatusBox");
   const statusText = document.getElementById("partyStatusText");
   const roomInput = document.getElementById("campaignRoomInput");
   const joinBtn = document.getElementById("joinCampaignBtn");
+  const copyPlayerCodeBtn = document.getElementById("copyPlayerRoomCodeBtn");
+  const copyInviteBtn = document.getElementById("copyInviteLinkBtn");
   const leaveBtn = document.getElementById("leaveCampaignBtn");
   const playerSection = document.getElementById("playerPartySection");
   const headerDot = document.getElementById("headerPartyDot");
+  const headerBtnText = document.getElementById("headerPartyBtnText");
 
   const dot = statusBox?.querySelector(".status-dot");
+
+  renderRecentRoomsBar();
 
   if (connectedCampaignRoom) {
     if (dot) { dot.classList.remove("disconnected"); dot.classList.add("connected"); }
     if (headerDot) headerDot.classList.add("connected");
+    if (headerBtnText) headerBtnText.textContent = `Party: ${connectedCampaignRoom}`;
     if (statusText) statusText.textContent = `Connected to room: ${connectedCampaignRoom}`;
     if (roomInput) roomInput.value = connectedCampaignRoom;
     if (joinBtn) joinBtn.style.display = "none";
+    if (copyPlayerCodeBtn) copyPlayerCodeBtn.style.display = "inline-flex";
+    if (copyInviteBtn) copyInviteBtn.style.display = "inline-flex";
     if (leaveBtn) leaveBtn.style.display = "inline-flex";
     if (playerSection) playerSection.style.display = "block";
     startPlayerPartyListener();
   } else {
     if (dot) { dot.classList.remove("connected"); dot.classList.add("disconnected"); }
-    if (headerDot) headerDot.classList.remove("connected");
+    if (headerDot) headerDot.classList.toggle("connected", !!activeDMRoomCode);
+    if (headerBtnText) headerBtnText.textContent = activeDMRoomCode ? `DM: ${activeDMRoomCode}` : "Party";
     if (statusText) statusText.textContent = "Not connected to any campaign room.";
     if (joinBtn) joinBtn.style.display = "inline-flex";
+    if (copyPlayerCodeBtn) copyPlayerCodeBtn.style.display = "none";
+    if (copyInviteBtn) copyInviteBtn.style.display = "none";
     if (leaveBtn) leaveBtn.style.display = "none";
     if (playerSection) playerSection.style.display = "none";
     if (playerPartyListUnsubscribe) {
       playerPartyListUnsubscribe();
       playerPartyListUnsubscribe = null;
     }
+    if (!activeDMRoomCode) renderLivePartyDock([]);
   }
 
   const dmCodeText = document.getElementById("dmActiveRoomCode");
+  const dmInput = document.getElementById("dmRoomCodeInput");
   const copyBtn = document.getElementById("copyRoomCodeBtn");
+  const copyDMInviteBtn = document.getElementById("copyDMInviteLinkBtn");
   const closeBtn = document.getElementById("closeCampaignBtn");
 
   if (activeDMRoomCode) {
     if (dmCodeText) dmCodeText.textContent = activeDMRoomCode;
+    if (dmInput) dmInput.value = activeDMRoomCode;
     if (copyBtn) copyBtn.style.display = "inline-flex";
+    if (copyDMInviteBtn) copyDMInviteBtn.style.display = "inline-flex";
     if (closeBtn) closeBtn.style.display = "inline-flex";
   } else {
     if (dmCodeText) dmCodeText.textContent = "NONE";
     if (copyBtn) copyBtn.style.display = "none";
+    if (copyDMInviteBtn) copyDMInviteBtn.style.display = "none";
     if (closeBtn) closeBtn.style.display = "none";
   }
 }
@@ -1665,13 +1855,20 @@ async function joinCampaignRoom(roomCode) {
   await ensureAuthenticated();
   connectedCampaignRoom = cleanCode;
   localStorage.setItem(CAMPAIGN_ROOM_KEY, connectedCampaignRoom);
+  addRecentRoom(cleanCode);
+
+  const dmInput = document.getElementById("dmRoomCodeInput");
+  if (dmInput && !activeDMRoomCode) dmInput.value = cleanCode;
+
   updatePartyStatusUI();
 
   const roster = getRoster();
   if (roster[activeCharId]) {
     await syncToLiveCampaign(roster[activeCharId]);
+  } else {
+    saveSheet(true);
   }
-  showStatus(`Joined Room ${cleanCode}!`);
+  showStatus(`Connected to Room ${cleanCode}!`);
 }
 
 async function leaveCampaignRoom() {
@@ -1702,10 +1899,32 @@ function startPlayerPartyListener() {
   playerPartyListUnsubscribe = db.collection("campaigns").doc(connectedCampaignRoom).collection("members")
     .onSnapshot((snapshot) => {
       const members = [];
-      snapshot.forEach((doc) => members.push(doc.data()));
-      if (countEl) countEl.textContent = `${members.length} Active`;
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        members.push(data);
 
+        // Apply remote DM adjustments if any
+        if (data.id === activeCharId && data.dmAdjustedAt && data.dmAdjustedAt > (window._lastAppliedDmAdjust || 0)) {
+          window._lastAppliedDmAdjust = data.dmAdjustedAt;
+          const curHpEl = document.getElementById("curHp");
+          const inspToggle = document.getElementById("heroicInspirationToggle");
+          if (curHpEl && data.hp && typeof data.hp.cur === "number") {
+            curHpEl.value = data.hp.cur;
+          }
+          if (inspToggle && typeof data.heroicInspiration === "boolean") {
+            inspToggle.checked = data.heroicInspiration;
+          }
+          updateHealthBars();
+          saveSheet(true);
+        }
+      });
+
+      cachedRoomMembers = members;
+      renderLivePartyDock(members);
+
+      if (countEl) countEl.textContent = `${members.length} Active`;
       if (!grid) return;
+
       if (members.length === 0) {
         grid.innerHTML = `<p class="dm-empty-msg">No adventurers in this party yet.</p>`;
         return;
@@ -1756,7 +1975,8 @@ function startDMLiveListener(roomCode) {
   }
   if (dmListenerUnsubscribe) dmListenerUnsubscribe();
 
-  activeDMRoomCode = roomCode.toUpperCase();
+  activeDMRoomCode = roomCode.trim().toUpperCase();
+  addRecentRoom(activeDMRoomCode);
   updatePartyStatusUI();
 
   const grid = document.getElementById("dmPartyGrid");
@@ -1767,6 +1987,10 @@ function startDMLiveListener(roomCode) {
       cachedRoomMembers = [];
       snapshot.forEach((doc) => cachedRoomMembers.push(doc.data()));
       if (countEl) countEl.textContent = `${cachedRoomMembers.length} Active`;
+
+      if (!connectedCampaignRoom) {
+        renderLivePartyDock(cachedRoomMembers);
+      }
 
       if (!grid) return;
       if (cachedRoomMembers.length === 0) {
@@ -1784,7 +2008,7 @@ function startDMLiveListener(roomCode) {
             <div class="dm-card-header">
               ${m.avatar ? `<img src="${m.avatar}" class="dm-player-avatar" alt="Avatar" />` : `<div class="dm-avatar-placeholder">&dagger;</div>`}
               <div class="dm-player-info">
-                <span class="dm-player-name">${escapeHtml(m.name || "Unnamed")}</span>
+                <span class="dm-player-name">${escapeHtml(m.name || "Unnamed")} ${m.heroicInspiration ? "&#10022;" : ""}</span>
                 <span class="dm-player-sub">${escapeHtml(m.charRace || "")} ${escapeHtml(m.charClass || "")} (Lvl ${m.level || 1})</span>
               </div>
             </div>
@@ -1806,6 +2030,13 @@ function startDMLiveListener(roomCode) {
             <div class="dm-conditions-list">
               ${(m.conditions || []).map((c) => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("")}
             </div>
+            <div class="dm-quick-actions">
+              <button type="button" class="dm-quick-btn dmg" data-dm-act="hp" data-delta="-5" data-member-id="${escapeHtml(m.id)}" title="Deal 5 Damage">-5 HP</button>
+              <button type="button" class="dm-quick-btn dmg" data-dm-act="hp" data-delta="-1" data-member-id="${escapeHtml(m.id)}" title="Deal 1 Damage">-1</button>
+              <button type="button" class="dm-quick-btn heal" data-dm-act="hp" data-delta="1" data-member-id="${escapeHtml(m.id)}" title="Heal 1 HP">+1</button>
+              <button type="button" class="dm-quick-btn heal" data-dm-act="hp" data-delta="5" data-member-id="${escapeHtml(m.id)}" title="Heal 5 HP">+5 HP</button>
+              <button type="button" class="dm-quick-btn insp" data-dm-act="inspire" data-member-id="${escapeHtml(m.id)}" title="Toggle Heroic Inspiration">&#10022; Inspire</button>
+            </div>
           </div>
         `;
       }).join("");
@@ -1813,7 +2044,38 @@ function startDMLiveListener(roomCode) {
       console.warn("DM listener error:", err);
     });
 
-  showStatus(`DM Monitoring Room ${activeDMRoomCode}`);
+  showStatus(`Monitoring Room ${activeDMRoomCode}`);
+}
+
+async function dmQuickAdjustPlayer(memberId, actionType, delta = 0) {
+  const room = activeDMRoomCode || connectedCampaignRoom;
+  if (!db || !room || !memberId) return;
+  const member = cachedRoomMembers.find((m) => m.id === memberId);
+  if (!member) return;
+
+  try {
+    await ensureAuthenticated();
+    if (actionType === "hp") {
+      const cur = member.hp?.cur ?? 10;
+      const max = member.hp?.max ?? 10;
+      const temp = member.hp?.temp ?? 0;
+      const nextCur = Math.min(max, Math.max(0, cur + delta));
+      await db.collection("campaigns").doc(room).collection("members").doc(memberId).set({
+        hp: { cur: nextCur, max, temp },
+        dmAdjustedAt: Date.now()
+      }, { merge: true });
+      showStatus(`${member.name}: HP → ${nextCur}/${max}`);
+    } else if (actionType === "inspire") {
+      const nextInsp = !member.heroicInspiration;
+      await db.collection("campaigns").doc(room).collection("members").doc(memberId).set({
+        heroicInspiration: nextInsp,
+        dmAdjustedAt: Date.now()
+      }, { merge: true });
+      showStatus(`${member.name}: ${nextInsp ? "Granted Inspiration!" : "Inspiration Removed"}`);
+    }
+  } catch (err) {
+    console.error("DM quick adjust failed:", err);
+  }
 }
 
 async function closeDMCampaignRoom() {
@@ -1909,10 +2171,11 @@ function openInspectModal(memberId) {
 }
 
 async function kickPlayerFromRoom(memberId) {
-  if (!db || !activeDMRoomCode || !memberId) return;
+  const room = activeDMRoomCode || connectedCampaignRoom;
+  if (!db || !room || !memberId) return;
   if (!confirm("Are you sure you want to remove this player from the live party?")) return;
   try {
-    await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).delete();
+    await db.collection("campaigns").doc(room).collection("members").doc(memberId).delete();
     closeModal("dmInspectModal");
     currentInspectedMemberId = null;
     showStatus("Player removed from session");
@@ -1954,7 +2217,6 @@ function applyHpAdjustment(type) {
       curHp = Math.max(0, curHp - amt);
     }
 
-    // Check if concentrating on a spell
     const concSpell = document.getElementById("spellConcentration")?.value?.trim();
     if (concSpell) {
       const dc = Math.max(10, Math.floor(amt / 2));
@@ -2011,7 +2273,6 @@ function applyShortRest() {
   if (curHDEl) curHDEl.value = curHD;
   if (curHpEl) curHpEl.value = curHp;
 
-  // Restore Pact Magic slots on Short Rest
   const pactMax = parseInt(document.getElementById("pactSlotsMax")?.value, 10) || 0;
   const pactCurEl = document.getElementById("pactSlotsCur");
   if (pactCurEl && pactMax > 0) pactCurEl.value = pactMax;
@@ -2032,7 +2293,6 @@ function applyLongRest() {
   const tempHpEl = document.getElementById("tempHp");
   if (tempHpEl) tempHpEl.value = 0;
 
-  // Restore Hit Dice (half max, min 1)
   const maxHD = parseInt(document.getElementById("hitDiceMax")?.value, 10) || 1;
   const curHDEl = document.getElementById("hitDiceCur");
   if (curHDEl) {
@@ -2041,7 +2301,6 @@ function applyLongRest() {
     curHDEl.value = curHD;
   }
 
-  // Restore Spell Slots
   for (let lvl = 1; lvl <= 9; lvl++) {
     const maxVal = parseInt(document.getElementById(`slot${lvl}_max`)?.value, 10) || 0;
     const curEl = document.getElementById(`slot${lvl}_cur`);
@@ -2049,18 +2308,15 @@ function applyLongRest() {
     updateSlotPips(lvl);
   }
 
-  // Restore Pact Magic Slots
   const pactMax = parseInt(document.getElementById("pactSlotsMax")?.value, 10) || 0;
   const pactCurEl = document.getElementById("pactSlotsCur");
   if (pactCurEl) pactCurEl.value = pactMax;
 
-  // Reset Death Saves
   const dSucc = document.getElementById("deathSucc");
   const dFail = document.getElementById("deathFail");
   if (dSucc) dSucc.value = 0;
   if (dFail) dFail.value = 0;
 
-  // Reset Primary Class Points & Custom Counters
   const classPtsMax = parseInt(document.getElementById("classPtsMax")?.value, 10) || 0;
   const curClassPts = document.getElementById("classPtsCur");
   if (curClassPts) curClassPts.value = classPtsMax;
@@ -2070,7 +2326,6 @@ function applyLongRest() {
   });
   renderCustomResources();
 
-  // Decrease Exhaustion by 1
   const exEl = document.getElementById("exhaustionLevel");
   if (exEl) {
     const curEx = parseInt(exEl.value, 10) || 0;
@@ -2191,7 +2446,6 @@ function importFromGenericOrRoll20(parsed) {
 
   if (d.name) document.getElementById("charName").value = d.name;
 
-  // Check Roll20 attributes array if present
   if (Array.isArray(d.attribs)) {
     const getAttr = (name) => d.attribs.find((a) => a.name === name)?.current;
     if (getAttr("class")) document.getElementById("charClass").value = getAttr("class");
@@ -2227,11 +2481,6 @@ function openPartyModal() {
   const modal = document.getElementById("partyModal");
   if (modal) {
     modal.classList.add("open");
-    modal.querySelectorAll(".party-mode-tabs .sub-tab").forEach((b, i) => {
-      b.classList.toggle("active", i === 0);
-    });
-    document.getElementById("party-join-view")?.classList.add("active");
-    document.getElementById("party-dm-view")?.classList.remove("active");
   }
 }
 
@@ -2347,6 +2596,7 @@ document.addEventListener("click", async (e) => {
     else if (act === "short-rest") applyShortRest();
     else if (act === "long-rest") applyLongRest();
     else if (act === "open-hp") document.getElementById("openHpModalBtn")?.click();
+    else if (act === "open-party") openPartyModal();
     else if (act === "reset-turn") document.getElementById("resetTurnEconomyBtn")?.click();
     else if (act === "roll-skill") {
       const row = document.getElementById(cmdItem.dataset.rowId);
@@ -2411,8 +2661,8 @@ document.addEventListener("click", async (e) => {
 
     const dcEl = document.getElementById("spellDc");
     const atkEl = document.getElementById("spellAtkBonus");
-    constabilEl = document.getElementById("spellAbility");
-    if (constabilEl && !constabilEl.value.trim()) constabilEl.value = statKey.toUpperCase();
+    const abilEl = document.getElementById("spellAbility");
+    if (abilEl && !abilEl.value.trim()) abilEl.value = statKey.toUpperCase();
     if (dcEl) dcEl.value = 8 + prof + mod;
     if (atkEl) atkEl.value = formatSigned(prof + mod);
     saveSheet(false);
@@ -2427,10 +2677,68 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // TOP BAR COMMAND BUTTONS
-  if (e.target.id === "partyModalBtn" || e.target.closest("#partyModalBtn")) {
+  // TOP BAR COMMAND BUTTONS & LIVE PARTY DOCK ACTIONS
+  if (e.target.id === "partyModalBtn" || e.target.closest("#partyModalBtn") || e.target.id === "dockOpenFullPartyBtn") {
     e.preventDefault();
     openPartyModal();
+    return;
+  }
+
+  if (e.target.id === "dockCopyCodeBtn" || e.target.id === "copyPlayerRoomCodeBtn") {
+    const code = connectedCampaignRoom || activeDMRoomCode;
+    if (code) {
+      navigator.clipboard.writeText(code).then(() => showStatus(`Room Code ${code} Copied!`));
+    }
+    return;
+  }
+
+  if (e.target.id === "dockCopyLinkBtn" || e.target.id === "copyInviteLinkBtn" || e.target.id === "copyDMInviteLinkBtn") {
+    copyRoomInviteLink(connectedCampaignRoom || activeDMRoomCode);
+    return;
+  }
+
+  if (e.target.id === "dockToggleCollapseBtn") {
+    isPartyDockCollapsed = !isPartyDockCollapsed;
+    e.target.innerHTML = isPartyDockCollapsed ? "&#9660;" : "&#9650;";
+    const body = document.getElementById("livePartyDockBody");
+    if (body) body.style.display = isPartyDockCollapsed ? "none" : "flex";
+    return;
+  }
+
+  if (e.target.id === "dockLeaveRoomBtn") {
+    if (connectedCampaignRoom) await leaveCampaignRoom();
+    if (activeDMRoomCode) await closeDMCampaignRoom();
+    return;
+  }
+
+  const dockPill = e.target.closest(".dock-member-pill");
+  if (dockPill) {
+    const memberId = dockPill.dataset.memberId;
+    if (memberId) openInspectModal(memberId);
+    return;
+  }
+
+  // Recent Room Chips (1-Click Rejoin)
+  const recentChip = e.target.closest(".recent-room-chip");
+  if (recentChip && recentChip.dataset.room) {
+    const code = recentChip.dataset.room;
+    const dmTabActive = document.getElementById("party-dm-view")?.classList.contains("active");
+    if (dmTabActive) {
+      startDMLiveListener(code);
+    } else {
+      await joinCampaignRoom(code);
+    }
+    return;
+  }
+
+  // DM Quick-Adjust Buttons on Player Cards
+  const dmQuickBtn = e.target.closest(".dm-quick-btn");
+  if (dmQuickBtn) {
+    e.stopPropagation();
+    const memberId = dmQuickBtn.dataset.memberId;
+    const act = dmQuickBtn.dataset.dmAct;
+    const delta = parseInt(dmQuickBtn.dataset.delta, 10) || 0;
+    await dmQuickAdjustPlayer(memberId, act, delta);
     return;
   }
 
@@ -2632,7 +2940,7 @@ document.addEventListener("click", async (e) => {
   // Companions Add / Delete
   if (e.target.id === "addCompanionBtn") {
     myCompanions.push({
-      name: "New Companion / Beast",
+      name: "New Companion / Creature",
       type: "Beast (CR 1/4)",
       ac: 13,
       hp: "15 / 15",
@@ -2641,7 +2949,7 @@ document.addEventListener("click", async (e) => {
     });
     renderCompanions();
     saveSheet(false);
-    showStatus("Companion Added!");
+    showStatus("Creature Added!");
     return;
   }
   if (e.target.classList.contains("companion-delete-btn")) {
@@ -2811,10 +3119,11 @@ document.addEventListener("click", async (e) => {
 
   if (e.target.id === "openDMRoomBtn") {
     const input = document.getElementById("dmRoomCodeInput");
-    if (input && input.value.trim()) {
-      startDMLiveListener(input.value.trim().toUpperCase());
+    const fallbackCode = input?.value?.trim() || connectedCampaignRoom;
+    if (fallbackCode) {
+      startDMLiveListener(fallbackCode.toUpperCase());
     } else {
-      alert("Please enter a room code to open.");
+      alert("Please enter a room code to monitor or click '+ New Room'.");
     }
     return;
   }
@@ -3018,7 +3327,7 @@ document.addEventListener("click", async (e) => {
 
   // Roll Initiative Orb
   if (e.target.id === "rollInitiativeOrb" || e.target.closest("#rollInitiativeOrb")) {
-    if (e.target.id === "initBonusMod") return; // Don't roll when editing misc bonus
+    if (e.target.id === "initBonusMod") return;
     const bonus = parseInt(document.getElementById("initiativeDisplay")?.textContent, 10) || 0;
     performD20Roll(bonus, "Initiative");
     return;
@@ -3238,6 +3547,20 @@ document.getElementById("customDiceFormulaInput")?.addEventListener("keydown", (
   }
 });
 
+document.getElementById("campaignRoomInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("joinCampaignBtn")?.click();
+  }
+});
+
+document.getElementById("dmRoomCodeInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("openDMRoomBtn")?.click();
+  }
+});
+
 document.getElementById("hpModalAmount")?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -3449,9 +3772,23 @@ document.getElementById("dndbeyondFileInput")?.addEventListener("change", (e) =>
   reader.readAsText(file);
 });
 
-// Initialization
+/* ==========================================================================
+   INITIALIZATION & URL INVITE LINK CHECK
+   ========================================================================== */
+
+detectOSAndSetShortcut();
 applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "theme-obsidian");
 loadSheet();
 loadAllSpells();
 loadAllTraits();
-updatePartyStatusUI();
+
+// Check if user opened a 1-click ?room=CODE invite link
+const urlParams = new URLSearchParams(window.location.search);
+const invitedRoom = urlParams.get("room");
+if (invitedRoom && invitedRoom.trim()) {
+  const cleanInvite = invitedRoom.trim().toUpperCase();
+  window.history.replaceState({}, document.title, window.location.pathname);
+  joinCampaignRoom(cleanInvite);
+} else {
+  updatePartyStatusUI();
+}
