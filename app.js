@@ -31,6 +31,7 @@ const ACTIVE_CHAR_ID_KEY = "badman_active_char_id";
 const THEME_STORAGE_KEY = "badman_active_theme";
 const CAMPAIGN_ROOM_KEY = "badman_active_campaign_room";
 const RECENT_ROOMS_KEY = "badman_recent_rooms_v1";
+const CREATED_ROOMS_KEY = "badman_created_dm_rooms_v1";
 
 let activeCharId = localStorage.getItem(ACTIVE_CHAR_ID_KEY) || "default";
 let connectedCampaignRoom = localStorage.getItem(CAMPAIGN_ROOM_KEY) || "";
@@ -1057,6 +1058,7 @@ function extractFullCharacterPayload(charData) {
     structuredInventory: myStructuredInventory || [],
     companions: myCompanions || [],
     conditions: myActiveConditions || [],
+    concentration: (f.spellConcentration || "").trim(),
     otherProfs: f.otherProfs || "",
     passivePerception: parseInt(document.getElementById("passivePerception")?.textContent, 10) || 10,
     passiveInsight: parseInt(document.getElementById("passiveInsight")?.textContent, 10) || 10,
@@ -1660,8 +1662,29 @@ function renderCommandPaletteResults(query = "") {
 }
 
 /* ==========================================================================
-   PARTY & DM DASHBOARD, RECENT ROOMS & ON-SCREEN DOCK
+   PARTY & DM DASHBOARD (WITH ROOM CREATOR LOCK & PLAYER PRIVACY)
    ========================================================================== */
+
+function getCreatedRooms() {
+  try {
+    return JSON.parse(localStorage.getItem(CREATED_ROOMS_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function addCreatedRoom(code) {
+  if (!code) return;
+  const clean = code.trim().toUpperCase();
+  const list = getCreatedRooms().filter((r) => r !== clean);
+  list.unshift(clean);
+  localStorage.setItem(CREATED_ROOMS_KEY, JSON.stringify(list));
+}
+
+function isLocalRoomCreator(code) {
+  if (!code) return false;
+  return getCreatedRooms().includes(code.trim().toUpperCase());
+}
 
 function getRecentRooms() {
   try {
@@ -1713,6 +1736,7 @@ function copyRoomInviteLink(roomCode) {
 function renderLivePartyDock(members) {
   const dock = document.getElementById("livePartyDock");
   const dockCode = document.getElementById("dockRoomCodeText");
+  const roleBadge = document.getElementById("dockRoleBadge");
   const dockBody = document.getElementById("livePartyDockBody");
   const lastRollEl = document.getElementById("livePartyLastRollText");
 
@@ -1724,8 +1748,15 @@ function renderLivePartyDock(members) {
     return;
   }
 
+  // Only the verified DM of the active room gets DM inspection privileges
+  const isCreatorDM = Boolean(activeDMRoomCode && activeDMRoomCode === activeRoom);
+
   dock.style.display = "flex";
   if (dockCode) dockCode.textContent = activeRoom;
+  if (roleBadge) {
+    roleBadge.textContent = isCreatorDM ? "DM / Creator" : "Player";
+    roleBadge.classList.toggle("is-dm", isCreatorDM);
+  }
   if (dockBody) dockBody.style.display = isPartyDockCollapsed ? "none" : "flex";
 
   if (!Array.isArray(members) || members.length === 0) {
@@ -1752,15 +1783,19 @@ function renderLivePartyDock(members) {
     }
   }
 
+  // Strictly render ONLY Name, AC, HP, Conditions, and Concentration in the dock
   if (dockBody) {
     dockBody.innerHTML = members.map((m) => {
       const hp = m.hp || { cur: 10, max: 10, temp: 0 };
       const pct = Math.min(100, Math.max(0, Math.round((hp.cur / (hp.max || 1)) * 100)));
       const conds = (m.conditions || []).join(", ");
+      const conc = (m.concentration || "").trim();
       const isDead = hp.cur <= 0;
 
       return `
-        <div class="dock-member-pill ${isDead ? "unconscious" : ""}" data-member-id="${escapeHtml(m.id || "")}" title="Click to inspect or view in Party &amp; DM Dashboard">
+        <div class="dock-member-pill ${isDead ? "unconscious" : ""} ${isCreatorDM ? "dm-clickable" : ""}"
+             ${isCreatorDM ? `data-member-id="${escapeHtml(m.id || "")}"` : ""}
+             title="${isCreatorDM ? "Click to inspect full character sheet (DM Only)" : "Party Member Vitals"}">
           <div class="dock-member-top">
             <span class="dock-member-name">${escapeHtml(m.name || "Unnamed")}</span>
             <span class="dock-member-ac">AC ${m.ac || 10}</span>
@@ -1773,6 +1808,7 @@ function renderLivePartyDock(members) {
             <div class="dm-health-fill" style="width: ${pct}%;"></div>
           </div>
           ${conds ? `<span class="dock-member-conds">Cond: ${escapeHtml(conds)}</span>` : ""}
+          ${conc ? `<span class="dock-member-conc">Conc: ${escapeHtml(conc)}</span>` : ""}
         </div>
       `;
     }).join("");
@@ -1857,9 +1893,6 @@ async function joinCampaignRoom(roomCode) {
   localStorage.setItem(CAMPAIGN_ROOM_KEY, connectedCampaignRoom);
   addRecentRoom(cleanCode);
 
-  const dmInput = document.getElementById("dmRoomCodeInput");
-  if (dmInput && !activeDMRoomCode) dmInput.value = cleanCode;
-
   updatePartyStatusUI();
 
   const roster = getRoster();
@@ -1903,7 +1936,7 @@ function startPlayerPartyListener() {
         const data = doc.data();
         members.push(data);
 
-        // Apply remote DM adjustments if any
+        // Apply remote DM adjustments to our own character if any
         if (data.id === activeCharId && data.dmAdjustedAt && data.dmAdjustedAt > (window._lastAppliedDmAdjust || 0)) {
           window._lastAppliedDmAdjust = data.dmAdjustedAt;
           const curHpEl = document.getElementById("curHp");
@@ -1930,10 +1963,12 @@ function startPlayerPartyListener() {
         return;
       }
 
+      // Strictly display ONLY Name, Avatar, HP, AC, Conditions, and Concentration for players
       grid.innerHTML = members.map((m) => {
         const hp = m.hp || { cur: 10, max: 10, temp: 0 };
         const pct = Math.min(100, Math.max(0, Math.round((hp.cur / (hp.max || 1)) * 100)));
-        const conds = (m.conditions || []).join(", ") || "Normal";
+        const conds = (m.conditions || []).join(", ") || "None";
+        const conc = (m.concentration || "").trim() || "None";
         const isDead = hp.cur <= 0;
 
         return `
@@ -1942,8 +1977,8 @@ function startPlayerPartyListener() {
               ${m.avatar ? `<img src="${m.avatar}" class="dm-player-avatar" alt="Avatar" />` : `<div class="dm-avatar-placeholder">&dagger;</div>`}
               <div class="dm-player-info">
                 <span class="dm-player-name">${escapeHtml(m.name || "Unnamed")}</span>
-                <span class="dm-player-sub">${escapeHtml(m.charClass || "")} (Lvl ${m.level || 1})</span>
               </div>
+              <span class="dock-member-ac">AC ${m.ac || 10}</span>
             </div>
             <div class="dm-health-gauge">
               <div class="dm-health-labels">
@@ -1955,6 +1990,7 @@ function startPlayerPartyListener() {
               </div>
             </div>
             <div style="font-size: 0.72rem; color: #94a3b8;"><strong>Conditions:</strong> ${escapeHtml(conds)}</div>
+            <div style="font-size: 0.72rem; color: #d8b4fe;"><strong>Concentration:</strong> ${escapeHtml(conc)}</div>
           </div>
         `;
       }).join("");
@@ -1963,19 +1999,61 @@ function startPlayerPartyListener() {
     });
 }
 
-function createNewCampaignRoom() {
-  const code = "REALM-" + Math.floor(1000 + Math.random() * 9000);
-  startDMLiveListener(code);
-}
-
-function startDMLiveListener(roomCode) {
+async function createNewCampaignRoom() {
   if (!db) {
     alert("Firebase database connection is unavailable.");
     return;
   }
+  await ensureAuthenticated();
+  const code = "REALM-" + Math.floor(1000 + Math.random() * 9000);
+  addCreatedRoom(code);
+
+  try {
+    await db.collection("campaigns").doc(code).set({
+      creatorUid: auth?.currentUser?.uid || "local",
+      createdAt: Date.now()
+    }, { merge: true });
+  } catch (err) {
+    console.warn("Could not write room creator metadata:", err);
+  }
+
+  await startDMLiveListener(code, true);
+}
+
+async function startDMLiveListener(roomCode, isNewlyCreated = false) {
+  if (!db) {
+    alert("Firebase database connection is unavailable.");
+    return;
+  }
+  const cleanCode = roomCode.trim().toUpperCase();
+  if (!cleanCode) return;
+
+  await ensureAuthenticated();
+
+  // Verify that this user is actually the creator of the room before granting DM access
+  if (!isNewlyCreated) {
+    let isAuthorized = isLocalRoomCreator(cleanCode);
+    try {
+      const roomDoc = await db.collection("campaigns").doc(cleanCode).get();
+      if (roomDoc.exists && roomDoc.data()?.creatorUid) {
+        if (auth?.currentUser?.uid && roomDoc.data().creatorUid === auth.currentUser.uid) {
+          isAuthorized = true;
+          addCreatedRoom(cleanCode);
+        }
+      }
+    } catch (e) {
+      console.warn("Room creator check note:", e);
+    }
+
+    if (!isAuthorized) {
+      alert("Access Denied: Only the DM who created this room can open the DM Command Center and inspect full player character sheets.");
+      return;
+    }
+  }
+
   if (dmListenerUnsubscribe) dmListenerUnsubscribe();
 
-  activeDMRoomCode = roomCode.trim().toUpperCase();
+  activeDMRoomCode = cleanCode;
   addRecentRoom(activeDMRoomCode);
   updatePartyStatusUI();
 
@@ -1988,9 +2066,7 @@ function startDMLiveListener(roomCode) {
       snapshot.forEach((doc) => cachedRoomMembers.push(doc.data()));
       if (countEl) countEl.textContent = `${cachedRoomMembers.length} Active`;
 
-      if (!connectedCampaignRoom) {
-        renderLivePartyDock(cachedRoomMembers);
-      }
+      renderLivePartyDock(cachedRoomMembers);
 
       if (!grid) return;
       if (cachedRoomMembers.length === 0) {
@@ -2029,6 +2105,7 @@ function startDMLiveListener(roomCode) {
             </div>
             <div class="dm-conditions-list">
               ${(m.conditions || []).map((c) => `<span class="dm-cond-badge">${escapeHtml(c)}</span>`).join("")}
+              ${m.concentration ? `<span class="dm-cond-badge" style="background:rgba(192,132,252,0.2);color:#d8b4fe;">Conc: ${escapeHtml(m.concentration)}</span>` : ""}
             </div>
             <div class="dm-quick-actions">
               <button type="button" class="dm-quick-btn dmg" data-dm-act="hp" data-delta="-5" data-member-id="${escapeHtml(m.id)}" title="Deal 5 Damage">-5 HP</button>
@@ -2044,12 +2121,11 @@ function startDMLiveListener(roomCode) {
       console.warn("DM listener error:", err);
     });
 
-  showStatus(`Monitoring Room ${activeDMRoomCode}`);
+  showStatus(`DM Session Active: ${activeDMRoomCode}`);
 }
 
 async function dmQuickAdjustPlayer(memberId, actionType, delta = 0) {
-  const room = activeDMRoomCode || connectedCampaignRoom;
-  if (!db || !room || !memberId) return;
+  if (!activeDMRoomCode || !db || !memberId) return;
   const member = cachedRoomMembers.find((m) => m.id === memberId);
   if (!member) return;
 
@@ -2060,14 +2136,14 @@ async function dmQuickAdjustPlayer(memberId, actionType, delta = 0) {
       const max = member.hp?.max ?? 10;
       const temp = member.hp?.temp ?? 0;
       const nextCur = Math.min(max, Math.max(0, cur + delta));
-      await db.collection("campaigns").doc(room).collection("members").doc(memberId).set({
+      await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).set({
         hp: { cur: nextCur, max, temp },
         dmAdjustedAt: Date.now()
       }, { merge: true });
       showStatus(`${member.name}: HP → ${nextCur}/${max}`);
     } else if (actionType === "inspire") {
       const nextInsp = !member.heroicInspiration;
-      await db.collection("campaigns").doc(room).collection("members").doc(memberId).set({
+      await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).set({
         heroicInspiration: nextInsp,
         dmAdjustedAt: Date.now()
       }, { merge: true });
@@ -2084,21 +2160,27 @@ async function closeDMCampaignRoom() {
     dmListenerUnsubscribe = null;
   }
   activeDMRoomCode = "";
-  cachedRoomMembers = [];
+  if (!connectedCampaignRoom) cachedRoomMembers = [];
   updatePartyStatusUI();
+  if (connectedCampaignRoom) renderLivePartyDock(cachedRoomMembers);
   const grid = document.getElementById("dmPartyGrid");
-  if (grid) grid.innerHTML = `<p class="dm-empty-msg">No party active. Create or enter a room code to inspect your players live.</p>`;
+  if (grid) grid.innerHTML = `<p class="dm-empty-msg">No DM session active. Click "+ New Room" or reopen a room you created to inspect your players live.</p>`;
   showStatus("DM Session Closed");
 }
 
 function openInspectModal(memberId) {
+  // Strictly enforce that only the verified Room Creator (DM) can inspect full sheets
+  if (!activeDMRoomCode) {
+    return;
+  }
+
   const member = cachedRoomMembers.find((m) => m.id === memberId);
   if (!member) return;
   currentInspectedMemberId = memberId;
 
   const content = document.getElementById("dmInspectContent");
   const title = document.getElementById("inspectCharTitle");
-  if (title) title.textContent = `Inspection: ${member.name || "Adventurer"}`;
+  if (title) title.textContent = `DM Inspection: ${member.name || "Adventurer"}`;
 
   const attrs = member.attributes || {};
   const hp = member.hp || { cur: 10, max: 10, temp: 0 };
@@ -2171,11 +2253,10 @@ function openInspectModal(memberId) {
 }
 
 async function kickPlayerFromRoom(memberId) {
-  const room = activeDMRoomCode || connectedCampaignRoom;
-  if (!db || !room || !memberId) return;
+  if (!activeDMRoomCode || !db || !memberId) return;
   if (!confirm("Are you sure you want to remove this player from the live party?")) return;
   try {
-    await db.collection("campaigns").doc(room).collection("members").doc(memberId).delete();
+    await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).delete();
     closeModal("dmInspectModal");
     currentInspectedMemberId = null;
     showStatus("Player removed from session");
@@ -2711,8 +2792,9 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  const dockPill = e.target.closest(".dock-member-pill");
-  if (dockPill) {
+  // Dock member pill click: ONLY opens inspect modal if user is the verified DM of the room
+  const dockPill = e.target.closest(".dock-member-pill.dm-clickable");
+  if (dockPill && activeDMRoomCode) {
     const memberId = dockPill.dataset.memberId;
     if (memberId) openInspectModal(memberId);
     return;
@@ -2724,7 +2806,7 @@ document.addEventListener("click", async (e) => {
     const code = recentChip.dataset.room;
     const dmTabActive = document.getElementById("party-dm-view")?.classList.contains("active");
     if (dmTabActive) {
-      startDMLiveListener(code);
+      await startDMLiveListener(code, false);
     } else {
       await joinCampaignRoom(code);
     }
@@ -3102,7 +3184,7 @@ document.addEventListener("click", async (e) => {
     if (input && input.value.trim()) {
       await joinCampaignRoom(input.value.trim());
     } else {
-      alert("Please enter a room code (e.g. TAVERN-42).");
+      alert("Please enter a room code (e.g. REALM-4200).");
     }
     return;
   }
@@ -3113,17 +3195,17 @@ document.addEventListener("click", async (e) => {
   }
 
   if (e.target.id === "createCampaignBtn") {
-    createNewCampaignRoom();
+    await createNewCampaignRoom();
     return;
   }
 
   if (e.target.id === "openDMRoomBtn") {
     const input = document.getElementById("dmRoomCodeInput");
-    const fallbackCode = input?.value?.trim() || connectedCampaignRoom;
-    if (fallbackCode) {
-      startDMLiveListener(fallbackCode.toUpperCase());
+    const codeToOpen = input?.value?.trim();
+    if (codeToOpen) {
+      await startDMLiveListener(codeToOpen.toUpperCase(), false);
     } else {
-      alert("Please enter a room code to monitor or click '+ New Room'.");
+      alert("Please enter the room code you created, or click '+ New Room' to start a new DM session.");
     }
     return;
   }
@@ -3142,7 +3224,7 @@ document.addEventListener("click", async (e) => {
   }
 
   const dmPlayerCard = e.target.closest(".dm-player-card");
-  if (dmPlayerCard) {
+  if (dmPlayerCard && activeDMRoomCode) {
     const memberId = dmPlayerCard.dataset.memberId;
     if (memberId) openInspectModal(memberId);
     return;
