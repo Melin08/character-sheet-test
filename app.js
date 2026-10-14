@@ -28,7 +28,7 @@ try {
 
 const ROSTER_STORAGE_KEY = "badman_char_roster_v1";
 const ACTIVE_CHAR_ID_KEY = "badman_active_char_id";
-const THEME_STORAGE_KEY = "badman_active_theme";
+const THEME_STORAGE_KEY = "badman_active_theme_v2";
 const CAMPAIGN_ROOM_KEY = "badman_active_campaign_room";
 const RECENT_ROOMS_KEY = "badman_recent_rooms_v1";
 const CREATED_ROOMS_KEY = "badman_created_dm_rooms_v1";
@@ -56,6 +56,7 @@ let currentDiceMode = "norm"; // "norm" | "adv" | "dis"
 let activeTraitCategoryFilter = "all";
 let activeSpellLevelFilter = "all";
 let isPartyDockCollapsed = false;
+let filterProficientSkillsOnly = false;
 
 let draggedSpellIndex = null;
 const apiCache = {};
@@ -282,7 +283,7 @@ function getClassCssClass(className) {
   return "class-fighter";
 }
 
-// Themes (including Restructured UI theme-nexus)
+// Themes (including Sovereign VTT Redesigned UI theme-nexus)
 function applyTheme(themeName) {
   const themes = [
     "theme-nexus",
@@ -290,7 +291,7 @@ function applyTheme(themeName) {
     "theme-aethertech", "theme-bloodmoon", "theme-glacial", "theme-underdark", "theme-solaris", "theme-cartographer"
   ];
   themes.forEach((t) => document.body.classList.remove(t));
-  const validTheme = themes.includes(themeName) ? themeName : "theme-obsidian";
+  const validTheme = themes.includes(themeName) ? themeName : "theme-nexus";
   document.body.classList.add(validTheme);
   localStorage.setItem(THEME_STORAGE_KEY, validTheme);
   const sel = document.getElementById("themeSelect");
@@ -428,6 +429,30 @@ function updateTabCounters() {
   if (spellsBadge) spellsBadge.textContent = myCharacterSpells.length;
 }
 
+function filterSkillsMatrix() {
+  const q = (document.getElementById("quickSkillSearch")?.value || "").toLowerCase().trim();
+
+  document.querySelectorAll(".skill-attr-column").forEach((col) => {
+    let visibleCount = 0;
+    col.querySelectorAll(".skill-row").forEach((row) => {
+      const label = (row.querySelector(".skill-label")?.textContent || "").toLowerCase();
+      const isProf = !!row.querySelector(".prof-cb")?.checked;
+      const isExp = !!row.querySelector(".exp-cb")?.checked;
+
+      const matchesSearch = !q || label.includes(q);
+      const matchesProf = !filterProficientSkillsOnly || isProf || isExp;
+
+      if (matchesSearch && matchesProf) {
+        row.style.display = "flex";
+        visibleCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+    col.style.display = visibleCount > 0 ? "flex" : "none";
+  });
+}
+
 function recalculateAll() {
   const levelInput = document.getElementById("charLevel");
   const level = Math.min(20, Math.max(1, parseInt(levelInput?.value, 10) || 1));
@@ -500,6 +525,7 @@ function recalculateAll() {
   updateConcentrationBanner();
   updateWealthAndEncumbrance();
   updateTabCounters();
+  filterSkillsMatrix();
 }
 
 /* ==========================================================================
@@ -521,8 +547,14 @@ function renderWeapons() {
   container.innerHTML = myCharacterWeapons.map((wpn, idx) => `
     <div class="attack-entry weapon-row-card" data-index="${idx}">
       <input type="text" class="save-field wpn-field wpn-name-input" data-prop="name" value="${escapeHtml(wpn.name || "")}" placeholder="Weapon or Attack..." />
-      <input type="text" class="save-field wpn-field wpn-type-input center" data-prop="atk" value="${escapeHtml(wpn.atk || "")}" placeholder="+5" />
-      <input type="text" class="save-field wpn-field wpn-dmg-input center" data-prop="dmg" value="${escapeHtml(wpn.dmg || "")}" placeholder="1d8+3" />
+      <div class="wpn-cell-with-roll">
+        <input type="text" class="save-field wpn-field wpn-type-input center" data-prop="atk" value="${escapeHtml(wpn.atk || "")}" placeholder="+5" />
+        <button type="button" class="wpn-roll-btn wpn-roll-atk-btn" data-index="${idx}" title="Roll Weapon Attack (d20 + Atk Bonus)">&#9856;</button>
+      </div>
+      <div class="wpn-cell-with-roll">
+        <input type="text" class="save-field wpn-field wpn-dmg-input center" data-prop="dmg" value="${escapeHtml(wpn.dmg || "")}" placeholder="1d8+3" />
+        <button type="button" class="wpn-roll-btn wpn-roll-dmg-btn" data-index="${idx}" title="Roll Weapon Damage">&#9876;</button>
+      </div>
       <input type="text" class="save-field wpn-field wpn-notes-input" data-prop="notes" value="${escapeHtml(wpn.notes || "")}" placeholder="Range, mastery, properties..." />
       <button type="button" class="weapon-delete-btn" data-index="${idx}" title="Delete weapon">&times;</button>
     </div>
@@ -896,8 +928,9 @@ function updateDiceBadgeDisplay(total, captionText = "Result", isCritSuccess = f
   }
 }
 
-function rollCustomFormula(formulaStr) {
-  const clean = (formulaStr || "").replace(/\s+/g, "").toLowerCase();
+function rollCustomFormula(formulaStr, customLabel = "") {
+  const rawMatch = (formulaStr || "").toLowerCase().match(/(\d*d\d+(?:\s*[+-]\s*\d+)?)/);
+  const clean = rawMatch ? rawMatch[1].replace(/\s+/g, "") : (formulaStr || "").replace(/\s+/g, "").toLowerCase();
   if (!clean) return;
 
   const regex = /^(\d*)d(\d+)([+-]\d+)?$/;
@@ -912,7 +945,7 @@ function rollCustomFormula(formulaStr) {
   const mod = match[3] ? parseInt(match[3], 10) : 0;
 
   if (count === 1 && sides === 20) {
-    performD20Roll(mod, clean);
+    performD20Roll(mod, customLabel || clean);
     return;
   }
 
@@ -925,9 +958,10 @@ function rollCustomFormula(formulaStr) {
   }
   const total = sum + mod;
   const modText = mod !== 0 ? (mod > 0 ? `+${mod}` : `${mod}`) : "";
-  const detail = `${count}d${sides}${modText} [${rolls.join(", ")}]`;
+  const labelPrefix = customLabel ? `${customLabel}: ` : "";
+  const detail = `${labelPrefix}${count}d${sides}${modText} [${rolls.join(", ")}]`;
 
-  updateDiceBadgeDisplay(total, `${count}d${sides}${modText}`);
+  updateDiceBadgeDisplay(total, customLabel || `${count}d${sides}${modText}`);
   addDiceHistory(detail, total);
 }
 
@@ -1590,7 +1624,8 @@ function renderCommandPaletteResults(query = "") {
   const q = query.toLowerCase().trim();
 
   const actions = [
-    { title: "Switch to Codex Nexus (Restructured Split-Screen UI)", tag: "Layout", action: "set-theme", target: "theme-nexus" },
+    { title: "Switch to Sovereign VTT (Redesigned UI)", tag: "Layout", action: "set-theme", target: "theme-nexus" },
+    { title: "Switch to Obsidian Dark (Classic Layout)", tag: "Layout", action: "set-theme", target: "theme-obsidian" },
     { title: "Roll Initiative", tag: "Combat", action: "roll-init" },
     { title: "Roll Death Saving Throw", tag: "Combat", action: "roll-death" },
     { title: "Take a Short Rest", tag: "Recovery", action: "short-rest" },
@@ -1750,7 +1785,6 @@ function renderLivePartyDock(members) {
     return;
   }
 
-  // Only the verified DM of the active room gets DM inspection privileges
   const isCreatorDM = Boolean(activeDMRoomCode && activeDMRoomCode === activeRoom);
 
   dock.style.display = "flex";
@@ -2171,10 +2205,7 @@ async function closeDMCampaignRoom() {
 }
 
 function openInspectModal(memberId) {
-  // Strictly enforce that only the verified Room Creator (DM) can inspect full sheets
-  if (!activeDMRoomCode) {
-    return;
-  }
+  if (!activeDMRoomCode) return;
 
   const member = cachedRoomMembers.find((m) => m.id === memberId);
   if (!member) return;
@@ -2626,7 +2657,7 @@ function openTraitModal() {
    ========================================================================== */
 
 document.addEventListener("click", async (e) => {
-  // 1. TOP MAIN WORKSPACE TABS ROUTING
+  // 1. MAIN WORKSPACE TABS ROUTING
   const mainTab = e.target.closest(".main-tab");
   if (mainTab && mainTab.dataset.target) {
     e.preventDefault();
@@ -2663,6 +2694,14 @@ document.addEventListener("click", async (e) => {
       activeSpellLevelFilter = catPill.dataset.lvl || "all";
       renderMySpells();
     }
+    return;
+  }
+
+  // Proficient-Only Skills Filter Button
+  if (e.target.id === "filterProficientSkillsBtn") {
+    filterProficientSkillsOnly = !filterProficientSkillsOnly;
+    e.target.classList.toggle("active", filterProficientSkillsOnly);
+    filterSkillsMatrix();
     return;
   }
 
@@ -2794,6 +2833,28 @@ document.addEventListener("click", async (e) => {
   if (e.target.id === "rollSpellAttackBtn") {
     const bonus = parseInt(document.getElementById("spellAtkBonus")?.value, 10) || 0;
     performD20Roll(bonus, "Spell Attack");
+    return;
+  }
+
+  // 1-Click Weapon Attack Roll & Damage Roll Buttons
+  const wpnAtkBtn = e.target.closest(".wpn-roll-atk-btn");
+  if (wpnAtkBtn) {
+    const idx = parseInt(wpnAtkBtn.dataset.index, 10);
+    const wpn = myCharacterWeapons[idx] || {};
+    const name = wpn.name?.trim() || "Weapon";
+    const numMatch = String(wpn.atk || "").match(/[+-]?\d+/);
+    const bonus = numMatch ? parseInt(numMatch[0], 10) : 0;
+    performD20Roll(bonus, `${name} Atk`);
+    return;
+  }
+
+  const wpnDmgBtn = e.target.closest(".wpn-roll-dmg-btn");
+  if (wpnDmgBtn) {
+    const idx = parseInt(wpnDmgBtn.dataset.index, 10);
+    const wpn = myCharacterWeapons[idx] || {};
+    const name = wpn.name?.trim() || "Weapon";
+    const rawDmg = (wpn.dmg || "1d6").trim();
+    rollCustomFormula(rawDmg, `${name} Dmg`);
     return;
   }
 
@@ -3617,6 +3678,10 @@ document.getElementById("themeSelect")?.addEventListener("change", (e) => {
   applyTheme(e.target.value);
 });
 
+document.getElementById("quickSkillSearch")?.addEventListener("input", () => {
+  filterSkillsMatrix();
+});
+
 document.getElementById("avatarFileInput")?.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -3908,7 +3973,7 @@ document.getElementById("dndbeyondFileInput")?.addEventListener("change", (e) =>
    ========================================================================== */
 
 detectOSAndSetShortcut();
-applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "theme-obsidian");
+applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "theme-nexus");
 loadSheet();
 loadAllSpells();
 loadAllTraits();
