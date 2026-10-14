@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5e Adventurer Codex — Sovereign VTT Edition</title>
+  <title>Adventurer Codex — Modern 5e Studio</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=60" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=70" />
 </head>
 <body id="top" class="theme-nexus">
 
   <!-- Toast Notification -->
-  <div id="saveToast" class="toast-banner" role="status" aria-live="polite">Saved!</div>
+  <div id="saveToast" class="toast-banner" role="status" aria-live="polite">Saved</div>
 
-  <!-- Ambient Backdrop Glows -->
+  <!-- Subtle Modern Ambient Mesh -->
   <div class="ambient-glow glow-crimson"></div>
   <div class="ambient-glow glow-sapphire"></div>
   <div class="ambient-glow glow-gold"></div>
@@ -23,34 +23,88 @@
   <div class="sheet-container" id="sheetContainer">
 
     <!-- ================================================================= -->
-    <!-- TOP COMMAND BAR                                                   -->
+    <!-- SLEEK STUDIO TOP NAVBAR                                           -->
     <!-- ================================================================= -->
     <header class="top-command-bar">
-      <!-- Top Row: Brand on Left, Concentration & Quick Action in Top-Right Corner -->
       <div class="command-top-row">
+        <!-- Brand & Live Concentration Status -->
         <div class="command-brand">
           <div class="brand-emblem" title="Adventurer Codex">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
               <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
               <polyline points="2 17 12 22 22 17"></polyline>
               <polyline points="2 12 12 17 22 12"></polyline>
             </svg>
           </div>
           <div class="brand-headings">
-            <span class="brand-title">Adventurer Codex</span>
-            <span class="brand-system">5e Tactical Character Engine</span>
+            <span class="brand-title">Codex</span>
+            <span class="brand-system">5e Studio</span>
           </div>
 
-          <!-- Global Active Concentration Pill (Auto-shows when concentrating on a spell) -->
+          <!-- Global Active Concentration Pill -->
           <div id="globalConcentrationBanner" class="concentration-global-pill" style="display: none;" title="Click to end concentration">
             <span class="conc-pulse-dot"></span>
-            <span class="conc-pill-label">Concentrating:</span>
+            <span class="conc-pill-label">Conc:</span>
             <strong id="globalConcentrationName">None</strong>
             <button type="button" id="clearConcentrationBtn" class="conc-clear-btn" aria-label="Drop Concentration">&times;</button>
           </div>
         </div>
 
-        <!-- Top-Right Corner: Quick Action Button (OS-aware shortcut) -->
+        <!-- Center: Segmented Workspace Navigation Dock -->
+        <nav class="codex-navigation-dock" id="mainNavDock" aria-label="Character Sheet Sections">
+          <button class="main-tab active" data-target="tab-stats" type="button">
+            <svg class="nav-tab-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+            <span>Combat &amp; Core</span>
+          </button>
+
+          <button class="main-tab" data-target="tab-traits" type="button">
+            <svg class="nav-tab-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>Features &amp; Traits</span>
+            <span class="tab-counter-pill" id="traitsCountBadge">0</span>
+          </button>
+
+          <button class="main-tab" data-target="tab-spells" type="button">
+            <svg class="nav-tab-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"></path>
+            </svg>
+            <span>Spells &amp; Grimoire</span>
+            <span class="tab-counter-pill" id="spellsCountBadge">0</span>
+          </button>
+
+          <button class="main-tab" data-target="tab-inventory" type="button">
+            <svg class="nav-tab-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span>Inventory &amp; Vault</span>
+          </button>
+
+          <button class="main-tab" data-target="tab-companions" type="button">
+            <svg class="nav-tab-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="9"></circle>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>Companions &amp; Creatures</span>
+          </button>
+
+          <button class="main-tab" data-target="tab-journal" type="button">
+            <svg class="nav-tab-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Notes &amp; Quests</span>
+          </button>
+        </nav>
+
+        <!-- Right: Quick Action Command Trigger -->
         <div class="command-top-right">
           <button class="btn btn-ghost cmd-palette-trigger" id="commandPaletteBtn" type="button" title="Quick Roll &amp; Search">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -63,252 +117,61 @@
         </div>
       </div>
 
-      <!-- Middle Row: Main Toolbar Controls -->
+      <!-- Secondary Sub-Toolbar: Party, Theme, Account & File Vault -->
       <div class="command-actions">
-        <!-- Live Party & DM Dashboard Button -->
-        <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Party &amp; DM Dashboard">
-          <span class="live-beacon-dot" id="headerPartyDot"></span>
-          <span id="headerPartyBtnText">Party</span>
-        </button>
+        <div class="command-left-Utilities">
+          <button class="btn btn-primary dm-hub-trigger" id="partyModalBtn" type="button" title="Party &amp; DM Dashboard">
+            <span class="live-beacon-dot" id="headerPartyDot"></span>
+            <span id="headerPartyBtnText">Party</span>
+          </button>
 
-        <!-- Account / Cloud Sync Button -->
-        <div class="auth-box">
-          <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
+          <div class="theme-selector-wrapper" title="Switch Theme">
+            <span class="theme-label-text">Theme</span>
+            <select id="themeSelect" class="theme-select" aria-label="Select Theme">
+              <optgroup label="Modern Studio UI">
+                <option value="theme-nexus" selected>&#10022; Linear Studio (Modern)</option>
+              </optgroup>
+              <optgroup label="Classic Themes">
+                <option value="theme-obsidian">Obsidian Dark</option>
+                <option value="theme-parchment">Ancient Parchment</option>
+                <option value="theme-eldritch">Eldritch Void</option>
+                <option value="theme-celestial">Celestial Light</option>
+                <option value="theme-emerald">Verdant Grove</option>
+                <option value="theme-aethertech">Aethertech Clockwork</option>
+                <option value="theme-bloodmoon">Crimson Rite</option>
+                <option value="theme-glacial">Glacial Frost</option>
+                <option value="theme-underdark">Bioluminescent Underdark</option>
+                <option value="theme-solaris">Radiant Dawn</option>
+                <option value="theme-cartographer">Cartographers Sketchbook</option>
+              </optgroup>
+            </select>
+          </div>
         </div>
 
-        <!-- Character Management -->
-        <div class="action-btn-group">
-          <button class="btn btn-ghost" id="saveBtn" type="button" title="Save Character (Ctrl+S)">Save</button>
-          <button class="btn btn-ghost" id="loadBtn" type="button" title="Load or Manage Characters">Load</button>
-          <button class="btn btn-ghost" id="newBtn" type="button" title="Create New Character">+ New</button>
-        </div>
+        <div class="command-right-utilities">
+          <div class="action-btn-group">
+            <button class="btn btn-ghost" id="saveBtn" type="button" title="Save Character (Ctrl+S)">Save</button>
+            <button class="btn btn-ghost" id="loadBtn" type="button" title="Switch or Manage Characters">Load</button>
+            <button class="btn btn-ghost" id="newBtn" type="button" title="Create New Character">+ New</button>
+          </div>
 
-        <!-- Data Vault & Importers -->
-        <div class="action-btn-group vault-group">
-          <button class="btn btn-ghost" id="backupBtn" type="button" title="Export Character JSON">Backup</button>
-          <label class="btn btn-ghost file-label" title="Restore Character JSON">
-            Restore
-            <input type="file" id="restoreFile" accept=".json" />
-          </label>
-          <button class="btn btn-ghost" id="importHubBtn" type="button" title="Import from D&amp;D Beyond, PC on Parchment, etc.">Import</button>
-          <button class="btn btn-ghost" id="printSheetBtn" type="button" title="Print Sheet">Print</button>
-          <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Active Character">Delete</button>
-        </div>
-      </div>
+          <div class="action-btn-group vault-group">
+            <button class="btn btn-ghost" id="backupBtn" type="button" title="Export JSON">Backup</button>
+            <label class="btn btn-ghost file-label" title="Restore JSON">
+              Restore
+              <input type="file" id="restoreFile" accept=".json" />
+            </label>
+            <button class="btn btn-ghost" id="importHubBtn" type="button" title="Import Character">Import</button>
+            <button class="btn btn-ghost" id="printSheetBtn" type="button" title="Print Sheet">Print</button>
+            <button class="btn btn-danger-ghost" id="deleteBtn" type="button" title="Delete Character">Delete</button>
+          </div>
 
-      <!-- Bottom Row (Left-Aligned directly under Party Button): Redesigned UI + Classic Themes -->
-      <div class="command-sub-row">
-        <div class="theme-selector-wrapper" title="Switch between the Redesigned VTT UI and Classic Themes">
-          <span class="theme-label-text">Theme:</span>
-          <select id="themeSelect" class="theme-select" aria-label="Select Theme">
-            <optgroup label="New Ground-Up Redesign">
-              <option value="theme-nexus" selected>&#10022; Sovereign VTT (Redesigned UI)</option>
-            </optgroup>
-            <optgroup label="Classic Realm Themes">
-              <option value="theme-obsidian">Obsidian Dark (Classic)</option>
-              <option value="theme-parchment">Ancient Parchment</option>
-              <option value="theme-eldritch">Eldritch Void</option>
-              <option value="theme-celestial">Celestial Light</option>
-              <option value="theme-emerald">Verdant Grove</option>
-              <option value="theme-aethertech">Aethertech Clockwork</option>
-              <option value="theme-bloodmoon">Crimson Rite</option>
-              <option value="theme-glacial">Glacial Frost</option>
-              <option value="theme-underdark">Bioluminescent Underdark</option>
-              <option value="theme-solaris">Radiant Dawn</option>
-              <option value="theme-cartographer">Cartographers Sketchbook</option>
-            </optgroup>
-          </select>
+          <div class="auth-box">
+            <button class="btn btn-outline" id="authModalBtn" type="button">Account</button>
+          </div>
         </div>
       </div>
     </header>
-
-    <!-- ================================================================= -->
-    <!-- HERO CODEX BANNER / TELEMETRY RIBBON                              -->
-    <!-- ================================================================= -->
-    <section class="hero-codex-card" id="heroCodexBanner">
-      <div class="hero-codex-main">
-        <!-- Interactive Avatar Token -->
-        <div class="avatar-portal" id="avatarFrame" title="Click to upload character portrait">
-          <div class="avatar-pulse-ring"></div>
-          <img id="charAvatarImg" class="char-avatar-img" src="" alt="Avatar" style="display: none;" />
-          <div class="avatar-placeholder" id="avatarPlaceholder">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span class="avatar-upload-label">Portrait</span>
-          </div>
-          <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
-        </div>
-
-        <!-- Identity & Descriptor Badges -->
-        <div class="hero-identity-cluster">
-          <div class="hero-name-row">
-            <input type="text" id="charName" class="save-field hero-name-input" placeholder="Character Name..." />
-          </div>
-
-          <div class="hero-badges-strip">
-            <!-- Class Pill -->
-            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="class">
-              <span class="pill-title">Class</span>
-              <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Select class..." />
-              <div id="classDropdown" class="dropdown-menu"></div>
-              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Subclass Pill -->
-            <div class="codex-field-pill" data-blur-id="subclass">
-              <span class="pill-title">Subclass</span>
-              <input type="text" id="charSubclass" class="save-field pill-input" placeholder="e.g. Battle Master" />
-              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Race Pill -->
-            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="race">
-              <span class="pill-title">Race</span>
-              <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Select race..." />
-              <div id="raceDropdown" class="dropdown-menu"></div>
-              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Background Pill -->
-            <div class="codex-field-pill" data-blur-id="background">
-              <span class="pill-title">Background</span>
-              <input type="text" id="charBackground" class="save-field pill-input" placeholder="e.g. Outlander" />
-              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Alignment Pill -->
-            <div class="codex-field-pill" data-blur-id="alignment">
-              <span class="pill-title">Alignment</span>
-              <input type="text" id="charAlignment" class="save-field pill-input" placeholder="e.g. Chaotic Good" />
-              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Stat Orbs Rack -->
-        <div class="hero-orbs-rack">
-          <!-- Level Orb -->
-          <div class="hero-stat-orb" data-blur-id="level">
-            <span class="orb-caption">Level</span>
-            <input type="number" id="charLevel" class="save-field orb-number center" value="1" min="1" max="20" />
-            <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Proficiency Orb -->
-          <div class="hero-stat-orb" data-blur-id="prof">
-            <span class="orb-caption">Proficiency</span>
-            <span id="profBonusDisplay" class="orb-val">+2</span>
-            <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Initiative Orb (Clickable to Roll Initiative!) -->
-          <div class="hero-stat-orb initiative-orb" id="rollInitiativeOrb" title="Click to Roll Initiative!">
-            <span class="orb-caption">Initiative</span>
-            <span id="initiativeDisplay" class="orb-val">+0</span>
-            <input type="number" id="initBonusMod" class="save-field init-misc-input center" value="0" title="Misc Initiative Bonus (e.g. Alert feat +5)" />
-          </div>
-
-          <!-- Speed Orb -->
-          <div class="hero-stat-orb" data-blur-id="speed">
-            <span class="orb-caption">Speed</span>
-            <div class="orb-unit-wrap">
-              <input type="number" id="charSpeed" class="save-field orb-number center" value="30" />
-              <span class="orb-unit">ft</span>
-            </div>
-            <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Visual Health Bar Strip inside Hero Banner -->
-      <div class="hero-health-bar-strip" id="heroHealthStrip" title="Click to open HP Calculator">
-        <div class="hero-hp-fill" id="heroHpBarFill" style="width: 100%;"></div>
-        <div class="hero-temp-hp-fill" id="heroTempHpBarFill" style="width: 0%;"></div>
-      </div>
-
-      <!-- Experience, Heroic Inspiration & External Links Bar -->
-      <div class="hero-codex-footer">
-        <div class="hero-xp-widget" data-blur-id="exp">
-          <span class="xp-title">XP</span>
-          <input type="text" id="charExp" class="save-field xp-input" placeholder="0 XP" />
-          <div class="xp-progress-bar" title="Progress to next level">
-            <div class="xp-fill-line" id="xpBarFill" style="width: 0%;"></div>
-          </div>
-          <span id="xpNextTierText" class="xp-next-label">/ 300</span>
-          <button type="button" class="blur-toggle-btn" title="Toggle blur">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-
-        <div class="hero-insp-widget" data-blur-id="inspiration">
-          <label class="insp-checkbox-label" title="Toggle Heroic Inspiration">
-            <input type="checkbox" id="heroicInspirationToggle" class="save-field insp-checkbox" />
-            <span class="insp-star-badge">&#10022;</span>
-          </label>
-          <span class="insp-title">Inspiration:</span>
-          <input type="text" id="charInspiration" class="save-field insp-input" placeholder="None / d6" />
-          <button type="button" class="blur-toggle-btn" title="Toggle blur">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-
-        <div class="codex-external-links">
-          <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">5E WIKIDOT</a>
-          <span class="sep">/</span>
-          <a href="https://roll20.net/compendium/dnd5e/BookIndex" target="_blank" rel="noopener noreferrer">ROLL20</a>
-          <span class="sep">/</span>
-          <a href="https://5e.tools/" target="_blank" rel="noopener noreferrer">5ETOOLS</a>
-        </div>
-      </div>
-    </section>
 
     <!-- ================================================================= -->
     <!-- ON-SCREEN LIVE PARTY DOCK (SHOWS ONLY HP, AC, CONDS & CONC)       -->
@@ -317,129 +180,221 @@
       <div class="live-party-dock-header">
         <div class="live-party-dock-title">
           <span class="status-dot connected"></span>
-          <span class="dock-room-label">Party Room:</span>
+          <span class="dock-room-label">Room</span>
           <strong id="dockRoomCodeText" class="dock-room-code">NONE</strong>
           <span id="dockRoleBadge" class="dock-role-badge">Player</span>
-          <button type="button" class="btn btn-ghost btn-xs" id="dockCopyCodeBtn" title="Copy Room Code">Copy Code</button>
-          <button type="button" class="btn btn-ghost btn-xs" id="dockCopyLinkBtn" title="Copy 1-Click Invite Link">Copy Invite Link</button>
+          <button type="button" class="btn btn-ghost btn-xs" id="dockCopyCodeBtn">Copy Code</button>
+          <button type="button" class="btn btn-ghost btn-xs" id="dockCopyLinkBtn">Invite Link</button>
         </div>
 
-        <!-- Live Shared Party Roll Ticker -->
         <div class="live-party-roll-ticker" id="livePartyRollTicker">
-          <span class="ticker-label">Last Party Roll:</span>
+          <span class="ticker-label">Latest Roll</span>
           <span id="livePartyLastRollText" class="ticker-val">Waiting for rolls...</span>
         </div>
 
         <div class="live-party-dock-actions">
           <button type="button" class="btn btn-outline btn-xs" id="dockOpenFullPartyBtn">Party &amp; DM Dashboard</button>
-          <button type="button" class="btn btn-ghost btn-xs" id="dockToggleCollapseBtn" title="Collapse/Expand Party Bar">&#9650;</button>
-          <button type="button" class="btn btn-danger-ghost btn-xs" id="dockLeaveRoomBtn" title="Disconnect from Room">Leave</button>
+          <button type="button" class="btn btn-ghost btn-xs" id="dockToggleCollapseBtn" title="Collapse/Expand">&#9650;</button>
+          <button type="button" class="btn btn-danger-ghost btn-xs" id="dockLeaveRoomBtn">Leave</button>
         </div>
       </div>
 
-      <div id="livePartyDockBody" class="live-party-dock-strip">
-        <!-- Mini party member pills rendered live here (HP, AC, Conditions, Concentration only) -->
+      <div id="livePartyDockBody" class="live-party-dock-strip"></div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- MODERN BENTO PROFILE & TELEMETRY HEADER                           -->
+    <!-- ================================================================= -->
+    <section class="hero-codex-card" id="heroCodexBanner">
+      <div class="hero-codex-main">
+        <!-- Avatar Portal -->
+        <div class="avatar-portal" id="avatarFrame" title="Click to upload portrait">
+          <div class="avatar-pulse-ring"></div>
+          <img id="charAvatarImg" class="char-avatar-img" src="" alt="Avatar" style="display: none;" />
+          <div class="avatar-placeholder" id="avatarPlaceholder">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="avatar-upload-label">Photo</span>
+          </div>
+          <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
+        </div>
+
+        <!-- Character Name & Sleek Tag Strip -->
+        <div class="hero-identity-cluster">
+          <div class="hero-name-row">
+            <input type="text" id="charName" class="save-field hero-name-input" placeholder="Untitled Adventurer" />
+          </div>
+
+          <div class="hero-badges-strip">
+            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="class">
+              <span class="pill-title">Class</span>
+              <input type="text" id="charClass" class="save-field pill-input" autocomplete="off" placeholder="Class..." />
+              <div id="classDropdown" class="dropdown-menu"></div>
+              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+
+            <div class="codex-field-pill" data-blur-id="subclass">
+              <span class="pill-title">Subclass</span>
+              <input type="text" id="charSubclass" class="save-field pill-input" placeholder="Archetype..." />
+              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+
+            <div class="codex-field-pill dropdown-pill-wrapper" data-blur-id="race">
+              <span class="pill-title">Species</span>
+              <input type="text" id="charRace" class="save-field pill-input" autocomplete="off" placeholder="Species..." />
+              <div id="raceDropdown" class="dropdown-menu"></div>
+              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+
+            <div class="codex-field-pill" data-blur-id="background">
+              <span class="pill-title">Origin</span>
+              <input type="text" id="charBackground" class="save-field pill-input" placeholder="Background..." />
+              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+
+            <div class="codex-field-pill" data-blur-id="alignment">
+              <span class="pill-title">Align</span>
+              <input type="text" id="charAlignment" class="save-field pill-input" placeholder="Alignment..." />
+              <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Core Telemetry Orbs -->
+        <div class="hero-orbs-rack">
+          <div class="hero-stat-orb" data-blur-id="level">
+            <span class="orb-caption">Level</span>
+            <input type="number" id="charLevel" class="save-field orb-number center" value="1" min="1" max="20" />
+            <button type="button" class="blur-toggle-btn" title="Toggle blur">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+
+          <div class="hero-stat-orb" data-blur-id="prof">
+            <span class="orb-caption">Proficiency</span>
+            <span id="profBonusDisplay" class="orb-val">+2</span>
+            <button type="button" class="blur-toggle-btn" title="Toggle blur">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+
+          <div class="hero-stat-orb initiative-orb" id="rollInitiativeOrb" title="Click to Roll Initiative!">
+            <span class="orb-caption">Initiative</span>
+            <div class="init-orb-row">
+              <span id="initiativeDisplay" class="orb-val">+0</span>
+              <input type="number" id="initBonusMod" class="save-field init-misc-input center" value="0" title="Misc Initiative Bonus" />
+            </div>
+          </div>
+
+          <div class="hero-stat-orb" data-blur-id="speed">
+            <span class="orb-caption">Speed</span>
+            <div class="orb-unit-wrap">
+              <input type="number" id="charSpeed" class="save-field orb-number center" value="30" />
+              <span class="orb-unit">ft</span>
+            </div>
+            <button type="button" class="blur-toggle-btn" title="Toggle blur">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thin Sleek Health Progress Bar -->
+      <div class="hero-health-bar-strip" id="heroHealthStrip" title="Click to open HP Calculator">
+        <div class="hero-hp-fill" id="heroHpBarFill" style="width: 100%;"></div>
+        <div class="hero-temp-hp-fill" id="heroTempHpBarFill" style="width: 0%;"></div>
+      </div>
+
+      <!-- Bottom Telemetry Sub-Bar: XP, Inspiration & Quick Reference -->
+      <div class="hero-codex-footer">
+        <div class="hero-xp-widget" data-blur-id="exp">
+          <span class="xp-title">XP</span>
+          <input type="text" id="charExp" class="save-field xp-input" placeholder="0" />
+          <div class="xp-progress-bar" title="Progress to next level">
+            <div class="xp-fill-line" id="xpBarFill" style="width: 0%;"></div>
+          </div>
+          <span id="xpNextTierText" class="xp-next-label">/ 300</span>
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+
+        <div class="hero-insp-widget" data-blur-id="inspiration">
+          <label class="insp-checkbox-label" title="Toggle Heroic Inspiration">
+            <input type="checkbox" id="heroicInspirationToggle" class="save-field insp-checkbox" />
+            <span class="insp-star-badge">&#10022;</span>
+          </label>
+          <span class="insp-title">Inspiration</span>
+          <input type="text" id="charInspiration" class="save-field insp-input" placeholder="None / d6" />
+          <button type="button" class="blur-toggle-btn" title="Toggle blur">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+
+        <div class="codex-external-links">
+          <a href="https://dnd5e.wikidot.com/" target="_blank" rel="noopener noreferrer">5E WIKIDOT</a>
+          <span class="sep">&middot;</span>
+          <a href="https://roll20.net/compendium/dnd5e/BookIndex" target="_blank" rel="noopener noreferrer">ROLL20</a>
+          <span class="sep">&middot;</span>
+          <a href="https://5e.tools/" target="_blank" rel="noopener noreferrer">5ETOOLS</a>
+        </div>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- 6 WORKSPACE NAVIGATION TABS / LEFT SIDEBAR RAIL                   -->
-    <!-- ================================================================= -->
-    <nav class="codex-navigation-dock" id="mainNavDock" aria-label="Character Sheet Sections">
-      <button class="main-tab active" data-target="tab-stats" type="button" title="Combat &amp; Core">
-        <svg class="nav-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14.5 17.5L3 6V3h3l11.5 11.5"></path>
-          <path d="M13 19l6-6"></path>
-          <path d="M16 16l4 4"></path>
-          <path d="M19 21l2-2"></path>
-        </svg>
-        <span>Combat &amp; Core</span>
-      </button>
-
-      <button class="main-tab" data-target="tab-traits" type="button" title="Features &amp; Traits">
-        <svg class="nav-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-        <span>Features &amp; Traits</span>
-        <span class="tab-counter-pill" id="traitsCountBadge">0</span>
-      </button>
-
-      <button class="main-tab" data-target="tab-spells" type="button" title="Spells &amp; Grimoire">
-        <svg class="nav-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
-          <path d="M12 12L2.1 10.5"></path>
-          <path d="M12 12l7.5-6.5"></path>
-        </svg>
-        <span>Spells &amp; Grimoire</span>
-        <span class="tab-counter-pill" id="spellsCountBadge">0</span>
-      </button>
-
-      <button class="main-tab" data-target="tab-inventory" type="button" title="Inventory &amp; Vault">
-        <svg class="nav-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-        </svg>
-        <span>Inventory &amp; Vault</span>
-      </button>
-
-      <button class="main-tab" data-target="tab-companions" type="button" title="Companions &amp; Creatures">
-        <svg class="nav-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3.1-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z"></path>
-        </svg>
-        <span>Companions &amp; Creatures</span>
-      </button>
-
-      <button class="main-tab" data-target="tab-journal" type="button" title="Notes &amp; Quests">
-        <svg class="nav-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
-        <span>Notes &amp; Quests</span>
-      </button>
-    </nav>
-
-    <!-- ================================================================= -->
-    <!-- WORKSPACE VIEWPORT                                                -->
+    <!-- MAIN WORKSPACE VIEWPORT                                           -->
     <!-- ================================================================= -->
     <div class="codex-tabs-viewport" id="codexTabsViewport">
 
       <!-- =============================================================== -->
-      <!-- TAB 1: COMBAT & CORE                                            -->
+      <!-- TAB 1: COMBAT & CORE (MODERN BENTO GRID)                        -->
       <!-- =============================================================== -->
       <div id="tab-stats" class="tab-page active">
 
-        <!-- Vitals HUD (4 Core Pillars) -->
+        <!-- Row 1: Vitals Bento Strip (4 Sleek Metric Cards) -->
         <div class="vitals-hud">
           <!-- Armor Class -->
           <div class="vitals-card ac-card">
             <div class="vitals-card-top">
-              <span class="card-tag">Defense</span>
-              <input type="text" id="armorWornNote" class="save-field vitals-mini-note" placeholder="Unarmored / Shield..." />
+              <span class="card-tag">Armor Class</span>
+              <input type="text" id="armorWornNote" class="save-field vitals-mini-note" placeholder="Gear / Shield..." />
             </div>
             <div class="card-main">
               <div class="ac-shield-box">
                 <input type="number" id="ac" class="save-field ac-input" value="10" />
               </div>
               <div class="card-details">
-                <span class="card-title">Armor Class</span>
-                <span class="card-caption">Total Protection</span>
+                <span class="card-title">Defense</span>
+                <span class="card-caption">Total AC</span>
               </div>
             </div>
           </div>
 
-          <!-- Health Pool with Visible Temp HP, Instant -1/+1 Steppers & ± Calculator -->
+          <!-- Hit Points & Temp HP -->
           <div class="vitals-card hp-card">
             <div class="vitals-card-top">
-              <span class="card-tag">Vitality</span>
+              <span class="card-tag">Hit Points</span>
               <div class="temp-hp-inline-badge" title="Temporary Hit Points">
-                <span>Temp HP:</span>
+                <span>Temp</span>
                 <input type="number" id="tempHp" class="save-field temp-hp-inline-input center" value="0" min="0" />
               </div>
             </div>
             <div class="hp-corner-controls">
-              <button type="button" class="hp-step-btn" id="quickHpMinusBtn" title="Quick -1 HP">&minus;</button>
-              <button type="button" class="hp-step-btn" id="quickHpPlusBtn" title="Quick +1 HP">+</button>
-              <button type="button" class="hp-corner-btn" id="openHpModalBtn" title="Damage / Heal Calculator">&plusmn;</button>
+              <button type="button" class="hp-step-btn" id="quickHpMinusBtn" title="-1 HP">&minus;</button>
+              <button type="button" class="hp-step-btn" id="quickHpPlusBtn" title="+1 HP">+</button>
+              <button type="button" class="hp-corner-btn" id="openHpModalBtn" title="HP Calculator">&plusmn;</button>
             </div>
             <div class="card-main">
               <div class="hp-gauge-box">
@@ -448,113 +403,103 @@
                 <input type="number" id="maxHp" class="save-field hp-input max" value="10" title="Max HP" />
               </div>
               <div class="card-details">
-                <span class="card-title hp-title-btn" id="hpTitleClick">Hit Points</span>
+                <span class="card-title hp-title-btn" id="hpTitleClick">Vitality</span>
                 <span class="card-caption" id="hpStatusCaption">Healthy (100%)</span>
               </div>
             </div>
           </div>
 
-          <!-- Death Saves -->
+          <!-- Death Saving Throws -->
           <div class="vitals-card death-card">
             <div class="vitals-card-top">
-              <span class="card-tag">Mortality</span>
-              <button type="button" id="rollDeathSaveBtn" class="vitals-mini-roll-btn" title="Roll a d20 Death Saving Throw">Roll d20</button>
+              <span class="card-tag">Death Saves</span>
+              <button type="button" id="rollDeathSaveBtn" class="vitals-mini-roll-btn" title="Roll d20 Death Save">Roll d20</button>
             </div>
             <div class="card-main">
               <div class="death-saves-box">
                 <div class="save-track succ">
-                  <span class="track-label">Success</span>
+                  <span class="track-label">Succ</span>
                   <input type="number" id="deathSucc" class="save-field death-input success-txt" value="0" min="0" max="3" />
                 </div>
                 <div class="save-track fail">
-                  <span class="track-label">Failure</span>
+                  <span class="track-label">Fail</span>
                   <input type="number" id="deathFail" class="save-field death-input fail-txt" value="0" min="0" max="3" />
                 </div>
               </div>
               <div class="card-details">
-                <span class="card-title">Death Saves</span>
-                <span class="card-caption">3 to stabilize or fall</span>
+                <span class="card-title">Mortality</span>
+                <span class="card-caption">3 to stabilize</span>
               </div>
             </div>
           </div>
 
-          <!-- Primary Class Energy Points -->
+          <!-- Primary Class Resource -->
           <div class="vitals-card resource-card">
             <div class="vitals-card-top">
-              <span class="card-tag">Primary Resource</span>
+              <span class="card-tag">Class Pool</span>
               <input type="text" id="classResourceName" class="save-field vitals-mini-note" placeholder="Ki / Rage / Sorcery..." />
             </div>
             <div class="card-main">
               <div class="resource-counter-box">
-                <input type="number" id="classPtsCur" class="save-field res-input" value="0" title="Current Points" />
+                <input type="number" id="classPtsCur" class="save-field res-input" value="0" />
                 <span class="hp-divider">/</span>
-                <input type="number" id="classPtsMax" class="save-field res-input" value="0" title="Max Points" />
+                <input type="number" id="classPtsMax" class="save-field res-input" value="0" />
               </div>
               <div class="card-details">
-                <span class="card-title">Class Points</span>
-                <span class="card-caption">Resets on Rest</span>
+                <span class="card-title">Resource</span>
+                <span class="card-caption">Restores on rest</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- TACTICAL TURN & RECOVERY BAR (Action Economy + Hit Dice + Rests) -->
+        <!-- Row 2: Action Economy, Hit Dice & Rest Bar -->
         <div class="compact-rest-bar">
-          <!-- Hit Dice Indicator -->
           <div class="rest-hd-indicator" data-blur-id="hitdice">
-            <span class="rest-hd-text">Hit Dice:</span>
-            <input type="text" id="hitDiceCur" class="save-field hitdice-input center" value="1" placeholder="Cur" />
+            <span class="rest-hd-text">Hit Dice</span>
+            <input type="text" id="hitDiceCur" class="save-field hitdice-input center" value="1" />
             <span class="rest-hd-slash">/</span>
-            <input type="text" id="hitDiceMax" class="save-field hitdice-input center" value="1" placeholder="Max" />
-            <select id="hitDieSize" class="save-field hd-size-select" title="Hit Die Type">
+            <input type="text" id="hitDiceMax" class="save-field hitdice-input center" value="1" />
+            <select id="hitDieSize" class="save-field hd-size-select" title="Hit Die Size">
               <option value="6">d6</option>
               <option value="8" selected>d8</option>
               <option value="10">d10</option>
               <option value="12">d12</option>
             </select>
             <button type="button" class="blur-toggle-btn" title="Toggle blur">
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
 
-          <!-- Action Economy Tracker -->
           <div class="action-economy-strip">
-            <span class="economy-label">Turn Economy:</span>
+            <span class="economy-label">Turn</span>
             <label class="econ-chip"><input type="checkbox" id="econ_action" class="save-field" /><span>Action</span></label>
-            <label class="econ-chip"><input type="checkbox" id="econ_bonus" class="save-field" /><span>Bonus Action</span></label>
+            <label class="econ-chip"><input type="checkbox" id="econ_bonus" class="save-field" /><span>Bonus</span></label>
             <label class="econ-chip"><input type="checkbox" id="econ_reaction" class="save-field" /><span>Reaction</span></label>
-            <label class="econ-chip"><input type="checkbox" id="econ_move" class="save-field" /><span>Movement</span></label>
-            <button type="button" id="resetTurnEconomyBtn" class="econ-reset-btn" title="Start New Turn (Reset Action, Bonus, Reaction, Move)">&#8635; New Turn</button>
+            <label class="econ-chip"><input type="checkbox" id="econ_move" class="save-field" /><span>Move</span></label>
+            <button type="button" id="resetTurnEconomyBtn" class="econ-reset-btn">&#8635; Reset Turn</button>
           </div>
 
-          <!-- Short & Long Rest Triggers -->
           <div class="rest-actions-inline">
-            <button class="btn btn-rest-mini btn-short-rest" id="shortRestBtn" type="button" title="Spend Hit Dice to recover HP">
-              &#9789; Short Rest
-            </button>
-            <button class="btn btn-rest-mini btn-long-rest" id="longRestBtn" type="button" title="Full recovery of HP, slots, and half Hit Dice">
-              &#9728; Long Rest
-            </button>
+            <button class="btn btn-rest-mini btn-short-rest" id="shortRestBtn" type="button">Short Rest</button>
+            <button class="btn btn-rest-mini btn-long-rest" id="longRestBtn" type="button">Long Rest</button>
           </div>
         </div>
 
-        <!-- COMBAT ARENA: Ability Scores vs Attack Arsenal & Tactical Trackers -->
+        <!-- Row 3: 6-Card Ability Ribbon + Combat Arena & Skills Bento -->
         <div class="two-col-layout">
-          <!-- LEFT PANE: Attributes, Saves & Passive Senses -->
+          <!-- Left / Top Bento: 6 Ability Scores, Passive Senses & Defenses -->
           <div class="left-pane">
             <div class="pane-header flex-header">
               <h2 class="section-title">Ability Scores</h2>
-              <span class="pane-hint">Click mod or hex to roll</span>
+              <span class="pane-hint">Click Mod for Check &bull; Hex for Save</span>
             </div>
 
             <div class="attributes-group">
               <!-- STR -->
               <div class="attr-pod attr-str" data-attr="str">
                 <div class="attr-badge">
-                  <span class="attr-abbr">Str</span>
+                  <span class="attr-abbr">STR</span>
                   <span class="attr-full">Strength</span>
                 </div>
                 <div class="attr-score-box">
@@ -576,7 +521,7 @@
               <!-- DEX -->
               <div class="attr-pod attr-dex" data-attr="dex">
                 <div class="attr-badge">
-                  <span class="attr-abbr">Dex</span>
+                  <span class="attr-abbr">DEX</span>
                   <span class="attr-full">Dexterity</span>
                 </div>
                 <div class="attr-score-box">
@@ -598,7 +543,7 @@
               <!-- CON -->
               <div class="attr-pod attr-con" data-attr="con">
                 <div class="attr-badge">
-                  <span class="attr-abbr">Con</span>
+                  <span class="attr-abbr">CON</span>
                   <span class="attr-full">Constitution</span>
                 </div>
                 <div class="attr-score-box">
@@ -620,7 +565,7 @@
               <!-- INT -->
               <div class="attr-pod attr-int" data-attr="int">
                 <div class="attr-badge">
-                  <span class="attr-abbr">Int</span>
+                  <span class="attr-abbr">INT</span>
                   <span class="attr-full">Intelligence</span>
                 </div>
                 <div class="attr-score-box">
@@ -642,7 +587,7 @@
               <!-- WIS -->
               <div class="attr-pod attr-wis" data-attr="wis">
                 <div class="attr-badge">
-                  <span class="attr-abbr">Wis</span>
+                  <span class="attr-abbr">WIS</span>
                   <span class="attr-full">Wisdom</span>
                 </div>
                 <div class="attr-score-box">
@@ -664,7 +609,7 @@
               <!-- CHA -->
               <div class="attr-pod attr-cha" data-attr="cha">
                 <div class="attr-badge">
-                  <span class="attr-abbr">Cha</span>
+                  <span class="attr-abbr">CHA</span>
                   <span class="attr-full">Charisma</span>
                 </div>
                 <div class="attr-score-box">
@@ -684,108 +629,109 @@
               </div>
             </div>
 
-            <!-- Passive Senses Widget (Perception, Insight, Investigation) -->
-            <div class="passive-senses-bar three-senses">
-              <div class="passive-badge-card" title="Passive Perception = 10 + Perception Mod">
-                <span class="passive-badge-label">Passive Perception</span>
-                <span class="passive-badge-value" id="passivePerception">10</span>
+            <!-- Passive Senses & Defenses Row -->
+            <div class="senses-defenses-bento-row">
+              <div class="passive-senses-bar three-senses">
+                <div class="passive-badge-card" title="10 + Perception">
+                  <span class="passive-badge-label">Passive Perc</span>
+                  <span class="passive-badge-value" id="passivePerception">10</span>
+                </div>
+                <div class="passive-badge-card" title="10 + Insight">
+                  <span class="passive-badge-label">Passive Ins</span>
+                  <span class="passive-badge-value" id="passiveInsight">10</span>
+                </div>
+                <div class="passive-badge-card" title="10 + Investigation">
+                  <span class="passive-badge-label">Passive Inv</span>
+                  <span class="passive-badge-value" id="passiveInvestigation">10</span>
+                </div>
               </div>
-              <div class="passive-badge-card" title="Passive Insight = 10 + Insight Mod">
-                <span class="passive-badge-label">Passive Insight</span>
-                <span class="passive-badge-value" id="passiveInsight">10</span>
-              </div>
-              <div class="passive-badge-card" title="Passive Investigation = 10 + Investigation Mod">
-                <span class="passive-badge-label">Passive Investigation</span>
-                <span class="passive-badge-value" id="passiveInvestigation">10</span>
-              </div>
-            </div>
 
-            <!-- Senses, Vision & Defenses Summary Card -->
-            <div class="defenses-summary-card">
-              <div class="defense-field-row">
-                <label for="charSenses">Senses / Vision</label>
-                <input type="text" id="charSenses" class="save-field" placeholder="e.g. Darkvision 60 ft., Blindsight 10 ft." />
-              </div>
-              <div class="defense-field-row">
-                <label for="charResistances">Resistances / Immunities</label>
-                <input type="text" id="charResistances" class="save-field" placeholder="e.g. Fire, Poison, Charmed..." />
+              <div class="defenses-summary-card">
+                <div class="defense-field-row">
+                  <label for="charSenses">Senses &amp; Vision</label>
+                  <input type="text" id="charSenses" class="save-field" placeholder="Darkvision 60 ft., Blindsight..." />
+                </div>
+                <div class="defense-field-row">
+                  <label for="charResistances">Resistances &amp; Immunities</label>
+                  <input type="text" id="charResistances" class="save-field" placeholder="Fire, Poison, Charmed..." />
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- RIGHT PANE: Weapons, Custom Resource Counters & Conditions -->
+          <!-- Center / Right Bento: Weapons, Custom Trackers & Conditions -->
           <div class="right-pane">
             <div class="pane-header flex-header">
               <h2 class="section-title">Attack Arsenal</h2>
-              <button type="button" class="btn btn-add-weapon" id="addWeaponBtn">+ Add Weapon / Attack</button>
+              <button type="button" class="btn btn-add-weapon" id="addWeaponBtn">+ Add Attack</button>
             </div>
 
             <div class="attacks-table-wrapper">
               <div class="attacks-table">
                 <div class="attack-headers">
-                  <span>Weapon / Spell Attack</span>
-                  <span class="center">Atk Bonus</span>
-                  <span class="center">Damage &amp; Type</span>
-                  <span>Range, Mastery &amp; Notes</span>
+                  <span>Weapon / Action</span>
+                  <span class="center">Hit</span>
+                  <span class="center">Damage</span>
+                  <span>Properties &amp; Notes</span>
                   <span></span>
                 </div>
                 <div class="attack-rows-container" id="weaponsContainer"></div>
               </div>
             </div>
 
-            <!-- Dynamic Custom Resource Trackers -->
-            <div class="custom-resources-panel">
-              <div class="conditions-header-bar">
-                <div class="conditions-title-wrap">
-                  <span class="tactical-title">Tactical Counters &amp; Trackers</span>
+            <div class="trackers-conditions-split">
+              <!-- Dynamic Custom Resource Trackers -->
+              <div class="custom-resources-panel">
+                <div class="conditions-header-bar">
+                  <div class="conditions-title-wrap">
+                    <span class="tactical-title">Custom Counters</span>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-xs" id="addCustomResourceBtn">+ Counter</button>
                 </div>
-                <button type="button" class="btn btn-outline btn-xs" id="addCustomResourceBtn">+ Add Counter</button>
+                <div id="customResourcesList" class="custom-resources-grid"></div>
               </div>
-              <div id="customResourcesList" class="custom-resources-grid"></div>
-            </div>
 
-            <!-- Tactical Conditions Tracker -->
-            <div class="conditions-container">
-              <div class="conditions-header-bar">
-                <div class="conditions-title-wrap">
-                  <span class="tactical-title">Active Conditions</span>
-                  <button type="button" id="clearConditionsBtn" class="clear-conds-link" title="Clear all active conditions">Clear All</button>
+              <!-- Tactical Conditions Tracker -->
+              <div class="conditions-container">
+                <div class="conditions-header-bar">
+                  <div class="conditions-title-wrap">
+                    <span class="tactical-title">Conditions</span>
+                    <button type="button" id="clearConditionsBtn" class="clear-conds-link">Reset</button>
+                  </div>
+                  <div class="exhaustion-meter">
+                    <span class="exhaustion-label">Exhaustion</span>
+                    <input type="number" id="exhaustionLevel" class="save-field exhaustion-input center" value="0" min="0" max="6" />
+                  </div>
                 </div>
-                <div class="exhaustion-meter">
-                  <span class="exhaustion-label" title="Each level gives a cumulative penalty">Exhaustion (0–6)</span>
-                  <input type="number" id="exhaustionLevel" class="save-field exhaustion-input center" value="0" min="0" max="6" />
+                <div class="condition-chips-grid" id="conditionChips">
+                  <button type="button" class="cond-chip" data-cond="blinded">Blinded</button>
+                  <button type="button" class="cond-chip" data-cond="charmed">Charmed</button>
+                  <button type="button" class="cond-chip" data-cond="deafened">Deafened</button>
+                  <button type="button" class="cond-chip" data-cond="frightened">Frightened</button>
+                  <button type="button" class="cond-chip" data-cond="grappled">Grappled</button>
+                  <button type="button" class="cond-chip" data-cond="incapacitated">Incapacitated</button>
+                  <button type="button" class="cond-chip" data-cond="invisible">Invisible</button>
+                  <button type="button" class="cond-chip" data-cond="paralyzed">Paralyzed</button>
+                  <button type="button" class="cond-chip" data-cond="petrified">Petrified</button>
+                  <button type="button" class="cond-chip" data-cond="poisoned">Poisoned</button>
+                  <button type="button" class="cond-chip" data-cond="prone">Prone</button>
+                  <button type="button" class="cond-chip" data-cond="restrained">Restrained</button>
+                  <button type="button" class="cond-chip" data-cond="stunned">Stunned</button>
+                  <button type="button" class="cond-chip" data-cond="unconscious">Unconscious</button>
                 </div>
-              </div>
-              <div class="condition-chips-grid" id="conditionChips">
-                <button type="button" class="cond-chip" data-cond="blinded">Blinded</button>
-                <button type="button" class="cond-chip" data-cond="charmed">Charmed</button>
-                <button type="button" class="cond-chip" data-cond="deafened">Deafened</button>
-                <button type="button" class="cond-chip" data-cond="frightened">Frightened</button>
-                <button type="button" class="cond-chip" data-cond="grappled">Grappled</button>
-                <button type="button" class="cond-chip" data-cond="incapacitated">Incapacitated</button>
-                <button type="button" class="cond-chip" data-cond="invisible">Invisible</button>
-                <button type="button" class="cond-chip" data-cond="paralyzed">Paralyzed</button>
-                <button type="button" class="cond-chip" data-cond="petrified">Petrified</button>
-                <button type="button" class="cond-chip" data-cond="poisoned">Poisoned</button>
-                <button type="button" class="cond-chip" data-cond="prone">Prone</button>
-                <button type="button" class="cond-chip" data-cond="restrained">Restrained</button>
-                <button type="button" class="cond-chip" data-cond="stunned">Stunned</button>
-                <button type="button" class="cond-chip" data-cond="unconscious">Unconscious</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- SKILLS & PROFICIENCIES MATRIX (WITH INSTANT FILTER BAR) -->
+        <!-- SKILLS & PROFICIENCIES MATRIX -->
         <section class="horizontal-skills-section">
           <div class="pane-header flex-header">
-            <h2 class="section-title">Skills &amp; Proficiencies</h2>
+            <h2 class="section-title">Skills</h2>
             <div class="skills-legend">
-              <input type="text" id="quickSkillSearch" class="skill-quick-search" placeholder="Filter skills..." autocomplete="off" />
-              <button type="button" id="filterProficientSkillsBtn" class="btn btn-ghost btn-xs" title="Show only proficient skills">Proficient Only</button>
-              <span class="legend-item"><span class="legend-dot prof-dot"></span> Prof</span>
-              <span class="legend-item"><span class="legend-dot exp-dot"></span> Exp</span>
-              <label class="legend-item jack-toggle" title="Bard Jack of All Trades: Add half proficiency bonus to non-proficient skill checks">
+              <input type="text" id="quickSkillSearch" class="skill-quick-search" placeholder="Search skills..." autocomplete="off" />
+              <button type="button" id="filterProficientSkillsBtn" class="btn btn-ghost btn-xs">Proficient</button>
+              <label class="legend-item jack-toggle" title="Add half proficiency bonus to non-proficient skills">
                 <input type="checkbox" id="jackOfAllTradesCb" class="save-field" />
                 <span>Jack of All Trades</span>
               </label>
@@ -1036,7 +982,6 @@
           </div>
         </div>
 
-        <!-- Category Filter Pills -->
         <div class="category-filter-pills" id="traitCategoryFilterBar">
           <button type="button" class="cat-pill active" data-filter="all">All</button>
           <button type="button" class="cat-pill" data-filter="class">Class Features</button>
@@ -1055,7 +1000,7 @@
           <div class="spell-stat-card">
             <span class="spell-stat-label">Spellcasting Ability</span>
             <input type="text" id="spellAbility" class="save-field spell-stat-input center" placeholder="INT / WIS / CHA" />
-            <button type="button" id="autoCalcSpellStatsBtn" class="mini-calc-link" title="Auto-calculate Save DC &amp; Attack Bonus from Ability">Auto-Sync</button>
+            <button type="button" id="autoCalcSpellStatsBtn" class="mini-calc-link">Auto-Sync</button>
           </div>
           <div class="spell-stat-card">
             <span class="spell-stat-label">Spell Save DC</span>
@@ -1064,7 +1009,7 @@
           <div class="spell-stat-card">
             <span class="spell-stat-label">Spell Attack</span>
             <input type="text" id="spellAtkBonus" class="save-field spell-stat-input center" placeholder="+5" />
-            <button type="button" id="rollSpellAttackBtn" class="mini-calc-link" title="Roll d20 + Spell Attack Bonus">Roll d20</button>
+            <button type="button" id="rollSpellAttackBtn" class="mini-calc-link">Roll d20</button>
           </div>
           <div class="spell-stat-card">
             <span class="spell-stat-label">Prepared Spells</span>
@@ -1075,11 +1020,11 @@
             </div>
           </div>
           <div class="spell-stat-card">
-            <span class="spell-stat-label">Pact Magic (Warlock)</span>
+            <span class="spell-stat-label">Pact Magic</span>
             <div class="slot-counter stat-dual">
-              <input type="number" id="pactSlotsCur" class="save-field slot-input center" value="0" title="Current Pact Slots" />
+              <input type="number" id="pactSlotsCur" class="save-field slot-input center" value="0" />
               <span class="slot-divider">/</span>
-              <input type="number" id="pactSlotsMax" class="save-field slot-input center" value="0" title="Max Pact Slots" />
+              <input type="number" id="pactSlotsMax" class="save-field slot-input center" value="0" />
             </div>
           </div>
           <div class="spell-stat-card concentration-card">
@@ -1089,23 +1034,20 @@
         </div>
 
         <div class="slots-header-bar">
-          <h3 class="subsection-title">Spell Slots Matrix (Click Pips to Expend / Recover)</h3>
+          <h3 class="subsection-title">Spell Slots (Click Pips to Expend / Recover)</h3>
         </div>
-        <div class="slots-grid" id="slotsGridContainer">
-          <!-- Dynamically populated interactive slot tiles with bubble pips -->
-        </div>
+        <div class="slots-grid" id="slotsGridContainer"></div>
 
         <div class="cantrips-header">
           <div class="cantrips-title-group">
             <h3 class="section-title">Grimoire &amp; Known Spells</h3>
           </div>
           <div class="spell-filter-wrap">
-            <input type="text" id="filterSpellbookInput" class="spell-filter-input" placeholder="Search known spells by name, level, or range..." />
+            <input type="text" id="filterSpellbookInput" class="spell-filter-input" placeholder="Search known spells..." />
           </div>
           <button class="btn btn-add-spell" id="addSpellBtn" type="button">+ Add Spell</button>
         </div>
 
-        <!-- Spell Level Quick-Filter Bar -->
         <div class="category-filter-pills" id="spellLevelFilterBar">
           <button type="button" class="cat-pill active" data-lvl="all">All Spells</button>
           <button type="button" class="cat-pill" data-lvl="cantrip">Cantrips</button>
@@ -1123,10 +1065,9 @@
       <!-- TAB 4: INVENTORY & VAULT                                        -->
       <!-- =============================================================== -->
       <div id="tab-inventory" class="tab-page">
-        <!-- Treasury & Wealth Card -->
         <div class="currency-vault-card">
           <div class="vault-title-cluster">
-            <span class="vault-title">Coin Purse &amp; Treasury</span>
+            <span class="vault-title">Treasury &amp; Currency</span>
             <span class="vault-total-gp" id="totalWealthGpDisplay">Total Value: 0 GP</span>
           </div>
           <div class="currency-bar">
@@ -1138,22 +1079,21 @@
           </div>
         </div>
 
-        <!-- Magic Item Attunement Bar (3 Slots) & Carrying Capacity -->
         <div class="attunement-encumbrance-grid">
           <div class="attunement-card">
-            <span class="subsection-title">Arcane Attunement (Max 3 Magic Items)</span>
+            <span class="subsection-title">Arcane Attunement (Max 3)</span>
             <div class="attunement-slots-row">
               <div class="attune-slot">
                 <input type="checkbox" id="attune_cb_1" class="save-field attune-cb" />
-                <input type="text" id="attune_item_1" class="save-field attune-input" placeholder="Attuned Magic Item 1..." />
+                <input type="text" id="attune_item_1" class="save-field attune-input" placeholder="Attuned Item 1..." />
               </div>
               <div class="attune-slot">
                 <input type="checkbox" id="attune_cb_2" class="save-field attune-cb" />
-                <input type="text" id="attune_item_2" class="save-field attune-input" placeholder="Attuned Magic Item 2..." />
+                <input type="text" id="attune_item_2" class="save-field attune-input" placeholder="Attuned Item 2..." />
               </div>
               <div class="attune-slot">
                 <input type="checkbox" id="attune_cb_3" class="save-field attune-cb" />
-                <input type="text" id="attune_item_3" class="save-field attune-input" placeholder="Attuned Magic Item 3..." />
+                <input type="text" id="attune_item_3" class="save-field attune-input" placeholder="Attuned Item 3..." />
               </div>
             </div>
           </div>
@@ -1170,23 +1110,20 @@
           </div>
         </div>
 
-        <!-- Structured Item List + Classic Freeform Textareas -->
         <div class="two-col-layout">
           <div>
             <h2 class="section-title">Proficiencies, Languages &amp; Boons</h2>
-            <textarea id="otherProfs" class="save-field block-text" rows="12" placeholder="Armor, weapons, artisan tools, instruments, languages, damage resistances, immunities, feats..."></textarea>
+            <textarea id="otherProfs" class="save-field block-text" rows="12" placeholder="Armor, weapons, tools, languages, resistances..."></textarea>
           </div>
           <div>
             <div class="pane-header flex-header">
               <h2 class="section-title">Equipment &amp; Backpack</h2>
-              <button type="button" class="btn btn-outline btn-xs" id="addInventoryItemBtn">+ Add Tracked Item</button>
+              <button type="button" class="btn btn-outline btn-xs" id="addInventoryItemBtn">+ Add Item</button>
             </div>
-            <!-- Structured Interactive Items Container -->
             <div id="structuredInventoryList" class="structured-inv-list"></div>
 
-            <!-- Classic Freeform Equipment Notes -->
-            <label for="inventory" class="subsection-title" style="display:block; margin: 0.75rem 0 0.4rem 0;">Additional Gear, Loot &amp; Bag of Holding Notes</label>
-            <textarea id="inventory" class="save-field block-text journal-box" rows="10" placeholder="Detailed inventory, weights, magic items, containers, potions, quest items..."></textarea>
+            <label for="inventory" class="subsection-title" style="display:block; margin: 0.75rem 0 0.4rem 0;">Additional Gear &amp; Notes</label>
+            <textarea id="inventory" class="save-field block-text journal-box" rows="10" placeholder="Loot, magic items, containers, potions..."></textarea>
           </div>
         </div>
       </div>
@@ -1198,13 +1135,11 @@
         <div class="pane-header flex-header">
           <div>
             <h2 class="section-title">Companions &amp; Creatures</h2>
-            <span class="section-subtitle">Track Familiars, Beast Master Companions, Find Steed, Steel Defenders, Summons, and Wild Shapes</span>
+            <span class="section-subtitle">Track Familiars, Beast Master Companions, Mounts, Summons, and Wild Shapes</span>
           </div>
           <button type="button" class="btn btn-add-trait" id="addCompanionBtn">+ Add Creature</button>
         </div>
-        <div id="companionsList" class="traits-grid-container">
-          <!-- Dynamically rendered creature statblock cards -->
-        </div>
+        <div id="companionsList" class="traits-grid-container"></div>
       </div>
 
       <!-- =============================================================== -->
@@ -1220,18 +1155,18 @@
 
         <div id="sub-notes" class="subtab-page active">
           <h2 class="section-title">Campaign Log &amp; Session Notes</h2>
-          <textarea id="campaignNotes" class="save-field block-text journal-box" rows="18" placeholder="Quests, session notes, locations, clues, session dates..."></textarea>
+          <textarea id="campaignNotes" class="save-field block-text journal-box" rows="18" placeholder="Session notes, clues, locations..."></textarea>
         </div>
 
         <div id="sub-quests" class="subtab-page">
           <div class="two-col-layout">
             <div>
               <h2 class="section-title">Active Quests &amp; Objectives</h2>
-              <textarea id="activeQuestsNotes" class="save-field block-text journal-box" rows="14" placeholder="Main quests, bounties, personal goals, unresolved mysteries..."></textarea>
+              <textarea id="activeQuestsNotes" class="save-field block-text journal-box" rows="14" placeholder="Main quests, bounties, personal goals..."></textarea>
             </div>
             <div>
               <h2 class="section-title">Completed Quests &amp; Rumors</h2>
-              <textarea id="completedQuestsNotes" class="save-field block-text journal-box" rows="14" placeholder="Resolved quests, tavern rumors, world lore..."></textarea>
+              <textarea id="completedQuestsNotes" class="save-field block-text journal-box" rows="14" placeholder="Resolved quests, world lore..."></textarea>
             </div>
           </div>
         </div>
@@ -1255,23 +1190,23 @@
           </div>
 
           <h2 class="section-title">Character Appearance &amp; Backstory</h2>
-          <textarea id="backstory" class="save-field block-text journal-box" rows="10" placeholder="Origin, physical description, age, height, weight, key life events..."></textarea>
+          <textarea id="backstory" class="save-field block-text journal-box" rows="10" placeholder="Origin, physical description, key life events..."></textarea>
         </div>
 
         <div id="sub-npcs" class="subtab-page">
           <h2 class="section-title">NPCs, Factions &amp; Contacts</h2>
-          <textarea id="npcList" class="save-field block-text journal-box" rows="18" placeholder="Names, affiliations, attitudes, locations, debts, secrets..."></textarea>
+          <textarea id="npcList" class="save-field block-text journal-box" rows="18" placeholder="Names, affiliations, attitudes, locations..."></textarea>
         </div>
       </div>
 
     </div><!-- /.codex-tabs-viewport -->
 
     <!-- ================================================================= -->
-    <!-- DOCKED ARCANE DICE STATION (ORDERED HIGHEST TO LOWEST)            -->
+    <!-- FLOATING STUDIO DICE DOCK (ORDERED HIGHEST TO LOWEST)             -->
     <!-- ================================================================= -->
     <section class="dice-station-bar" id="diceStationBar">
       <div class="dice-station-left">
-        <div class="dice-mode-group" title="Toggle Advantage or Disadvantage for d20 rolls">
+        <div class="dice-mode-group" title="Toggle Advantage or Disadvantage">
           <button type="button" class="dice-mode-btn" data-mode="adv">ADV</button>
           <button type="button" class="dice-mode-btn active" data-mode="norm">NORM</button>
           <button type="button" class="dice-mode-btn" data-mode="dis">DIS</button>
@@ -1287,9 +1222,8 @@
           <button class="btn dice-btn" data-sides="4" type="button">d4</button>
         </div>
 
-        <!-- Custom Formula Roller (e.g. 2d6+4 or 8d6) -->
         <div class="custom-formula-box">
-          <input type="text" id="customDiceFormulaInput" class="formula-input" placeholder="e.g. 2d6+4" autocomplete="off" />
+          <input type="text" id="customDiceFormulaInput" class="formula-input" placeholder="2d6+4" autocomplete="off" />
           <button type="button" class="btn btn-primary btn-xs" id="rollFormulaBtn">Roll</button>
         </div>
       </div>
@@ -1302,7 +1236,7 @@
       <div class="dice-history-drawer">
         <div class="dice-history-header">
           <span class="dice-history-title">Roll Log</span>
-          <button type="button" id="clearDiceHistoryBtn" class="clear-log-btn" title="Clear roll history">Clear</button>
+          <button type="button" id="clearDiceHistoryBtn" class="clear-log-btn">Clear</button>
         </div>
         <div class="dice-history-list" id="diceHistoryList">
           <span class="dice-history-empty">No rolls logged yet.</span>
@@ -1316,7 +1250,7 @@
     <footer class="sheet-footer">
       <hr class="footer-divider" />
       <div class="footer-meta">
-        <div class="footer-title">5e Character Sheet — Adventurer Codex Sovereign VTT</div>
+        <div class="footer-title">Adventurer Codex — 5e Studio</div>
         <ol class="footer-links">
           <li><button type="button" id="helpLinkBtn" class="footer-link-action">Help &amp; Shortcuts</button></li>
           <li>Created by Melin08</li>
@@ -1325,19 +1259,19 @@
       </div>
       <div class="bottom-quicknav">
         <a href="#top">Top</a>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-stats" data-scroll="attr">Attributes</button>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-stats" data-scroll="skills">Skills</button>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-traits" data-scroll="traits">Abilities</button>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-spells" data-scroll="spells">Spells</button>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-inventory">Inventory</button>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-companions">Companions</button>
-        <span>|</span>
+        <span>&middot;</span>
         <button class="footer-nav-btn" data-tab="tab-journal" data-scroll="journal">Notes</button>
       </div>
     </footer>
@@ -1366,30 +1300,22 @@
         <button id="closeImportHubModal" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
       </div>
       <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; max-height: 80vh;">
-        
         <div class="subtab-controls" style="margin-bottom: 0;">
           <button type="button" class="sub-tab active" data-sub="import-platform-parchment">PC on Parchment</button>
           <button type="button" class="sub-tab" data-sub="import-platform-dndbeyond">D&amp;D Beyond</button>
           <button type="button" class="sub-tab" data-sub="import-platform-roll20">Roll20 / Other</button>
         </div>
 
-        <!-- TAB 1: PC on Parchment -->
         <div id="import-platform-parchment" class="subtab-page active">
           <details class="import-guide-accordion" open style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 0.85rem 1.15rem; margin-bottom: 1rem;">
             <summary style="font-weight: 800; font-size: 0.88rem; color: var(--accent-gold); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none;">
-              In-Depth Guide: How to retrieve character JSON from PC on Parchment
+              How to retrieve character JSON from PC on Parchment
             </summary>
             <ol style="margin-top: 0.85rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; display: flex; flex-direction: column; gap: 0.45rem;">
-              <li>Open your web browser and navigate to <a href="https://pconparchment.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary-red); font-weight: 700;">pconparchment.com</a>.</li>
-              <li>Log in and open the specific character sheet you want to export into Adventurer Codex.</li>
-              <li>Open your browser's Developer Tools by pressing <kbd>F12</kbd> (or right-click anywhere on the webpage and select <strong>Inspect</strong>).</li>
-              <li>In the DevTools top toolbar, switch to the <strong>Network</strong> tab and click <strong>Fetch/XHR</strong>.</li>
-              <li>Refresh your browser page (<kbd>F5</kbd> or <kbd>Ctrl+R</kbd> / <kbd>Cmd+R</kbd>).</li>
-              <li>Click on the request named <strong>characters</strong> or beginning with <code>rest/v1/characters</code>, select the <strong>Response</strong> tab, and copy all of it.</li>
+              <li>Open <a href="https://pconparchment.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary-red); font-weight: 700;">pconparchment.com</a> and open your character sheet.</li>
+              <li>Press <kbd>F12</kbd> to open Developer Tools, switch to the <strong>Network</strong> tab, and click <strong>Fetch/XHR</strong>.</li>
+              <li>Refresh (<kbd>F5</kbd>), click the <strong>characters</strong> request, open the <strong>Response</strong> tab, and copy all of it.</li>
             </ol>
-            <p class="import-help-note" style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-subtle); font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
-              Stuck or need help? Contact me on Discord (lmp2620).
-            </p>
           </details>
 
           <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
@@ -1400,32 +1326,21 @@
           </div>
 
           <textarea id="parchmentJsonInput" class="block-text" rows="8" placeholder="Paste the PC on Parchment JSON here..." style="font-family: monospace; font-size: 0.8rem; margin-bottom: 1rem !important;"></textarea>
-          
           <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
             <button type="button" class="btn btn-ghost" id="cancelImportHubBtn">Cancel</button>
             <button type="button" class="btn red" id="parseParchmentBtn">Convert &amp; Import</button>
           </div>
         </div>
 
-        <!-- TAB 2: D&D Beyond -->
         <div id="import-platform-dndbeyond" class="subtab-page">
           <details class="import-guide-accordion" open style="background: var(--bg-input); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 0.85rem 1.15rem; margin-bottom: 1rem;">
             <summary style="font-weight: 800; font-size: 0.88rem; color: var(--accent-gold); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none;">
-              In-Depth Guide: How to retrieve character JSON from D&amp;D Beyond
+              How to retrieve character JSON from D&amp;D Beyond
             </summary>
-            <div style="margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem;">
-              <div>
-                <strong style="color: #ffffff; font-size: 0.85rem;">Direct API URL</strong>
-                <ol style="margin-top: 0.35rem; padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65;">
-                  <li>Set your D&amp;D Beyond character privacy to <strong>Public</strong> and copy your numeric Character ID from the URL.</li>
-                  <li>Open: <code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px;">https://character-service.dndbeyond.com/character/v5/character/YOUR_ID_HERE</code></li>
-                  <li>Copy all the raw JSON text and paste it below.</li>
-                </ol>
-              </div>
+            <div style="margin-top: 0.85rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.65;">
+              Set your D&amp;D Beyond character privacy to <strong>Public</strong>, copy your numeric Character ID from the URL, and open:<br />
+              <code style="color: var(--accent-blue); background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px;">https://character-service.dndbeyond.com/character/v5/character/YOUR_ID_HERE</code>
             </div>
-            <p class="import-help-note" style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-subtle); font-size: 0.78rem; color: var(--accent-blue); font-weight: 700;">
-              Stuck or need help? Contact me on Discord (lmp2620).
-            </p>
           </details>
 
           <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
@@ -1436,32 +1351,24 @@
           </div>
 
           <textarea id="dndbeyondJsonInput" class="block-text" rows="8" placeholder="Paste the D&amp;D Beyond character JSON here..." style="font-family: monospace; font-size: 0.8rem; margin-bottom: 1rem !important;"></textarea>
-          
           <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
             <button type="button" class="btn btn-ghost" id="cancelDnDBeyondBtn">Cancel</button>
             <button type="button" class="btn red" id="parseDnDBeyondBtn">Convert &amp; Import</button>
           </div>
         </div>
 
-        <!-- TAB 3: Roll20 / Other -->
         <div id="import-platform-roll20" class="subtab-page">
           <div style="background: var(--bg-input); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 2rem 1.5rem; text-align: center; color: var(--text-muted);">
             <h4 style="color: #ffffff; font-size: 1.05rem; margin-bottom: 0.4rem;">Roll20 &amp; Generic 5e JSON Importer</h4>
-            <p style="font-size: 0.84rem; max-width: 440px; margin: 0 auto 1rem auto; line-height: 1.55;">
-              Paste any Roll20 or 5e character export JSON below and our smart mapper will extract ability scores, HP, level, and equipment.
-            </p>
-            <textarea id="roll20JsonInput" class="block-text" rows="6" placeholder="Paste Roll20 or generic 5e JSON here..." style="font-family: monospace; font-size: 0.8rem; margin-bottom: 1rem !important;"></textarea>
+            <textarea id="roll20JsonInput" class="block-text" rows="6" placeholder="Paste Roll20 or generic 5e JSON here..." style="font-family: monospace; font-size: 0.8rem; margin: 1rem 0 !important;"></textarea>
             <button type="button" class="btn red" id="parseRoll20Btn">Smart Import JSON</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 
-  <!-- =================================================================== -->
-  <!-- PARTY & DM DASHBOARD MODAL                                          -->
-  <!-- =================================================================== -->
+  <!-- PARTY & DM DASHBOARD MODAL -->
   <div id="partyModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box party-modal-box">
       <div class="modal-header">
@@ -1470,13 +1377,11 @@
       </div>
 
       <div class="party-modal-content">
-        <!-- Quick Recent Rooms Strip (1-Click Rejoin) -->
         <div id="recentRoomsBar" class="recent-rooms-bar" style="display: none;">
           <span class="recent-rooms-label">Recent Rooms:</span>
           <div id="recentRoomsList" class="recent-rooms-chips"></div>
         </div>
 
-        <!-- Sub-tabs: Player Join vs DM View -->
         <div class="subtab-controls party-mode-tabs">
           <button type="button" class="sub-tab active" data-sub="party-join-view">Player: Party View</button>
           <button type="button" class="sub-tab" data-sub="party-dm-view">DM: Live Dashboard</button>
@@ -1546,7 +1451,7 @@
     </div>
   </div>
 
-  <!-- DM FULL CHARACTER INSPECTION MODAL (ROOM CREATOR ONLY) -->
+  <!-- DM FULL CHARACTER INSPECTION MODAL -->
   <div id="dmInspectModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box dm-inspect-box">
       <div class="modal-header">
@@ -1687,6 +1592,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
-  <script src="app.js?v=60"></script>
+  <script src="app.js?v=70"></script>
 </body>
 </html>
