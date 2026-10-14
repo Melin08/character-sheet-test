@@ -483,11 +483,10 @@ textarea::-webkit-scrollbar-thumb,
 .avatar-portal,
 .btn-rest-mini,
 .dm-player-card,
-.player-party-card,
 .econ-chip,
 .econ-reset-btn,
 .recent-room-chip,
-.dock-member-pill {
+.dock-member-pill.dm-clickable {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -509,7 +508,7 @@ textarea::-webkit-scrollbar-thumb,
 .avatar-portal:hover,
 .btn-rest-mini:hover,
 .recent-room-chip:hover,
-.dock-member-pill:hover {
+.dock-member-pill.dm-clickable:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
@@ -1229,7 +1228,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   4B. ON-SCREEN LIVE PARTY DOCK (ALWAYS VISIBLE WHEN CONNECTED)
+   4B. ON-SCREEN LIVE PARTY DOCK (PRIVACY-LOCKED PLAYER VITALS)
    ========================================================================== */
 .live-party-dock {
   background: var(--card-gradient, var(--bg-card));
@@ -1268,6 +1267,21 @@ textarea::-webkit-scrollbar-thumb,
   font-weight: 900;
   color: var(--accent-gold);
   letter-spacing: 0.08em;
+}
+.dock-role-badge {
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--accent-blue);
+}
+.dock-role-badge.is-dm {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
 }
 
 .live-party-roll-ticker {
@@ -1308,13 +1322,20 @@ textarea::-webkit-scrollbar-thumb,
   background: var(--bg-input);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
-  padding: 0.45rem 0.7rem;
-  min-width: 185px;
-  max-width: 225px;
+  padding: 0.48rem 0.75rem;
+  min-width: 195px;
+  max-width: 240px;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.32rem;
   flex-shrink: 0;
+  cursor: default;
+}
+.dock-member-pill.dm-clickable {
+  cursor: pointer;
+}
+.dock-member-pill.dm-clickable:hover {
+  border-color: var(--primary-red);
 }
 .dock-member-pill.unconscious {
   border-color: #ef4444;
@@ -1327,7 +1348,7 @@ textarea::-webkit-scrollbar-thumb,
   gap: 0.4rem;
 }
 .dock-member-name {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: #ffffff;
   white-space: nowrap;
@@ -1339,19 +1360,29 @@ textarea::-webkit-scrollbar-thumb,
   font-weight: 800;
   color: var(--accent-blue);
   background: rgba(56, 189, 248, 0.12);
-  padding: 0.08rem 0.35rem;
+  padding: 0.08rem 0.38rem;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 .dock-member-hp-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: #f87171;
 }
 .dock-member-conds {
-  font-size: 0.64rem;
-  color: var(--text-muted);
+  font-size: 0.65rem;
+  color: #fca5a5;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dock-member-conc {
+  font-size: 0.65rem;
+  color: #d8b4fe;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3370,7 +3401,7 @@ textarea.block-text {
 }
 
 /* ==========================================================================
-   15. PARTY REALM, RECENT ROOMS, DM DASHBOARD & INSPECTOR MODALS
+   15. PARTY & DM DASHBOARD, RECENT ROOMS & INSPECTOR MODALS
    ========================================================================== */
 .party-modal-box { max-width: 860px; width: 95%; }
 .party-modal-content {
@@ -3472,6 +3503,9 @@ textarea.block-text {
   flex-direction: column;
   gap: 0.6rem;
   box-shadow: var(--shadow-sm);
+}
+.player-party-card {
+  cursor: default;
 }
 .dm-player-card:hover { border-color: var(--primary-red); }
 .player-party-card.unconscious,
