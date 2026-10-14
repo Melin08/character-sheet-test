@@ -1,9 +1,39 @@
 /* ==========================================================================
-   1. THEME DEFINITIONS & COLOR PALETTES (12 TOTAL THEMES)
+   1. THEME DEFINITIONS & COLOR PALETTES (SOVEREIGN VTT + 11 CLASSIC THEMES)
    ========================================================================== */
 
-/* Theme 1: Obsidian Dark (Default) - Volcanic Crystalline Glass */
-:root, body.theme-obsidian {
+/* NEW DEFAULT: Sovereign VTT (Ground-Up Redesigned UI) */
+:root, body.theme-nexus {
+  color-scheme: dark;
+  --bg-deep: #06080f;
+  --bg-surface: #0b0f1a;
+  --bg-card: #111728;
+  --bg-input: #070a12;
+  --bg-hover: #19223a;
+  --card-gradient: linear-gradient(160deg, rgba(22, 30, 52, 0.92) 0%, rgba(12, 16, 29, 0.96) 100%);
+
+  --border-subtle: rgba(148, 163, 184, 0.12);
+  --border-medium: rgba(148, 163, 184, 0.22);
+  --border-active: #d4af37;
+
+  --primary-red: #e11d48;
+  --primary-red-hover: #be123c;
+  --accent-gold: #f59e0b;
+  --accent-blue: #38bdf8;
+  --accent-purple: #c084fc;
+  --accent-emerald: #10b981;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --glow-1: rgba(225, 29, 72, 0.14);
+  --glow-2: rgba(56, 189, 248, 0.14);
+  --theme-rim: rgba(245, 158, 11, 0.3);
+}
+
+/* Classic Theme 1: Obsidian Dark */
+body.theme-obsidian {
   color-scheme: dark;
   --bg-deep: #050811;
   --bg-surface: #0b1120;
@@ -32,7 +62,7 @@
   --theme-rim: rgba(56, 189, 248, 0.18);
 }
 
-/* Theme 2: Ancient Parchment - Worn Sepia Fibrous Manuscript */
+/* Classic Theme 2: Ancient Parchment */
 body.theme-parchment {
   color-scheme: dark;
   --bg-deep: #1c150e;
@@ -62,7 +92,7 @@ body.theme-parchment {
   --theme-rim: rgba(217, 119, 6, 0.22);
 }
 
-/* Theme 3: Eldritch Void - Abyssal Cosmic Nebula */
+/* Classic Theme 3: Eldritch Void */
 body.theme-eldritch {
   color-scheme: dark;
   --bg-deep: #05010b;
@@ -92,7 +122,7 @@ body.theme-eldritch {
   --theme-rim: rgba(168, 85, 247, 0.3);
 }
 
-/* Theme 4: Celestial Light - Gilded Divine Starlight */
+/* Classic Theme 4: Celestial Light */
 body.theme-celestial {
   color-scheme: dark;
   --bg-deep: #020b16;
@@ -122,7 +152,7 @@ body.theme-celestial {
   --theme-rim: rgba(251, 191, 36, 0.25);
 }
 
-/* Theme 5: Verdant Grove - Bioluminescent Deep Canopy */
+/* Classic Theme 5: Verdant Grove */
 body.theme-emerald {
   color-scheme: dark;
   --bg-deep: #020c07;
@@ -152,7 +182,7 @@ body.theme-emerald {
   --theme-rim: rgba(16, 185, 129, 0.25);
 }
 
-/* Theme 6: Aethertech Clockwork - Polished Brass & Cyan Conduit */
+/* Classic Theme 6: Aethertech Clockwork */
 body.theme-aethertech {
   color-scheme: dark;
   --bg-deep: #060a12;
@@ -182,7 +212,7 @@ body.theme-aethertech {
   --theme-rim: rgba(0, 240, 255, 0.35);
 }
 
-/* Theme 7: Crimson Rite / Blood Moon - Gothic Ash & Arterial Crimson */
+/* Classic Theme 7: Crimson Rite */
 body.theme-bloodmoon {
   color-scheme: dark;
   --bg-deep: #090204;
@@ -212,7 +242,7 @@ body.theme-bloodmoon {
   --theme-rim: rgba(225, 29, 72, 0.35);
 }
 
-/* Theme 8: Glacial Frost - Frosted Arctic Glass & Aurora */
+/* Classic Theme 8: Glacial Frost */
 body.theme-glacial {
   color-scheme: dark;
   --bg-deep: #020812;
@@ -242,7 +272,7 @@ body.theme-glacial {
   --theme-rim: rgba(125, 211, 252, 0.35);
 }
 
-/* Theme 9: Bioluminescent Underdark - Cavern Abyss & Toxic Spore */
+/* Classic Theme 9: Bioluminescent Underdark */
 body.theme-underdark {
   color-scheme: dark;
   --bg-deep: #020409;
@@ -272,7 +302,7 @@ body.theme-underdark {
   --theme-rim: rgba(0, 255, 136, 0.35);
 }
 
-/* Theme 10: Solaris / Radiant Dawn - Alabaster Ivory & Sunburst Gold */
+/* Classic Theme 10: Radiant Dawn */
 body.theme-solaris {
   color-scheme: dark;
   --bg-deep: #140f07;
@@ -302,7 +332,7 @@ body.theme-solaris {
   --theme-rim: rgba(245, 158, 11, 0.35);
 }
 
-/* Theme 11: Cartographer’s Sketchbook - Sepia Draft & Umber Ink */
+/* Classic Theme 11: Cartographer’s Sketchbook */
 body.theme-cartographer {
   color-scheme: dark;
   --bg-deep: #17120c;
@@ -332,37 +362,6 @@ body.theme-cartographer {
   --theme-rim: rgba(194, 65, 12, 0.3);
 }
 
-/* Theme 12: Codex Nexus (Restructured Tactical Split-Screen UI) */
-body.theme-nexus {
-  color-scheme: dark;
-  --bg-deep: #040710;
-  --bg-surface: #090e1c;
-  --bg-card: #10182d;
-  --bg-input: #060a15;
-  --bg-hover: #172342;
-  --card-gradient: linear-gradient(155deg, #131e38 0%, #0b1122 100%);
-
-  --border-subtle: #1c2946;
-  --border-medium: #2b3f6c;
-  --border-active: #6366f1;
-
-  --primary-red: #6366f1;
-  --primary-red-hover: #4f46e5;
-  --accent-gold: #f59e0b;
-  --accent-blue: #38bdf8;
-  --accent-purple: #c084fc;
-  --accent-emerald: #10b981;
-
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
-
-  --glow-1: rgba(99, 102, 241, 0.16);
-  --glow-2: rgba(56, 189, 248, 0.14);
-  --theme-rim: rgba(99, 102, 241, 0.35);
-}
-
-/* Common sizing & shadow constants */
 :root {
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -382,7 +381,7 @@ body.theme-nexus {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
@@ -442,7 +441,6 @@ select.hd-size-select {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, filter 0.28s ease, opacity 0.28s ease !important;
 }
 
-/* Fix all native dropdown option menus so they are never white-on-white */
 select,
 select option,
 select optgroup,
@@ -480,7 +478,8 @@ textarea::-webkit-scrollbar,
 .player-party-cards-grid::-webkit-scrollbar,
 .structured-inv-list::-webkit-scrollbar,
 .live-party-dock-strip::-webkit-scrollbar,
-.tab-page::-webkit-scrollbar {
+.tab-page::-webkit-scrollbar,
+.horizontal-skills-section::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
@@ -493,7 +492,8 @@ textarea::-webkit-scrollbar-thumb,
 .player-party-cards-grid::-webkit-scrollbar-thumb,
 .structured-inv-list::-webkit-scrollbar-thumb,
 .live-party-dock-strip::-webkit-scrollbar-thumb,
-.tab-page::-webkit-scrollbar-thumb {
+.tab-page::-webkit-scrollbar-thumb,
+.horizontal-skills-section::-webkit-scrollbar-thumb {
   background: var(--border-medium);
   border-radius: 999px;
 }
@@ -519,7 +519,8 @@ textarea::-webkit-scrollbar-thumb,
 .econ-chip,
 .econ-reset-btn,
 .recent-room-chip,
-.dock-member-pill.dm-clickable {
+.dock-member-pill.dm-clickable,
+.wpn-roll-btn {
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               background-color 0.14s ease,
@@ -541,7 +542,8 @@ textarea::-webkit-scrollbar-thumb,
 .avatar-portal:hover,
 .btn-rest-mini:hover,
 .recent-room-chip:hover,
-.dock-member-pill.dm-clickable:hover {
+.dock-member-pill.dm-clickable:hover,
+.wpn-roll-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
@@ -557,7 +559,8 @@ textarea::-webkit-scrollbar-thumb,
 .btn-outline:active,
 .file-label:active,
 .avatar-portal:active,
-.btn-rest-mini:active {
+.btn-rest-mini:active,
+.wpn-roll-btn:active {
   transform: translateY(1px) scale(0.97) !important;
 }
 
@@ -596,11 +599,10 @@ textarea::-webkit-scrollbar-thumb,
   backdrop-filter: blur(16px);
   position: relative;
   z-index: 1;
-  transition: max-width 0.35s ease, padding 0.35s ease, background-color 0.35s ease, border-color 0.35s ease;
 }
 
 /* ==========================================================================
-   3. TOP COMMAND BAR (LEFT THEME SELECTOR UNDER PARTY & TOP-RIGHT QUICK ACTION)
+   3. TOP COMMAND BAR
    ========================================================================== */
 .top-command-bar {
   display: flex;
@@ -664,7 +666,6 @@ textarea::-webkit-scrollbar-thumb,
   margin-left: auto;
 }
 
-/* Global Concentration Pill */
 .concentration-global-pill {
   display: inline-flex;
   align-items: center;
@@ -708,7 +709,6 @@ textarea::-webkit-scrollbar-thumb,
 }
 .conc-clear-btn:hover { color: #ffffff; }
 
-/* Middle Row: Toolbar Actions */
 .command-actions {
   display: flex;
   align-items: center;
@@ -718,7 +718,6 @@ textarea::-webkit-scrollbar-thumb,
   width: 100%;
 }
 
-/* Bottom Row: Left-aligned directly under Party button */
 .command-sub-row {
   display: flex;
   align-items: center;
@@ -888,7 +887,6 @@ textarea::-webkit-scrollbar-thumb,
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: visible;
-  transition: all 0.3s ease;
 }
 .hero-codex-card::before {
   content: "";
@@ -1091,7 +1089,6 @@ textarea::-webkit-scrollbar-thumb,
   color: var(--text-dim);
 }
 
-/* Live Hero Health Bar Strip */
 .hero-health-bar-strip {
   margin-top: 1rem;
   height: 7px;
@@ -1261,7 +1258,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   4B. ON-SCREEN LIVE PARTY DOCK (PRIVACY-LOCKED PLAYER VITALS)
+   4B. ON-SCREEN LIVE PARTY DOCK
    ========================================================================== */
 .live-party-dock {
   background: var(--card-gradient, var(--bg-card));
@@ -1438,13 +1435,17 @@ textarea::-webkit-scrollbar-thumb,
   border: 1px solid var(--border-medium);
   border-bottom: none;
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  padding: 0.7rem 1.25rem;
-  font-size: 0.88rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.86rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   white-space: nowrap;
+}
+.nav-tab-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
 }
 .main-tab:hover {
   color: var(--text-main);
@@ -1454,6 +1455,9 @@ textarea::-webkit-scrollbar-thumb,
   background: var(--primary-red);
   color: #ffffff;
   border-color: var(--primary-red);
+}
+.main-tab.active .nav-tab-icon {
+  opacity: 1;
 }
 .tab-counter-pill {
   font-size: 0.68rem;
@@ -1623,7 +1627,6 @@ textarea::-webkit-scrollbar-thumb,
   line-height: 44px;
 }
 
-/* Quick HP Steppers + Calculator Corner Controls */
 .hp-corner-controls {
   position: absolute;
   top: 0.75rem;
@@ -1770,7 +1773,6 @@ textarea::-webkit-scrollbar-thumb,
   cursor: pointer;
 }
 
-/* Action Economy Chips */
 .action-economy-strip {
   display: flex;
   align-items: center;
@@ -2077,7 +2079,7 @@ textarea::-webkit-scrollbar-thumb,
   font-size: 0.8rem !important;
 }
 
-/* Weapons Table */
+/* Weapons Table with 1-Click Roll Buttons */
 .attacks-table-wrapper {
   width: 100%;
   max-width: 100%;
@@ -2092,7 +2094,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .attack-headers {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 2.2fr) 30px;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 0.95fr) minmax(0, 1.1fr) minmax(0, 2fr) 30px;
   gap: 0.5rem;
   font-weight: 800;
   font-size: 0.7rem;
@@ -2108,7 +2110,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .weapon-row-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 2.2fr) 30px;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 0.95fr) minmax(0, 1.1fr) minmax(0, 2fr) 30px;
   gap: 0.5rem;
   align-items: center;
   background: var(--card-gradient, var(--bg-card));
@@ -2123,6 +2125,32 @@ textarea::-webkit-scrollbar-thumb,
 .weapon-row-card input {
   min-width: 0 !important;
   width: 100% !important;
+}
+.wpn-cell-with-roll {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.wpn-roll-btn {
+  width: 26px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+.wpn-roll-btn:hover {
+  background: var(--primary-red);
+  border-color: var(--primary-red);
+  color: #ffffff;
 }
 .wpn-name-input {
   font-weight: 700 !important;
@@ -2308,7 +2336,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ==========================================================================
-   8. HORIZONTAL SKILLS ATTRIBUTE MATRIX (PERMANENT FIXED-COLOR COLUMNS)
+   8. SKILLS ATTRIBUTE MATRIX (WITH QUICK SEARCH & FILTER)
    ========================================================================== */
 .horizontal-skills-section {
   margin-top: 2.25rem;
@@ -2318,11 +2346,21 @@ textarea::-webkit-scrollbar-thumb,
 .skills-legend {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.65rem;
   font-size: 0.74rem;
   font-weight: 700;
   color: var(--text-muted);
   flex-wrap: wrap;
+}
+.skill-quick-search {
+  width: 145px;
+  padding: 0.28rem 0.6rem !important;
+  font-size: 0.75rem !important;
+}
+#filterProficientSkillsBtn.active {
+  background: var(--primary-red) !important;
+  border-color: var(--primary-red) !important;
+  color: #ffffff !important;
 }
 .legend-item {
   display: inline-flex;
@@ -2436,7 +2474,6 @@ textarea::-webkit-scrollbar-thumb,
   transition: all var(--transition-fast);
 }
 
-/* Locked Proficiency and Expertise Bubble Colors */
 .prof-cb:checked + .bubble {
   background-color: #ef4444 !important;
   border-color: #ef4444 !important;
@@ -2965,7 +3002,6 @@ textarea::-webkit-scrollbar-thumb,
   font-weight: 800;
 }
 
-/* Attunement & Encumbrance Row */
 .attunement-encumbrance-grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -3036,7 +3072,6 @@ textarea::-webkit-scrollbar-thumb,
   font-weight: 600;
 }
 
-/* Structured Inventory List */
 .structured-inv-list {
   display: flex;
   flex-direction: column;
@@ -3239,7 +3274,7 @@ textarea.block-text {
 .dice-history-empty { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
 
 /* ==========================================================================
-   13. FOOTER
+   13. FOOTER & MODALS
    ========================================================================== */
 .sheet-footer { margin-top: 3rem; }
 .footer-divider { border: none; border-top: 1px solid var(--border-medium); margin-bottom: 1.25rem; }
@@ -3289,9 +3324,6 @@ textarea.block-text {
   cursor: pointer;
 }
 
-/* ==========================================================================
-   14. MODALS, COMMAND PALETTE & COMPENDIUM BROWSERS
-   ========================================================================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -3413,7 +3445,6 @@ textarea.block-text {
 .tag-cantrip { background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: var(--accent-blue); }
 .tag-level { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: var(--accent-gold); }
 
-/* Schools & Classes */
 .school-abjuration { background: rgba(56, 189, 248, 0.12); color: #38bdf8; }
 .school-conjuration { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
 .school-divination { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
@@ -3450,9 +3481,7 @@ textarea.block-text {
   font-size: 0.88rem;
 }
 
-/* ==========================================================================
-   15. PARTY & DM DASHBOARD, RECENT ROOMS & INSPECTOR MODALS
-   ========================================================================== */
+/* Party & DM Modals */
 .party-modal-box { max-width: 860px; width: 95%; }
 .party-modal-content {
   padding: 1.35rem;
@@ -3461,7 +3490,6 @@ textarea.block-text {
   gap: 1rem;
   overflow-y: auto;
 }
-
 .recent-rooms-bar {
   display: flex;
   align-items: center;
@@ -3472,17 +3500,8 @@ textarea.block-text {
   padding: 0.45rem 0.75rem;
   flex-wrap: wrap;
 }
-.recent-rooms-label {
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--text-dim);
-}
-.recent-rooms-chips {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
+.recent-rooms-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-dim); }
+.recent-rooms-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .recent-room-chip {
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
@@ -3492,22 +3511,9 @@ textarea.block-text {
   font-weight: 800;
   color: var(--accent-gold);
 }
-.recent-room-chip:hover {
-  border-color: var(--accent-gold);
-  background: var(--bg-hover);
-}
-
-.party-modal-desc {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
-}
-.party-action-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
+.recent-room-chip:hover { border-color: var(--accent-gold); background: var(--bg-hover); }
+.party-modal-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.party-action-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .party-room-input {
   flex: 1;
   min-width: 170px;
@@ -3534,8 +3540,7 @@ textarea.block-text {
 .status-dot.disconnected { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
 .status-dot.connected { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
-.player-party-cards-grid,
-.dm-party-cards-grid {
+.player-party-cards-grid, .dm-party-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
   gap: 0.85rem;
@@ -3543,8 +3548,7 @@ textarea.block-text {
   overflow-y: auto;
   padding: 0.25rem;
 }
-.player-party-card,
-.dm-player-card {
+.player-party-card, .dm-player-card {
   background: var(--card-gradient, var(--bg-card));
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
@@ -3554,17 +3558,12 @@ textarea.block-text {
   gap: 0.6rem;
   box-shadow: var(--shadow-sm);
 }
-.player-party-card {
-  cursor: default;
-}
+.player-party-card { cursor: default; }
 .dm-player-card:hover { border-color: var(--primary-red); }
-.player-party-card.unconscious,
-.dm-player-card.unconscious {
+.player-party-card.unconscious, .dm-player-card.unconscious {
   border-color: #ef4444;
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
 }
-
-/* DM Quick HP & Inspiration Controls on Player Cards */
 .dm-quick-actions {
   display: flex;
   align-items: center;
@@ -3613,7 +3612,6 @@ textarea.block-text {
 .dm-party-heading { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: #ffffff; }
 .dm-member-counter { font-size: 0.75rem; font-weight: 700; color: var(--accent-emerald); }
 .dm-empty-msg { grid-column: 1 / -1; text-align: center; color: var(--text-dim); font-style: italic; padding: 1.75rem 0; }
-
 .dm-card-header { display: flex; align-items: center; gap: 0.65rem; }
 .dm-player-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-medium); }
 .dm-avatar-placeholder {
@@ -3657,7 +3655,6 @@ textarea.block-text {
   padding: 0.1rem 0.35rem;
 }
 
-/* DM Inspector Modal */
 .dm-inspect-box { max-width: 920px; width: 95%; max-height: 90vh; }
 .inspect-header-actions { display: flex; align-items: center; gap: 0.75rem; }
 .inspect-modal-content { padding: 1.4rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.15rem; }
@@ -3737,7 +3734,6 @@ textarea.block-text {
 .inspect-mini-tag { font-size: 0.64rem; font-weight: 800; color: var(--accent-emerald); text-transform: uppercase; }
 .inspect-mini-desc { font-size: 0.75rem; color: var(--text-muted); max-height: 90px; overflow-y: auto; }
 
-/* HP Modal, Roster Modal & Auth Modal */
 .hp-modal-box, .auth-modal-box { max-width: 430px; }
 .hp-modal-content, .auth-modal-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
 .hp-modal-input-wrap { display: flex; flex-direction: column; gap: 0.35rem; }
@@ -3788,7 +3784,6 @@ textarea.block-text {
 .auth-sync-status { text-align: center; font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700; margin-bottom: 1.25rem; }
 .auth-error-msg { color: #f87171; font-size: 0.82rem; text-align: center; min-height: 1.2rem; }
 
-/* Dropdown Menus */
 .dropdown-pill-wrapper { position: relative; }
 .dropdown-menu {
   display: none;
@@ -3838,151 +3833,305 @@ kbd {
 }
 
 /* ==========================================================================
-   16. RESTRUCTURED UI THEME ("CODEX NEXUS" — SPLIT-SCREEN COMMAND HUD)
+   16. GROUND-UP REDESIGN: "SOVEREIGN VTT" (body.theme-nexus)
    ========================================================================== */
-@media (min-width: 1180px) {
+@media (min-width: 1120px) {
   body.theme-nexus {
-    padding: 1rem 1.25rem;
+    padding: 0 !important;
+    background-color: #05070e;
+    background-image:
+      radial-gradient(circle at 18% 0%, rgba(225, 29, 72, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(56, 189, 248, 0.12) 0%, transparent 45%),
+      linear-gradient(180deg, #070a14 0%, #04060c 100%);
   }
 
+  /* Full-Screen OS App Shell Grid: Left Rail + Main Viewport */
   body.theme-nexus .sheet-container {
-    max-width: 1680px;
-    padding: 1.35rem 1.75rem;
-  }
-
-  /* Compact Hero Banner in Nexus Mode */
-  body.theme-nexus .hero-codex-card {
-    padding: 1rem 1.35rem;
-    margin-bottom: 1rem;
-  }
-  body.theme-nexus .hero-name-input {
-    font-size: 1.75rem;
-  }
-  body.theme-nexus .avatar-portal {
-    width: 64px;
-    height: 64px;
-  }
-
-  /* Sticky Navigation Pill Bar */
-  body.theme-nexus .codex-navigation-dock {
-    position: sticky;
-    top: 8px;
-    z-index: 800;
-    background: rgba(9, 14, 28, 0.92);
-    backdrop-filter: blur(14px);
-    padding: 0.4rem 0.5rem;
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-md);
-    margin-bottom: 1.25rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  }
-  body.theme-nexus .main-tab {
-    border-radius: var(--radius-sm);
-    border: 1px solid transparent;
-    padding: 0.5rem 1.1rem;
-  }
-
-  /* When on Combat & Core Tab: 3-Column Zero-Scroll Tactical Grid */
-  body.theme-nexus #tab-stats.active {
+    max-width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+    padding: 1rem 1.5rem 5.5rem 1.5rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     display: grid;
-    grid-template-columns: 340px minmax(0, 1.3fr) 360px;
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto;
     grid-template-areas:
-      "vitals vitals vitals"
-      "rest rest rest"
-      "combat combat skills";
-    gap: 1.25rem;
+      "nav topbar"
+      "nav hero"
+      "nav partydock"
+      "nav viewport"
+      "nav footer";
+    column-gap: 1.5rem;
+    row-gap: 1rem;
     align-items: start;
   }
+
+  /* 1. Left Vertical Icon Navigation Rail */
+  body.theme-nexus .codex-navigation-dock {
+    grid-area: nav;
+    position: sticky;
+    top: 1rem;
+    height: calc(100vh - 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    background: linear-gradient(180deg, rgba(15, 21, 38, 0.95) 0%, rgba(9, 13, 24, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 1.15rem 0.75rem;
+    margin-bottom: 0;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    overflow: hidden;
+  }
+
+  body.theme-nexus .codex-navigation-dock::before {
+    content: "NAVIGATION";
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+    padding: 0 0.65rem 0.5rem 0.65rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 0.35rem;
+  }
+
+  body.theme-nexus .main-tab {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #94a3b8;
+    position: relative;
+  }
+
+  body.theme-nexus .main-tab:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    transform: translateX(3px);
+  }
+
+  body.theme-nexus .main-tab.active {
+    background: linear-gradient(90deg, rgba(225, 29, 72, 0.22) 0%, rgba(225, 29, 72, 0.04) 100%);
+    border-color: rgba(225, 29, 72, 0.45);
+    color: #ffffff;
+    box-shadow: inset 3px 0 0 #e11d48, 0 6px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  body.theme-nexus .main-tab.active .nav-tab-icon {
+    color: #fb7185;
+  }
+
+  body.theme-nexus .tab-counter-pill {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* 2. Sleek Top Command Bar */
+  body.theme-nexus .top-command-bar {
+    grid-area: topbar;
+    background: rgba(15, 21, 38, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 0;
+    backdrop-filter: blur(16px);
+  }
+
+  /* 3. Redesigned Hero Telemetry Banner */
+  body.theme-nexus .hero-codex-card {
+    grid-area: hero;
+    margin-bottom: 0;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(20, 28, 50, 0.92) 0%, rgba(11, 16, 30, 0.96) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    padding: 1.1rem 1.4rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+  body.theme-nexus .hero-codex-card::before {
+    background: linear-gradient(90deg, transparent 0%, #f59e0b 50%, transparent 100%);
+  }
+  body.theme-nexus .avatar-portal {
+    border-radius: 16px;
+    width: 74px;
+    height: 74px;
+    border: 2px solid rgba(245, 158, 11, 0.5);
+  }
+  body.theme-nexus .char-avatar-img,
+  body.theme-nexus .avatar-pulse-ring {
+    border-radius: 14px;
+  }
+  body.theme-nexus .hero-name-input {
+    font-size: 1.85rem;
+  }
+  body.theme-nexus .hero-health-bar-strip {
+    height: 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  body.theme-nexus .live-party-dock {
+    grid-area: partydock;
+    margin-bottom: 0;
+    border-radius: 16px;
+  }
+
+  body.theme-nexus .codex-tabs-viewport {
+    grid-area: viewport;
+    min-width: 0;
+  }
+
+  body.theme-nexus .sheet-footer {
+    grid-area: footer;
+    margin-top: 1.5rem;
+  }
+
+  /* 4. 3-Zone Bento Combat Dashboard (#tab-stats) */
+  body.theme-nexus #tab-stats.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) 390px;
+    grid-template-areas:
+      "vitals skills"
+      "rest skills"
+      "arena skills";
+    gap: 1.15rem;
+    align-items: start;
+  }
+
   body.theme-nexus #tab-stats.active > .vitals-hud {
     grid-area: vitals;
     margin-bottom: 0;
+    gap: 0.85rem;
   }
+
   body.theme-nexus #tab-stats.active > .compact-rest-bar {
     grid-area: rest;
     margin-bottom: 0;
+    border-radius: 14px;
+    background: rgba(17, 23, 40, 0.9);
   }
+
   body.theme-nexus #tab-stats.active > .two-col-layout {
-    grid-area: combat;
-    grid-template-columns: 330px minmax(0, 1fr);
-    gap: 1.25rem;
+    grid-area: arena;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 1.15rem;
     margin-top: 0;
   }
+
+  /* 5. Redesigned 2×3 Ability Medallion Grid */
+  body.theme-nexus .attributes-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  body.theme-nexus .attr-pod {
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.65rem;
+    border-radius: 14px;
+    border-left-width: 1px !important;
+    border-top-width: 3px !important;
+    background: linear-gradient(165deg, rgba(22, 31, 56, 0.95) 0%, rgba(11, 15, 28, 0.98) 100%);
+    gap: 0.45rem;
+    position: relative;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+  }
+  body.theme-nexus .attr-pod:hover {
+    transform: translateY(-3px);
+  }
+  body.theme-nexus .attr-str { border-top-color: #ef4444 !important; }
+  body.theme-nexus .attr-dex { border-top-color: #10b981 !important; }
+  body.theme-nexus .attr-con { border-top-color: #f97316 !important; }
+  body.theme-nexus .attr-int { border-top-color: #3b82f6 !important; }
+  body.theme-nexus .attr-wis { border-top-color: #c084fc !important; }
+  body.theme-nexus .attr-cha { border-top-color: #eab308 !important; }
+
+  body.theme-nexus .attr-badge {
+    width: 100%;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  body.theme-nexus .attr-abbr {
+    font-size: 0.95rem;
+  }
+  body.theme-nexus .attr-full {
+    font-size: 0.58rem;
+    margin-top: 0;
+  }
+
+  body.theme-nexus .attr-mod-box {
+    width: 68px;
+    height: 50px;
+    border-radius: 12px;
+    font-size: 1.55rem;
+    order: 2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  body.theme-nexus .attr-score-box {
+    order: 3;
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+  }
+  body.theme-nexus .attr-input {
+    font-size: 0.84rem;
+    width: 32px;
+  }
+
+  body.theme-nexus .attr-save-box {
+    order: 4;
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* 6. Dedicated Right-Hand Skills Drawer */
   body.theme-nexus #tab-stats.active > .horizontal-skills-section {
     grid-area: skills;
     margin-top: 0;
-    padding-top: 0;
+    padding: 1.1rem;
     border-top: none;
-    background: var(--bg-card);
+    background: var(--card-gradient);
     border: 1px solid var(--border-medium);
-    border-radius: var(--radius-md);
-    padding: 0.9rem;
-    max-height: 760px;
+    border-radius: 18px;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 6.5rem);
     overflow-y: auto;
+    box-shadow: var(--shadow-md);
   }
+
   body.theme-nexus #tab-stats.active .skills-attribute-matrix {
     grid-template-columns: 1fr;
     gap: 0.65rem;
   }
 
-  /* SPLIT-SCREEN MODE: When viewing Features, Spells, Inventory, Companions, or Notes,
-     keep Combat & Core pinned on the left and open the secondary tab on the right! */
-  body.theme-nexus .codex-tabs-viewport:has(.tab-page:not(#tab-stats).active) {
-    display: grid;
-    grid-template-columns: minmax(520px, 1.05fr) minmax(520px, 1fr);
-    gap: 1.5rem;
-    align-items: start;
-  }
-
-  body.theme-nexus .codex-tabs-viewport:has(.tab-page:not(#tab-stats).active) #tab-stats {
-    display: block !important;
-    background: rgba(16, 24, 45, 0.45);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: 1.15rem;
-  }
-
-  body.theme-nexus .codex-tabs-viewport:has(.tab-page:not(#tab-stats).active) #tab-stats .vitals-hud {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  body.theme-nexus .codex-tabs-viewport:has(.tab-page:not(#tab-stats).active) #tab-stats .two-col-layout {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  body.theme-nexus .codex-tabs-viewport:has(.tab-page:not(#tab-stats).active) #tab-stats .skills-attribute-matrix {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  body.theme-nexus .codex-tabs-viewport:has(.tab-page:not(#tab-stats).active) .tab-page:not(#tab-stats).active {
-    position: sticky;
-    top: 68px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-lg);
-    padding: 1.35rem;
-    max-height: calc(100vh - 155px);
-    overflow-y: auto;
-    box-shadow: var(--shadow-md);
-  }
-
-  body.theme-nexus .spells-grid-container,
-  body.theme-nexus .traits-grid-container {
-    grid-template-columns: 1fr;
-  }
-
-  /* Floating Bottom Dice Station in Nexus Mode */
+  /* 7. Floating Bottom Glassmorphic Dice HUD */
   body.theme-nexus .dice-station-bar {
-    position: sticky;
-    bottom: 12px;
-    z-index: 900;
-    background: rgba(9, 14, 28, 0.94);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(99, 102, 241, 0.55);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(99, 102, 241, 0.2);
-    padding: 0.65rem 1.15rem;
-    margin-top: 1.5rem;
+    position: fixed;
+    bottom: 14px;
+    left: 252px;
+    right: 24px;
+    margin-top: 0;
+    z-index: 950;
+    background: rgba(10, 14, 26, 0.92);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 16px;
+    padding: 0.6rem 1.15rem;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85), 0 0 24px rgba(225, 29, 72, 0.15);
   }
 }
 
@@ -4021,6 +4170,6 @@ kbd {
   .top-command-bar, .codex-navigation-dock, .dice-station-bar, .sheet-footer, .ambient-glow, .modal-backdrop, .blur-toggle-btn, .live-party-dock {
     display: none !important;
   }
-  .sheet-container { box-shadow: none !important; border: none !important; max-width: 100% !important; padding: 0 !important; }
+  .sheet-container { display: block !important; box-shadow: none !important; border: none !important; max-width: 100% !important; padding: 0 !important; }
   .tab-page { display: block !important; margin-bottom: 2rem; page-break-inside: avoid; }
 }
