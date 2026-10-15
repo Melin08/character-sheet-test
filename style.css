@@ -4,6 +4,8 @@
 
 /* DEFAULT: Linear Studio (Modern Sleek UI) */
 /* DEFAULT: Linear Indigo (Modern Studio UI) */
+/* DEFAULT: Linear Studio (Modern Sleek UI) */
+/* DEFAULT: Linear Indigo (Modern Studio UI) */
 :root, body.theme-nexus {
   color-scheme: dark;
   --bg-deep: #09090b;
@@ -19,6 +21,7 @@
 
   --primary-red: #6366f1;
   --primary-red-hover: #4f46e5;
+  --primary-fg: #ffffff;
   --accent-gold: #f59e0b;
   --accent-blue: #38bdf8;
   --accent-purple: #c084fc;
@@ -50,6 +53,7 @@ body.theme-midnight {
 
   --primary-red: #38bdf8;
   --primary-red-hover: #0284c7;
+  --primary-fg: #ffffff;
   --accent-gold: #f59e0b;
   --accent-blue: #00f0ff;
   --accent-purple: #818cf8;
@@ -81,6 +85,7 @@ body.theme-emerald {
 
   --primary-red: #10b981;
   --primary-red-hover: #059669;
+  --primary-fg: #020b06;
   --accent-gold: #f59e0b;
   --accent-blue: #06b6d4;
   --accent-purple: #a7f3d0;
@@ -112,6 +117,7 @@ body.theme-crimson {
 
   --primary-red: #f43f5e;
   --primary-red-hover: #e11d48;
+  --primary-fg: #ffffff;
   --accent-gold: #fb7185;
   --accent-blue: #38bdf8;
   --accent-purple: #c084fc;
@@ -143,6 +149,7 @@ body.theme-amber {
 
   --primary-red: #f59e0b;
   --primary-red-hover: #d97706;
+  --primary-fg: #0a0803;
   --accent-gold: #fbbf24;
   --accent-blue: #38bdf8;
   --accent-purple: #f59e0b;
@@ -174,6 +181,7 @@ body.theme-violet {
 
   --primary-red: #a855f7;
   --primary-red-hover: #9333ea;
+  --primary-fg: #ffffff;
   --accent-gold: #f43f5e;
   --accent-blue: #38bdf8;
   --accent-purple: #c084fc;
@@ -205,6 +213,7 @@ body.theme-monolith {
 
   --primary-red: #f1f5f9;
   --primary-red-hover: #ffffff;
+  --primary-fg: #000000;
   --accent-gold: #f59e0b;
   --accent-blue: #38bdf8;
   --accent-purple: #c084fc;
@@ -236,6 +245,7 @@ body.theme-cyberpunk {
 
   --primary-red: #ec4899;
   --primary-red-hover: #db2777;
+  --primary-fg: #ffffff;
   --accent-gold: #f59e0b;
   --accent-blue: #06b6d4;
   --accent-purple: #d946ef;
@@ -282,7 +292,7 @@ body {
     radial-gradient(circle at 85% 100%, var(--glow-2) 0%, transparent 45%);
   background-attachment: fixed;
   color: var(--text-main);
-  padding: 0 1.25rem 6.5rem 1.25rem;
+  padding: 0 0 6.5rem 0;
   line-height: 1.5;
   min-height: 100vh;
   position: relative;
@@ -492,6 +502,7 @@ input[type="number"] {
 .sheet-container {
   max-width: 1480px;
   margin: 0 auto;
+  padding: 0 1.25rem;
   position: relative;
   z-index: 1;
 }
@@ -503,15 +514,24 @@ input[type="number"] {
   position: sticky;
   top: 0;
   z-index: 900;
-  background: rgba(9, 9, 11, 0.82);
+  width: 100%;
+  background: var(--bg-surface);
+  background: color-mix(in srgb, var(--bg-surface) 84%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 0.75rem 0;
   margin-bottom: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.top-command-bar-inner {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0.65rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 .command-top-row {
@@ -535,8 +555,11 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--primary-fg, #ffffff);
   box-shadow: 0 2px 10px var(--theme-rim);
+}
+.brand-emblem svg {
+  stroke: var(--primary-fg, #ffffff);
 }
 .brand-headings {
   display: flex;
@@ -595,11 +618,16 @@ input[type="number"] {
 }
 .main-tab.active {
   background: var(--primary-red);
-  color: #ffffff;
+  color: var(--primary-fg, #ffffff);
+  font-weight: 700;
   box-shadow: 0 2px 10px var(--theme-rim);
 }
 .main-tab.active .nav-tab-icon {
   opacity: 1;
+  stroke: var(--primary-fg, #ffffff);
+}
+.main-tab.active span {
+  color: var(--primary-fg, #ffffff);
 }
 .tab-counter-pill {
   font-size: 0.65rem;
@@ -608,6 +636,10 @@ input[type="number"] {
   padding: 0.05rem 0.4rem;
   border-radius: 999px;
   color: #ffffff;
+}
+.main-tab.active .tab-counter-pill {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--primary-fg, #ffffff);
 }
 
 .command-top-right {
@@ -697,8 +729,11 @@ input[type="number"] {
 
 .dm-hub-trigger {
   background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-hover) 100%) !important;
-  color: #ffffff !important;
+  color: var(--primary-fg, #ffffff) !important;
   border-radius: var(--radius-sm) !important;
+}
+.dm-hub-trigger span {
+  color: var(--primary-fg, #ffffff) !important;
 }
 .live-beacon-dot {
   width: 7px;
@@ -765,11 +800,92 @@ input[type="number"] {
 .btn.red,
 .btn-primary {
   background: var(--primary-red);
-  color: #ffffff;
+  color: var(--primary-fg, #ffffff);
 }
 .btn.red:hover,
 .btn-primary:hover {
   background: var(--primary-red-hover);
+}
+
+/* ==========================================================================
+   HIGH-CONTRAST ACCESSIBILITY OVERRIDES (MONOLITH OLED & SOLAR AMBER)
+   ========================================================================== */
+body.theme-monolith .main-tab.active,
+body.theme-monolith .main-tab.active span,
+body.theme-monolith .dm-hub-trigger,
+body.theme-monolith .dm-hub-trigger span,
+body.theme-monolith .btn-primary,
+body.theme-monolith .sub-tab.active,
+body.theme-monolith .cat-pill.active,
+body.theme-monolith .btn-add-trait,
+body.theme-monolith .btn-add-weapon,
+body.theme-monolith .btn-add-spell,
+body.theme-monolith .dice-result-badge:not(.crit-success):not(.crit-fail),
+body.theme-monolith .dice-result-badge:not(.crit-success):not(.crit-fail) .roll-output,
+body.theme-monolith .dice-result-badge:not(.crit-success):not(.crit-fail) .roll-caption,
+body.theme-monolith .spell-add-badge,
+body.theme-monolith .char-select-btn,
+body.theme-monolith .dice-btn:hover,
+body.theme-monolith .hp-step-btn:hover,
+body.theme-monolith .hp-corner-btn:hover,
+body.theme-monolith .party-connect-btn.active,
+body.theme-monolith #partyRoomToggleBtn.active {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+body.theme-monolith .brand-emblem {
+  color: #000000 !important;
+}
+
+body.theme-monolith .brand-emblem svg,
+body.theme-monolith .main-tab.active svg,
+body.theme-monolith .main-tab.active .nav-tab-icon {
+  stroke: #000000 !important;
+}
+
+body.theme-monolith .main-tab.active .tab-counter-pill {
+  background: rgba(0, 0, 0, 0.16) !important;
+  color: #000000 !important;
+}
+
+body.theme-monolith .dm-hub-trigger .live-beacon-dot {
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+body.theme-monolith .dm-hub-trigger .live-beacon-dot.connected {
+  background: #059669 !important;
+}
+
+body.theme-amber .main-tab.active,
+body.theme-amber .main-tab.active span,
+body.theme-amber .dm-hub-trigger,
+body.theme-amber .dm-hub-trigger span,
+body.theme-amber .btn-primary,
+body.theme-amber .sub-tab.active,
+body.theme-amber .cat-pill.active,
+body.theme-amber .btn-add-trait,
+body.theme-amber .btn-add-weapon,
+body.theme-amber .btn-add-spell,
+body.theme-amber .dice-btn:hover,
+body.theme-amber .hp-step-btn:hover,
+body.theme-amber .hp-corner-btn:hover {
+  color: #0a0803 !important;
+  font-weight: 700 !important;
+}
+
+body.theme-amber .brand-emblem {
+  color: #0a0803 !important;
+}
+
+body.theme-amber .brand-emblem svg,
+body.theme-amber .main-tab.active svg,
+body.theme-amber .main-tab.active .nav-tab-icon {
+  stroke: #0a0803 !important;
+}
+
+body.theme-amber .main-tab.active .tab-counter-pill {
+  background: rgba(0, 0, 0, 0.2) !important;
+  color: #0a0803 !important;
 }
 .btn.gray,
 .btn-ghost {
@@ -2090,7 +2206,7 @@ input[type="number"] {
 }
 .sub-tab.active, .cat-pill.active {
   background: var(--primary-red);
-  color: #ffffff;
+  color: var(--primary-fg, #ffffff);
   border-color: var(--primary-red);
 }
 .subtab-page { display: none; }
@@ -2098,7 +2214,7 @@ input[type="number"] {
 
 .btn-add-trait, .btn-add-weapon, .btn-add-spell {
   background: var(--primary-red) !important;
-  color: #ffffff !important;
+  color: var(--primary-fg, #ffffff) !important;
   border-radius: var(--radius-xs) !important;
   padding: 0.35rem 0.85rem !important;
   font-size: 0.74rem !important;
@@ -2700,7 +2816,9 @@ kbd {
 }
 
 @media (max-width: 768px) {
-  body { padding: 0 0.65rem 7.5rem 0.65rem; }
+  body { padding: 0 0 7.5rem 0; }
+  .sheet-container { padding: 0 0.65rem; }
+  .top-command-bar-inner { padding: 0.65rem 0.65rem; }
   .attributes-group { grid-template-columns: repeat(2, 1fr); }
   .vitals-hud { grid-template-columns: 1fr; }
   .skills-attribute-matrix { grid-template-columns: 1fr; }
