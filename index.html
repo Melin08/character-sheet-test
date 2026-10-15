@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Adventurer Codex — Modern 5e Studio</title>
+  <title>Adventurer Codex — Modern 5e Sheet</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.2'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=72" />
+  <link rel="stylesheet" href="style.css?v=73" />
 </head>
 <body id="top" class="theme-nexus">
 
@@ -37,7 +37,7 @@
           </div>
           <div class="brand-headings">
             <span class="brand-title">Codex</span>
-            <span class="brand-system">5e Studio</span>
+            <span class="brand-system">5e Sheet</span>
           </div>
 
           <!-- Global Active Concentration Pill -->
@@ -249,7 +249,7 @@
             </div>
 
             <div class="codex-field-pill" data-blur-id="background">
-              <span class="pill-title">Origin</span>
+              <span class="pill-title">Background</span>
               <input type="text" id="charBackground" class="save-field pill-input" placeholder="Background..." />
               <button type="button" class="blur-toggle-btn" title="Toggle privacy blur">
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -662,8 +662,8 @@
           <!-- Center / Right Bento: Weapons, Custom Trackers & Conditions -->
           <div class="right-pane">
             <div class="pane-header flex-header">
-              <h2 class="section-title">Attack Arsenal</h2>
-              <button type="button" class="btn btn-add-weapon" id="addWeaponBtn">+ Add Attack</button>
+              <h2 class="section-title">Weapons Arsenal</h2>
+              <button type="button" class="btn btn-add-weapon" id="addWeaponBtn">+ Add Weapon</button>
             </div>
 
             <div class="attacks-table-wrapper">
@@ -1252,7 +1252,7 @@
     <footer class="sheet-footer">
       <hr class="footer-divider" />
       <div class="footer-meta">
-        <div class="footer-title">Adventurer Codex — 5e Studio</div>
+        <div class="footer-title">Adventurer Codex — 5e Sheet</div>
         <ol class="footer-links">
           <li><button type="button" id="helpLinkBtn" class="footer-link-action">Help &amp; Shortcuts</button></li>
           <li>Created by Melin08</li>
@@ -1422,7 +1422,7 @@
         <!-- VIEW 2: DM Live Dashboard (Restricted to Room Creator) -->
         <div id="party-dm-view" class="subtab-page">
           <p class="party-modal-desc">
-            Click <strong>+ New Room</strong> to create a room as the DM. Only the creator of a room has permission to inspect full player character sheets and use DM HP/Inspiration controls.
+            Enter a custom code or leave blank to auto-generate, then click <strong>Create Party</strong>. Only the room creator can inspect player sheets and manage party vitals.
           </p>
           <div class="dm-command-strip">
             <div class="dm-room-display">
@@ -1430,9 +1430,8 @@
               <strong id="dmActiveRoomCode" class="dm-code-text">NONE</strong>
             </div>
             <div class="dm-action-btns">
-              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="YOUR ROOM CODE" maxlength="15" autocomplete="off" style="width: 155px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
-              <button type="button" class="btn btn-primary" id="openDMRoomBtn">Reopen My Room</button>
-              <button type="button" class="btn btn-ghost" id="createCampaignBtn">+ New Room</button>
+              <input type="text" id="dmRoomCodeInput" class="party-room-input center" placeholder="Custom Code (optional)" maxlength="20" autocomplete="off" style="width: 195px; font-size: 0.85rem; padding: 0.4rem 0.6rem;" />
+              <button type="button" class="btn btn-primary" id="createCampaignBtn">Create Party</button>
               <button type="button" class="btn btn-ghost" id="copyRoomCodeBtn" style="display: none;">Copy Code</button>
               <button type="button" class="btn btn-ghost" id="copyDMInviteLinkBtn" style="display: none;">Invite Link</button>
               <button type="button" class="btn btn-danger-ghost" id="closeCampaignBtn" style="display: none;">Close</button>
@@ -1445,7 +1444,7 @@
               <span class="dm-member-counter" id="dmMemberCount">0 Active</span>
             </div>
             <div class="dm-party-cards-grid" id="dmPartyGrid">
-              <p class="dm-empty-msg">No DM session active. Click "+ New Room" or reopen a room you created to inspect your players live.</p>
+              <p class="dm-empty-msg">No DM session active. Create a party above to inspect your players live.</p>
             </div>
           </div>
         </div>
