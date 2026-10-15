@@ -926,11 +926,14 @@ function updateDiceBadgeDisplay(total, captionText = "Result", isCritSuccess = f
   const cap = document.getElementById("rollDetailCaption");
   const badge = document.getElementById("diceResultBadge");
 
+  // Normalize any uppercase 'D' in dice formulas like 1D100 -> 1d100
+  const normalizedCap = (captionText || "").replace(/(\d+)D(\d+)/g, "$1d$2");
+
   if (out) out.textContent = total;
   if (cap) {
     if (isCritSuccess) cap.textContent = "NATURAL 20!";
     else if (isCritFail) cap.textContent = "NATURAL 1!";
-    else cap.textContent = captionText.length > 22 ? captionText.slice(0, 22) + "…" : captionText;
+    else cap.textContent = normalizedCap.length > 22 ? normalizedCap.slice(0, 22) + "…" : normalizedCap;
   }
 
   if (badge) {
@@ -2066,7 +2069,36 @@ async function createNewCampaignRoom() {
     return;
   }
   await ensureAuthenticated();
-  const code = "REALM-" + Math.floor(1000 + Math.random() * 9000);
+
+  const dmInput = document.getElementById("dmRoomCodeInput");
+  const rawCode = dmInput?.value?.trim() || "";
+  let code = "";
+
+  if (rawCode) {
+    code = rawCode.toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+    if (code.length < 3) {
+      alert("Custom room code must be at least 3 characters long (letters, numbers, dashes).");
+      return;
+    }
+  } else {
+    code = "REALM-" + Math.floor(1000 + Math.random() * 9000);
+  }
+
+  // Check if room already exists
+  try {
+    const existingDoc = await db.collection("campaigns").doc(code).get();
+    if (existingDoc.exists) {
+      const data = existingDoc.data();
+      const currentUid = auth?.currentUser?.uid || "local";
+      if (data?.creatorUid && data.creatorUid !== currentUid && !isLocalRoomCreator(code)) {
+        alert(`Room code "${code}" is already in use by another DM. Please choose a different code.`);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Room check note:", err);
+  }
+
   addCreatedRoom(code);
 
   try {
@@ -2312,12 +2344,12 @@ function openInspectModal(memberId) {
 
 async function kickPlayerFromRoom(memberId) {
   if (!activeDMRoomCode || !db || !memberId) return;
-  if (!confirm("Are you sure you want to remove this player from the live party?")) return;
+  if (!confirm("Kick player from party?")) return;
   try {
     await db.collection("campaigns").doc(activeDMRoomCode).collection("members").doc(memberId).delete();
     closeModal("dmInspectModal");
     currentInspectedMemberId = null;
-    showStatus("Player removed from session");
+    showStatus("Player removed from party");
   } catch (err) {
     console.error("Kick error:", err);
   }
@@ -3333,17 +3365,6 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  if (e.target.id === "openDMRoomBtn") {
-    const input = document.getElementById("dmRoomCodeInput");
-    const codeToOpen = input?.value?.trim();
-    if (codeToOpen) {
-      await startDMLiveListener(codeToOpen.toUpperCase(), false);
-    } else {
-      alert("Please enter the room code you created, or click '+ New Room' to start a new DM session.");
-    }
-    return;
-  }
-
   if (e.target.id === "copyRoomCodeBtn") {
     const code = document.getElementById("dmActiveRoomCode")?.textContent;
     if (code && code !== "NONE") {
@@ -3845,7 +3866,7 @@ document.getElementById("campaignRoomInput")?.addEventListener("keydown", (e) =>
 document.getElementById("dmRoomCodeInput")?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
-    document.getElementById("openDMRoomBtn")?.click();
+    document.getElementById("createCampaignBtn")?.click();
   }
 });
 
